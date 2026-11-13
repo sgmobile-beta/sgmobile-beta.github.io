@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icons/simgolf-mobile.png">
 <link rel="icon" type="image/png" href="icons/simgolf-mobile.png">
 <link rel="manifest" href="manifest.webmanifest">
-<title>SGMobile Beta 1.0.10</title>
+<title>SGMobile Beta 1.0.12</title>
 <style>
   /* Shared mobile presentation palette; original game artwork stays native. */
   :root{
@@ -97,7 +97,7 @@
 </style>
 </head>
 <body>
-<div id="build-header"><div id="build-label" title="SGMobile Beta 1.0.10 · sgmobile-beta110-construction-history-v1-20261113">Beta 1.0.10<span id="build-edition"></span></div><div id="mobile-status" hidden></div></div>
+<div id="build-header"><div id="build-label" title="SGMobile Beta 1.0.12 · sgmobile-beta112-android-map-recovery-v1-20261113">Beta 1.0.12<span id="build-edition"></span></div><div id="mobile-status" hidden></div></div>
 <div id="safe-area-probe" aria-hidden="true"></div>
 <div id="game-stage"><canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas></div>
 <script src="golfer-history-model.js"></script>
@@ -133,7 +133,7 @@
     return landscape;
   };
   Module.localFiles = true;
-  Module.buildInfo = Object.freeze({version: '1.0.10', id: 'sgmobile-beta110-construction-history-v1-20261113', channel: 'beta'});
+  Module.buildInfo = Object.freeze({version: '1.0.12', id: 'sgmobile-beta112-android-map-recovery-v1-20261113', channel: 'beta'});
   // Choose at launch; the ready initial loader permits one last change before
   // Continue. Future changes are shared unless explicitly
   // registered as Enhanced-only; save storage and formats remain shared.
@@ -476,7 +476,11 @@
     };
     Module.mapZoomFrameReady=function(frame){
       var v=Module.mapPresentation;if(!v.zooming)return;
-      if(!pinch&&!v.pendingNative&&frame.valid&&frame.zoom===nativeDetail(v.zoom)&&frame.width===canvas.width&&frame.height===canvas.height&&Module.viewportResize?.status===1&&Module.viewportResize.seq===Module.viewportRequest?.seq){v.zooming=false;}
+      if(pinch||v.pendingNative||!frame.valid||frame.logicalZoom!==v.nativeZoom||frame.zoom!==v.nativeZoom||frame.zoom!==nativeDetail(v.zoom))return;
+      var resize=Module.viewportResize,target=Module.adaptiveTarget,bounds=Module.getScreenBounds();
+      var scale=v.baseScale*v.appliedZoom/(v.nativeZoom/4);
+      if(target?.scale!==scale||target.cssWidth!==bounds.width||target.cssHeight!==bounds.height)return;
+      if(frame.width===canvas.width&&frame.height===canvas.height&&resize?.status===1&&resize.seq===Module.viewportRequest?.seq){v.zooming=false;}
     };
     function queue(type, x, y, distance, mode, inputFrame) {
       if(Module.analyticsActive){if(type===0||type===8||type===9||type===10||type>=11)return;if(type>=1&&type<=4)mode=6;}
@@ -713,8 +717,7 @@
         if (fingers.size!==1 || blocked) return;
         // A newly-started pinch can supersede a pending refinement, but a
         // lone tap must not build/aim against a different native projection.
-        var view=Module.mapPresentation,pixels=Module.panVisual?.pixelFrame;
-        if(Module.mapPresentation.course&&view.zooming&&(view.pendingNative||!pixels||pixels.zoom!==view.nativeZoom||pixels.width!==canvas.width||pixels.height!==canvas.height||Module.viewportResize?.seq!==Module.viewportRequest?.seq)){gesture=null;return;}
+        if(Module.mapPresentation.course&&Module.mapPresentation.zooming){gesture=null;return;}
         var p = nativePoint(e);
         gesture = {id:e.pointerId,x:e.clientX,y:e.clientY,dist:0,point:p,frame:Module.mapPresentation.course?(Module.panVisual?.frame||null):null,sent:false,navigation:Module.mapPresentation.course&&(Module.analyticsActive||(!Module.aimMode&&!Module.lotMode&&!Module.terrainMode&&((Module.mapMode===0&&!Module.mobileState?.constructing)||Module.mapMode===6)))};
         if(!Module.analyticsActive&&Module.mapPresentation.course&&Module.terrainMode){gesture.terrainStart={...Module.terrainTarget};if(mapMouse)Module.setTerrainTarget(p[0],p[1]);}
@@ -847,7 +850,7 @@
         }
       }
       var prior=Module.adaptiveTarget;
-      if(covered&&prior&&next.cssWidth===prior.cssWidth&&next.cssHeight===prior.cssHeight&&next.scale===Module.canvasScale&&canvas.width>=next.width&&canvas.height>=next.height&&canvas.width*canvas.height<=next.width*next.height*1.15&&Module.viewportResize?.status===1&&Module.viewportResize.seq===Module.viewportRequest?.seq)return;
+      if(covered&&prior&&next.cssWidth===prior.cssWidth&&next.cssHeight===prior.cssHeight&&next.scale===prior.scale&&next.scale===Module.canvasScale&&canvas.width>=next.width&&canvas.height>=next.height&&canvas.width*canvas.height<=next.width*next.height*1.15&&Module.viewportResize?.status===1&&Module.viewportResize.seq===Module.viewportRequest?.seq)return;
       if(fingers.size) {
         if(covered&&Module.adaptiveTarget&&next.cssWidth===Module.adaptiveTarget.cssWidth&&next.cssHeight===Module.adaptiveTarget.cssHeight)return;
         // A native zoom/detail change can outgrow the previous buffer before
@@ -1044,6 +1047,7 @@
       return true;
     }
     Module.onMapPresent=function(frame){frame.elevation=Module.captureElevationFrame?.(frame);state.presentSerial=(state.presentSerial||0)+1;state.lastNativeAt=performance.now();var previous=state.frame;
+      state.fallbackFrame=null;
       var disposition=deferUncoveredFrame(frame,previous);
       if(disposition===true)return;
       if(disposition==='recover'){
@@ -1051,10 +1055,19 @@
         // forever. Cancel through the ordinary input queue, block remaining
         // contacts until release, then show this complete native frame.
         Module.cancelMapGesture?.();Module.resetSmoothPan('map-handoff-recovery');
-        if(capture(frame)){state.frame=frame;apply();}
+      }
+      if(!capture(frame)){
+        // A gesture anchored to a copied frame cannot cross to native drawing.
+        if(previous?.valid&&frame.valid&&disposition!=='recover')Module.cancelMapGesture?.();
+        state.pixelFrame=null;
+        Module.resetSmoothPan('native-map-pixels-unavailable');
+        // The native canvas can complete a usable course frame without a
+        // bitmap for smooth pan (including WebGL). Keep its geometry separate.
+        if(frame.valid)state.fallbackFrame={serial:state.presentSerial,zoom:frame.zoom,width:frame.width,height:frame.height,x:frame.x,y:frame.y,rotation:frame.rotation};
+        Module.mapZoomFrameReady?.(frame);
         return;
       }
-      if(!capture(frame)){Module.resetSmoothPan('native-map-pixels-unavailable');return;}
+      if(disposition==='recover'){state.frame=frame;apply();return;}
       Module.mapZoomFrameReady?.(frame);
       var eligible=frame.valid&&Module.mobileUI&&Module.mapPresentation?.course&&(Module.analyticsActive||(!Module.aimMode&&!Module.lotMode&&!Module.terrainMode&&(!Module.mobileState?.constructing||state.rest||state.navigation||state.held||performance.now()-state.recent<180)));
       if(!eligible||!previous||!previous.valid||frame.rotation!==previous.rotation||frame.zoom!==previous.zoom||frame.width!==previous.width||frame.height!==previous.height){Module.resetSmoothPan('frame-context');state.frame=frame;return;}

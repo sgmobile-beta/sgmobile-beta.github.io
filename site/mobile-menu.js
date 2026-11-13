@@ -4325,8 +4325,30 @@ Module.getGolferDiagnostics=function(){
     (room.hidden?root:roomContinue).focus({preventScroll:true});
   };
   Module.suspendProgressScreen=function(serial){const s=Module.progressScreen;if(s?.serial!==serial)return;s.suspended=true;root.hidden=true;document.body.classList.remove('mobile-progress-open');};
-  Module.endProgressScreen=function(serial){const s=Module.progressScreen;if(s?.serial!==serial)return;s.active=false;s.closing=true;endAt=performance.now();Module.progressScreenQueue=[];if(!s.suspended){showReport(false);trophy.hidden=trophyDone.hidden=room.hidden=true;map.hidden=false;root.classList.remove('trophy','trophy-responsive');}};
-  function refresh(){const s=Module.progressScreen;if(!s)return;if(s.suspended&&s.active)return;if(root.hidden&&!s.active){Module.progressScreen=null;return;}if(!s.active&&Module.mobileState?.course&&Module.mapPresentation?.course&&!Module.uiPresentation&&!document.getElementById('map-display')?.hidden&&((Module.panVisual?.pixelSerial||0)>beforePixels||performance.now()-endAt>1200)){root.hidden=true;document.body.classList.remove('mobile-progress-open');Module.progressScreen=null;Module.refreshCanvasPresentation();return;}bounds();}
+  Module.endProgressScreen=function(serial){
+    const s=Module.progressScreen;
+    if(s?.serial!==serial)return;
+    s.active=false;s.closing=true;s.closePresent=Module.panVisual?.presentSerial||0;
+    endAt=performance.now();Module.progressScreenQueue=[];
+    if(!s.suspended){showReport(false);trophy.hidden=trophyDone.hidden=room.hidden=true;map.hidden=false;root.classList.remove('trophy','trophy-responsive');}
+  };
+  function refresh(){
+    const s=Module.progressScreen;
+    if(!s||(s.suspended&&s.active))return;
+    if(root.hidden&&!s.active){Module.progressScreen=null;return;}
+    if(!s.active&&Module.mobileState?.course&&Module.mapPresentation?.course&&!Module.uiPresentation){
+      const copiedReady=!document.getElementById('map-display')?.hidden&&
+        ((Module.panVisual?.pixelSerial||0)>beforePixels||performance.now()-endAt>1200);
+      // HD presents its own canvas, so the copied map may stay hidden on a healthy course.
+      const native=Module.panVisual?.fallbackFrame;
+      const nativeReady=native&&native.serial>s.closePresent&&native.width===Module.canvas.width&&native.height===Module.canvas.height;
+      if(copiedReady||nativeReady){
+        root.hidden=true;document.body.classList.remove('mobile-progress-open');
+        Module.progressScreen=null;Module.refreshCanvasPresentation();return;
+      }
+    }
+    bounds();
+  }
   setInterval(refresh,60);for(const event of ['resize','simgolf-screen-resize','simgolf-header-resize'])addEventListener(event,refresh);
 })();
 

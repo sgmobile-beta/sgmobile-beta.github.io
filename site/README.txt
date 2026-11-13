@@ -1,4 +1,4 @@
-SGMobile Beta 1.0.10
+SGMobile Beta 1.0.12
 
 An unofficial mobile adaptation of Sid Meier's SimGolf. Classic keeps the
 original game rules. Enhanced lets you choose optional features per career.

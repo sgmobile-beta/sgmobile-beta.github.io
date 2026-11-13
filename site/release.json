@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "build": "sgmobile-beta110-construction-history-v1-20261113",
+  "build": "sgmobile-beta112-android-map-recovery-v1-20261113",
   "files": [
     {
       "path": "7zz.umd.js",
@@ -20,7 +20,7 @@
     {
       "path": "README.txt",
       "bytes": 3746,
-      "sha256": "54dfab3456afa8ef60aca4771ac947c06636154f6a6f6c5a2f5f8de0ae665a77"
+      "sha256": "824172edafa498a9f9c59d0126372e6b4a8e7ee66b974a08c16ec7b89371c049"
     },
     {
       "path": "THIRD_PARTY_NOTICES.txt",
@@ -139,18 +139,18 @@
     },
     {
       "path": "golf.html",
-      "bytes": 101907,
-      "sha256": "7aca0b1676efcdd546edda78194a541181616588bf63058f87cc920aab224140"
+      "bytes": 102634,
+      "sha256": "b69c9545bc5ec6dcc1eddab21b95c0fe6037450d170790910f68634fcd7968ff"
     },
     {
       "path": "golf.js",
       "bytes": 495998,
-      "sha256": "1539459719d268725983a08e12e38fc37711953bdd208c660362bcda8c9412f4"
+      "sha256": "e45291257250d8d4dce5c2019826f7adf65533290429a093938b6951915490c5"
     },
     {
       "path": "golf.wasm",
       "bytes": 3513981,
-      "sha256": "1e1b9a807117f16e1ac3d1a7ad238715be52f9d88c3cde714d733a032aead3f0"
+      "sha256": "305e33404e600ef42a9b27c33ea0542f5d1baeec941adeba49c95404eb51145b"
     },
     {
       "path": "golfer-experience-model.js",
@@ -304,8 +304,8 @@
     },
     {
       "path": "local-install.js",
-      "bytes": 142428,
-      "sha256": "c2c6213c5df2b7835f0e5a53e65d7a8ce103d32f56a9e43449dc150a7150bc48"
+      "bytes": 142661,
+      "sha256": "16be5f2c9a0bc343a41d3b75cf8b086c07d4c5ab3f7ac638dbf86334a393c1a8"
     },
     {
       "path": "manifest.webmanifest",
@@ -314,8 +314,8 @@
     },
     {
       "path": "mobile-menu.js",
-      "bytes": 450706,
-      "sha256": "f74e87f7dd172727368e6c4c43c05330ba2a4161a9812944328894813fd3951a"
+      "bytes": 451185,
+      "sha256": "2ee872993abddf2856631a74371ec89ca1fb359bdbcd9d95c109262750686921"
     },
     {
       "path": "offline.js",
@@ -345,7 +345,7 @@
     {
       "path": "service-worker.js",
       "bytes": 4023,
-      "sha256": "80ae1b8caadd21f03f13d8abe341be9c978029369c211e944237986bd8a9e72a"
+      "sha256": "f5ff4bce74718366992e6f52656808bc46bbbbe598339ab194de88571f975887"
     },
     {
       "path": "sources/7z-wasm-1.2.0-source.tar.gz",
