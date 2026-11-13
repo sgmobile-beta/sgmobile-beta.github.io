@@ -182,7 +182,10 @@
       const selected=registry.validate(preferences),features={};
       for(const f of catalog.filter(f=>f.available)){
         const allowed=f.id!=='creativeSandbox'||context==='sandbox';
-        features[f.id]={schema:f.schemaVersion,enabled:edition==='enhanced'&&allowed&&selected[f.id]===true};
+        const enabled=edition==='enhanced'&&allowed&&selected[f.id]===true;
+        // Keep new default-off careers portable to builds before this opt-in.
+        if(f.id==='constructionUndoRedo'&&!enabled)continue;
+        features[f.id]={schema:f.schemaVersion,enabled};
       }
       return validateGame({format:FORMAT,id:uuid(),edition,features,featureIds:Object.keys(features),created:Date.now(),origin:origin||{kind:'new'}});
     }

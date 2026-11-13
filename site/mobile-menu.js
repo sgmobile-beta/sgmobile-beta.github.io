@@ -235,7 +235,14 @@
     #mobile-ui button,#mobile-mode-rail button,#mobile-cancel,#mobile-open-hole{padding:9px 12px;border:1px solid var(--menu-border);border-radius:5px;background:var(--menu-button);color:var(--menu-text);cursor:pointer;touch-action:manipulation;pointer-events:auto}
     #mobile-ui button[aria-pressed=true],#mobile-mode-rail button[aria-pressed=true]{background:var(--menu-selected);border-color:var(--menu-focus)}
     #mobile-ui .icon,#mobile-cancel,#mobile-open-hole{width:48px;height:48px;padding:10px}#mobile-ui .icon svg,#mobile-cancel svg,#mobile-open-hole svg{width:26px;height:26px;display:block;pointer-events:none}
-    #mobile-build-actions{position:absolute;right:calc(max(8px,env(safe-area-inset-right)) + 168px);bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px));display:flex;gap:6px}
+    #mobile-course-dock{
+      position:absolute;left:calc(max(8px,env(safe-area-inset-left)) + 54px);right:max(8px,env(safe-area-inset-right));
+      bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px));
+      display:flex;flex-wrap:wrap-reverse;justify-content:flex-end;align-items:flex-end;gap:6px 12px
+    }
+    #mobile-build-actions{display:flex;align-items:center;gap:6px}
+    #mobile-ui.has-build-history #mobile-build-actions{margin-right:auto}
+    #mobile-ui.has-build-history #mobile-camera{margin-left:auto}
     #mobile-cancel{position:fixed;z-index:90;left:max(8px,env(safe-area-inset-left));bottom:calc(var(--mobile-bottom-offset,0px) + max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px))}#mobile-cancel[hidden]{display:none!important}
     #mobile-build-strip{position:absolute;left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));bottom:max(8px,env(safe-area-inset-bottom));padding:6px;background:var(--menu-overlay);border:1px solid var(--menu-border);border-radius:6px;pointer-events:auto;box-sizing:border-box}
     #mobile-build-strip .strip-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
@@ -333,6 +340,32 @@
     #mobile-terrain-up{grid-column:1}#mobile-terrain-precision{grid-column:2;min-width:96px}#mobile-terrain-down{grid-column:3}
     #mobile-terrain-controls button{background:var(--mobile-surface)}#mobile-terrain-controls button[aria-pressed=true]{background:var(--menu-selected)}
     #mobile-terrain-elevation-map{grid-column:1/-1;justify-self:center;min-height:44px}
+    #mobile-ui.has-build-history #mobile-terrain-controls{
+      left:max(16px,env(safe-area-inset-left));right:max(16px,env(safe-area-inset-right));
+      bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px) + var(--build-dock-clearance,48px) + var(--build-open-hole-space,0px) + 16px)
+    }
+    #mobile-ui.has-build-history #mobile-lot-controls{
+      bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px) + var(--build-dock-clearance,48px) + var(--build-open-hole-space,0px) + 10px)
+    }
+    #mobile-build-history{display:flex;gap:6px}
+    #mobile-build-history button{
+      width:48px;height:48px;display:grid;place-content:center;gap:2px;padding:2px;
+      font-size:12px;line-height:1.1;font-weight:700;border-color:#80601c;
+      background:linear-gradient(#fff7d6,#efcd72);color:#382908
+    }
+    #mobile-build-history .history-count{font-size:11px;font-variant-numeric:tabular-nums}
+    #mobile-build-history-status{
+      position:absolute;left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));
+      bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px) + var(--build-dock-height,48px) + 6px);
+      width:fit-content;max-width:360px;margin-inline:auto;padding:4px 8px;box-sizing:border-box;
+      border-radius:5px;background:var(--mobile-surface);font-size:12px;text-align:center
+    }
+    #mobile-ui.landmarks-open.has-build-history :is(#mobile-course-dock,#mobile-build-history-status){visibility:visible;z-index:3}
+    #mobile-ui.landmarks-open.has-build-history :is(#mobile-camera,#mobile-remove){display:none}
+    #mobile-ui.landmarks-open.has-build-history #mobile-panel.landmarks{
+      bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--build-dock-clearance,48px) + var(--build-open-hole-space,0px) + 8px);
+      padding-bottom:12px
+    }
     #mobile-terrain-status{grid-column:1/-1;grid-row:1;justify-self:center;text-align:center;font-size:12px;max-width:100%;padding:4px 8px;border-radius:5px;background:var(--mobile-surface);pointer-events:none}
     #mobile-lot-controls{position:absolute;left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px) + 58px);display:flex;gap:10px;align-items:center;padding:8px;background:var(--menu-overlay);border-radius:6px;pointer-events:auto}#mobile-lot-controls div{flex:1;font-size:13px;line-height:1.4;text-align:center}#mobile-place-lot{flex:none;min-width:70px}
     #mobile-round-info{position:absolute;left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px) + 220px);max-height:24vh;overflow:auto;padding:6px;background:var(--menu-overlay);border-radius:6px;font-size:13px;text-align:center;pointer-events:auto}
@@ -394,13 +427,13 @@
     #mobile-leaderboard li.leaderboard-player{display:flex;justify-content:space-between;align-items:baseline;gap:6px;padding:6px 8px;border:1px solid #92702b;border-radius:6px;background:#f9e7a8;color:#32240f;font-weight:700}
     #mobile-leaderboard .leaderboard-you{flex:none;padding:1px 6px;border-radius:9px;background:#4d3b1b;color:#fff5d2;font-size:12px}
     #mobile-ui #mobile-pan[aria-pressed=true]{background:var(--mobile-surface)}
-    #mobile-camera{position:absolute;right:max(8px,env(safe-area-inset-right));bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px));display:flex;gap:6px}
+    #mobile-camera{display:flex;gap:6px}
     #mobile-round-toggles{position:absolute;left:calc(max(8px,env(safe-area-inset-left)) + 54px);bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px));display:flex;gap:6px}#mobile-round-toggles button{padding:9px 8px}
     #mobile-scorecard{position:absolute;left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px) + 220px);max-height:32vh;overflow:auto;background:var(--menu-overlay);padding:8px;border-radius:6px;pointer-events:auto;text-align:center}
     #mobile-scorecard table{border-collapse:collapse;width:100%;font-size:13px}#mobile-scorecard th,#mobile-scorecard td{padding:4px;border-bottom:1px solid var(--menu-line)}#mobile-scorecard caption{padding:4px}#mobile-scorecard tr.current{background:var(--menu-selected)}
     @media(min-width:720px){#mobile-scorecard{bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px) + 166px)}}
     #mobile-close-photo{position:absolute;left:max(8px,env(safe-area-inset-left));top:max(8px,env(safe-area-inset-top))}
-    #mobile-open-hole{position:fixed;z-index:90;left:calc(max(8px,env(safe-area-inset-left)) + 54px);bottom:calc(var(--mobile-bottom-offset,0px) + max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px));width:48px;height:48px}#mobile-open-hole[hidden]{display:none!important}
+    #mobile-open-hole{position:fixed;z-index:90;left:calc(max(8px,env(safe-area-inset-left)) + 54px);bottom:calc(var(--mobile-bottom-offset,0px) + max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px) + var(--build-dock-clearance,0px));width:48px;height:48px}#mobile-open-hole[hidden]{display:none!important}
     #mobile-message{position:absolute;top:calc(max(8px,env(safe-area-inset-top)) + 50px);left:max(8px,env(safe-area-inset-left));right:calc(max(8px,env(safe-area-inset-right)) + 64px);margin:0 auto;max-width:none;max-height:calc(100% - 160px);display:flex;flex-direction:column;overflow:hidden;overscroll-behavior:contain;touch-action:pan-y;white-space:pre-line;overflow-wrap:break-word;word-break:normal;line-height:1.4;text-align:center;padding:12px 42px;box-sizing:border-box;border-radius:5px;background:var(--menu-overlay);text-shadow:none;pointer-events:auto}
     #mobile-mode-rail button,#mobile-cancel,#mobile-open-hole,#mobile-ui > button,#mobile-camera button,#mobile-build-actions button,#mobile-round-controls button,#mobile-round-toggles button{background:var(--mobile-surface)}
     #mobile-mode-rail button[aria-pressed=true],#mobile-ui > button[aria-pressed=true],#mobile-build-actions button[aria-pressed=true],#mobile-round-controls button[aria-pressed=true],#mobile-round-toggles button[aria-pressed=true]{background:var(--menu-selected)}
@@ -464,6 +497,7 @@
   document.body.appendChild(rail);
   var openHole=icon('Open hole','M4 3h4v7h8V3h4v18h-4v-7H8v7H4z',function(){if(!s.canOpenHole||holeToOpen!==null||pendingHole)return;holeToOpen=s.openableHole;if(s.photoActive)Module.keyboardInput(27,27);requestSection('');});openHole.querySelector('svg').setAttribute('fill','currentColor');openHole.querySelector('svg').setAttribute('stroke','none');openHole.id='mobile-open-hole';openHole.setAttribute('aria-label','Open hole');openHole.title='Open hole';openHole.hidden=true;document.body.appendChild(openHole);
   var closePhoto=button('Close photo',function(){Module.setAimMode(false);Module.keyboardInput(27,27);});closePhoto.id='mobile-close-photo';root.appendChild(closePhoto);
+  var courseDock=document.createElement('div');courseDock.id='mobile-course-dock';
   var camera=document.createElement('div');camera.id='mobile-camera';
   var pan=icon('Pan map','M12 2v20M2 12h20M8 6l4-4 4 4M8 18l4 4 4-4M6 8l-4 4 4 4M18 8l4 4-4 4',function(){
     if(s.rebuildClubhouse&&s.object===15){panBuildTool=panBuildTool?.clubhouse?null:{clubhouse:true,object:15};Module.setMapMode(panBuildTool?6:0);render();return;}
@@ -478,10 +512,10 @@
       render();
     }else {endBuild();open=false;render();}
   });pan.id='mobile-pan';
-  camera.append(pan,icon('Rotate left','M3 10a9 9 0 1 1 2 8M3 4v6h6',function(){command(1,36);}),icon('Rotate right','M21 10a9 9 0 1 0-2 8M21 4v6h-6',function(){command(1,33);}));root.appendChild(camera);
+  camera.append(pan,icon('Rotate left','M3 10a9 9 0 1 1 2 8M3 4v6h6',function(){command(1,36);}),icon('Rotate right','M21 10a9 9 0 1 0-2 8M21 4v6h-6',function(){command(1,33);}));
   var buildActions=document.createElement('div');buildActions.id='mobile-build-actions';
   var remove=icon('Remove / Undo','M4 14l9-11 8 7-9 11H7l-3-3zM7 21h15M9 8l8 7',function(){Module.setMapMode(Module.mapMode===2?0:2);syncControls();});remove.id='mobile-remove';
-  var cancel=icon('Cancel','M5 5l14 14M19 5L5 19',cancelSection);cancel.id='mobile-cancel';cancel.hidden=true;buildActions.append(remove);root.append(buildActions);document.body.appendChild(cancel);
+  var cancel=icon('Cancel','M5 5l14 14M19 5L5 19',cancelSection);cancel.id='mobile-cancel';cancel.hidden=true;courseDock.append(buildActions,camera);root.append(courseDock);document.body.appendChild(cancel);
   var strip=document.createElement('section');strip.id='mobile-build-strip';strip.setAttribute('aria-label','Construction choices');root.appendChild(strip);
   var stripHeader=document.createElement('div');stripHeader.className='strip-header';
   var stripTitle=document.createElement('div');stripTitle.className='strip-title';
@@ -502,6 +536,53 @@
   var terrainDown=icon('Lower selected terrain','M12 4v16M5 13l7 7 7-7',function(){Module.requestTerrainStep(-1);});terrainDown.id='mobile-terrain-down';terrainDown.hidden=true;
   var terrainElevationMap=button('Elevation Map',()=>openElevation('terrain'));terrainElevationMap.id='mobile-terrain-elevation-map';terrainElevationMap.hidden=true;
   terrainControls.append(terrainStatus,terrainUp,terrainPrecision,terrainDown,terrainElevationMap);root.appendChild(terrainControls);
+  var buildHistory=document.createElement('section');buildHistory.id='mobile-build-history';buildHistory.hidden=true;buildHistory.setAttribute('aria-label','Construction history');
+  var historyStatus=document.createElement('div');historyStatus.id='mobile-build-history-status';historyStatus.hidden=true;historyStatus.setAttribute('role','status');
+  var terrainUndo=button('Undo',function(){Module.requestVertexHistory(-1);Module.refreshVertexHistory();});terrainUndo.id='mobile-terrain-undo';terrainUndo.disabled=true;
+  var terrainRedo=button('Redo',function(){Module.requestVertexHistory(1);Module.refreshVertexHistory();});terrainRedo.id='mobile-terrain-redo';terrainRedo.disabled=true;
+  var undoCount=document.createElement('span'),redoCount=document.createElement('span');
+  undoCount.className=redoCount.className='history-count';
+  undoCount.setAttribute('aria-hidden','true');redoCount.setAttribute('aria-hidden','true');
+  terrainUndo.append(undoCount);terrainRedo.append(redoCount);
+  buildHistory.append(terrainUndo,terrainRedo);buildActions.append(buildHistory,remove);root.append(historyStatus);
+  function showHistoryCount(control,label,count,value){
+    var text=value?String(value):'';
+    if(count.textContent!==text)count.textContent=text;
+    count.hidden=!value;
+    control.setAttribute('aria-label',value?label+' ('+value+')':label);
+  }
+  function syncBuildDock(){
+    if(buildHistory.hidden){openHole.style.removeProperty('--build-dock-clearance');return;}
+    var height=Math.ceil(courseDock.getBoundingClientRect().height)||48;
+    var notice=historyStatus.hidden?0:Math.ceil(historyStatus.getBoundingClientRect().height)+6;
+    root.style.setProperty('--build-dock-height',height+'px');
+    root.style.setProperty('--build-dock-clearance',(height+notice)+'px');
+    openHole.style.setProperty('--build-dock-clearance',(height+notice+6)+'px');
+  }
+  Module.refreshVertexHistory=function(){
+    var history=buildHistory.hidden?null:Module.vertexHistory;
+    var enabled=Module.vertexHistoryBuildActive&&!history?.busy&&!Module.vertexHistoryRequestPending;
+    terrainUndo.disabled=!enabled||!history?.canUndo;
+    terrainRedo.disabled=!enabled||!history?.canRedo;
+    showHistoryCount(terrainUndo,'Undo',undoCount,history?.undoCount);
+    showHistoryCount(terrainRedo,'Redo',redoCount,history?.redoCount);
+    var message=history?.reason==='unsupported'?'This edit isn’t supported by Undo.':
+      history?.reason==='changed'?'History cleared after a different course edit.':
+      history?.reason==='applied'?'The change was applied, but its display couldn’t be verified. History cleared.':
+      history?.reason==='bench-use'?'Try again after golfers move away from the bench.':
+      history?.reason==='pathway-use'?'Try again after golfers move away from the path.':
+      history?.reason==='improvement-use'?'Try again after golfers move away from the improvement.':
+      history?.reason==='period'?'This edit belongs to an earlier accounting year.':
+      history?.reason==='funds'?'The original construction amount cannot be applied right now.':
+      history?.reason==='render'?'History is unavailable for this edit.':'';
+    if(historyStatus.textContent!==message)historyStatus.textContent=message;
+    historyStatus.hidden=!message;
+  };
+  if(typeof ResizeObserver!=='undefined'){
+    var buildDockObserver=new ResizeObserver(syncBuildDock);
+    buildDockObserver.observe(courseDock);
+    buildDockObserver.observe(historyStatus);
+  }
   var roundControls=document.createElement('div');roundControls.id='mobile-round-controls';root.appendChild(roundControls);
   var resumeShots=button('Resume shots',function(){command(13,0,true);});resumeShots.id='mobile-resume-shots';
   function setRoundAim(enabled){
@@ -1241,11 +1322,21 @@
     terrainElevationMap.hidden=!terrainAvailable||!Module.hasGameFeature('elevationMap')||Module.elevationMapLive;
     terrainElevationMap.disabled=!Module.canOpenElevationMap?.();
     terrainUp.hidden=terrainDown.hidden=!Module.terrainMode;terrainPrecision.setAttribute('aria-pressed',String(!!Module.terrainMode));
+    var modal=modalSection();
+    var historyVisible=course&&building&&!s.photoActive&&!s.roundActive&&!s.shotTurn&&
+      (!open||groupForPage(page)==='build')&&Module.hasGameFeature('constructionUndoRedo');
+    buildHistory.hidden=!historyVisible;
+    root.classList.toggle('has-build-history',historyVisible);
+    root.style.setProperty('--build-open-hole-space',historyVisible&&holeVisible?'54px':'0px');
+    Module.vertexHistoryBuildActive=historyVisible&&!modal&&!Module.uiPresentation&&!Module.lotPending&&!Module.elevationMapLive&&
+      !s.textInput&&!Module.buildingUpgradeNativeOwner&&!Module.mobileSaveNameActive;
     if(terrainAvailable){
       Module.refreshTerrainTarget();var preview=Module.terrainPreview,ready=!!Module.terrainMode&&preview?.serial===Module.terrainSerial&&preview.valid;
-      terrainUp.disabled=terrainDown.disabled=!ready||preview.pending>=32;
-      terrainStatus.textContent=['Vertex','Square','Area'][s.terrainShape]+' · '+(!Module.terrainMode?'Tap the map to raise':!ready?'Drag to choose a spot':'Drag to select · arrows adjust');
+      terrainUp.disabled=terrainDown.disabled=!ready||preview.pending>=32||!!Module.vertexHistory?.busy||!!Module.vertexHistoryRequestPending;
+      var hint=['Vertex','Square','Area'][s.terrainShape]+' · '+(!Module.terrainMode?'Tap the map to raise':!ready?'Drag to choose a spot':'Drag to select · arrows adjust');
+      if(terrainStatus.textContent!==hint)terrainStatus.textContent=hint;
     }
+    Module.refreshVertexHistory();
     Module.refreshTerrainReticle();
     var rebuilding=!!s.rebuildClubhouse&&s.object===15;
     var previewLot=course&&(building||rebuilding)&&!open&&!panBuildTool&&!s.photoActive&&((s.object===5&&s.availableLots>0)||(s.object===4&&s.variation?.selected>=0&&(s.variation.mask&(1<<s.variation.selected)))||([1,2,16,19].includes(s.object)&&s.variation?.selected>=0)||(s.object>=6&&s.object<=14)||rebuilding)&&Module.mapMode!==2;
@@ -1255,7 +1346,7 @@
     lotControls.hidden=!previewLot||!Module.lotMode;
     if(!lotControls.hidden){Module.refreshLotTarget();var p=Module.lotPreview,ready=p&&p.serial===Module.lotSerial;placeLot.disabled=!ready||!p.valid||!!Module.lotPending;var money=v=>'$'+v.toLocaleString();lotDetails.textContent=Module.lotPending?'Placing…':!ready?'Drag to preview a location; Place confirms.':creative()?(p.reason||((p.kind===5?'Home Site · Income '+money(p.value):p.kind===4?landmarkName(s.landmarks?.[p.variant]):p.kind===15?'Clubhouse':s.object>=6&&s.object<=14?s.buildings[s.object-6]:variantLabel(p.kind,p.variant))+' · Construction Free'+(p.kind===5?'':' · Original Value '+money(p.price)))):p.kind===4?landmarkName(s.landmarks?.[p.variant])+' · '+(p.free?'Free':money(p.price))+' · '+p.radius+' yd influence'+(p.reason?' · '+p.reason:''):p.kind!==5?((p.kind===15?'Clubhouse':s.object>=6&&s.object<=14?s.buildings[s.object-6]:variantLabel(p.kind,p.variant))+' · '+money(p.price)+(p.reason?' · '+p.reason:'')):p.reason||('Lot value '+money(p.value)+' · Preparation '+money(p.preparation)+' · Profit '+money(p.profit));if(openingLot)Module.centreLotTarget();}
 
-    camera.hidden=!course;buildActions.hidden=!course||s.photoActive;cancel.hidden=!seenCourse||!Module.mobileUI;remove.hidden=!building;remove.setAttribute('aria-pressed',String(Module.mapMode===2));pan.setAttribute('aria-pressed',String(panBuildTool!==null||(Module.mapMode===0&&!s.constructing)));syncBuildStrip();var stripSpace=(strip.hidden?0:strip.getBoundingClientRect().height+8)+'px';root.style.setProperty('--strip-space',stripSpace);cancel.style.setProperty('--strip-space',modalSection()?'0px':stripSpace);openHole.style.setProperty('--strip-space',modalSection()?'0px':stripSpace);roundControls.hidden=!course||!s.roundActive;
+    camera.hidden=!course;buildActions.hidden=!course||s.photoActive;cancel.hidden=!seenCourse||!Module.mobileUI;remove.hidden=!building;remove.setAttribute('aria-pressed',String(Module.mapMode===2));pan.setAttribute('aria-pressed',String(panBuildTool!==null||(Module.mapMode===0&&!s.constructing)));syncBuildStrip();var stripSpace=(strip.hidden?0:strip.getBoundingClientRect().height+8)+'px';root.style.setProperty('--strip-space',stripSpace);cancel.style.setProperty('--strip-space',modal?'0px':stripSpace);openHole.style.setProperty('--strip-space',modal?'0px':stripSpace);syncBuildDock();roundControls.hidden=!course||!s.roundActive;
     toggles.hidden=!course||!s.roundActive;
     var raisedRound=building||holeVisible||(!toggles.hidden&&toggles.getBoundingClientRect().right+6>camera.getBoundingClientRect().left);
     var roundBottom=raisedRound?108:54;
@@ -1348,13 +1439,17 @@
     if(!panel.classList.contains('landmarks')){
       var bottomClearance=page==='manage'||page==='system'
         ? 'calc(56px + var(--strip-space,0px))'
-        : (holeVisible?64:8)+'px';
+        : historyVisible&&groupForPage(page)==='build'
+          ? 'calc(16px + var(--strip-space,0px) + var(--build-dock-clearance,48px) + var(--build-open-hole-space,0px))'
+          : (holeVisible?64:8)+'px';
       panel.style.top='calc(max(8px,env(safe-area-inset-top)) + '+badgeSpace+'px)';
       panel.style.maxHeight='calc(100% - max(8px,env(safe-area-inset-top)) - '+badgeSpace+'px - max(8px,env(safe-area-inset-bottom)) - '+bottomClearance+')';
     }else{panel.style.top='';panel.style.maxHeight='';}
     message.style.top='calc(max(8px,env(safe-area-inset-top)) + '+Math.max(50,badgeSpace)+'px)';
     var bounds=Module.getScreenBounds(),messageTop=Math.max(8,bounds.safe.top)+Math.max(50,badgeSpace);
-    var reserve=(strip.hidden?0:strip.getBoundingClientRect().height+8)+72;
+    var reserve=(strip.hidden?0:strip.getBoundingClientRect().height+8)+(historyVisible
+      ? (Number.parseInt(root.style.getPropertyValue('--build-dock-clearance'),10)||48)+(holeVisible?54:0)+16
+      : 72);
     message.style.maxHeight=Math.max(0,root.getBoundingClientRect().height-messageTop-Math.max(8,bounds.safe.bottom)-reserve)+'px';
   }
   function leaveKeyboard(){

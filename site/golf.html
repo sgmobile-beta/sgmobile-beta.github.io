@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icons/simgolf-mobile.png">
 <link rel="icon" type="image/png" href="icons/simgolf-mobile.png">
 <link rel="manifest" href="manifest.webmanifest">
-<title>SGMobile Beta 1.0.3</title>
+<title>SGMobile Beta 1.0.10</title>
 <style>
   /* Shared mobile presentation palette; original game artwork stays native. */
   :root{
@@ -97,7 +97,7 @@
 </style>
 </head>
 <body>
-<div id="build-header"><div id="build-label" title="SGMobile Beta 1.0.3 · sgmobile-beta103-donation-dates-v1-20261113">Beta 1.0.3<span id="build-edition"></span></div><div id="mobile-status" hidden></div></div>
+<div id="build-header"><div id="build-label" title="SGMobile Beta 1.0.10 · sgmobile-beta110-construction-history-v1-20261113">Beta 1.0.10<span id="build-edition"></span></div><div id="mobile-status" hidden></div></div>
 <div id="safe-area-probe" aria-hidden="true"></div>
 <div id="game-stage"><canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas></div>
 <script src="golfer-history-model.js"></script>
@@ -133,7 +133,7 @@
     return landscape;
   };
   Module.localFiles = true;
-  Module.buildInfo = Object.freeze({version: '1.0.3', id: 'sgmobile-beta103-donation-dates-v1-20261113', channel: 'beta'});
+  Module.buildInfo = Object.freeze({version: '1.0.10', id: 'sgmobile-beta110-construction-history-v1-20261113', channel: 'beta'});
   // Choose at launch; the ready initial loader permits one last change before
   // Continue. Future changes are shared unless explicitly
   // registered as Enhanced-only; save storage and formats remain shared.
@@ -348,6 +348,7 @@
   Module.requestViewport = function (width, height) {
     if (!Number.isInteger(width) || !Number.isInteger(height)) return 0;
     var seq = (Module.viewportRequest?.seq || 0) + 1;
+    Module.cancelVertexHistoryRequest?.();
     Module.viewportRequest = {width:width, height:height, seq:seq};
     return seq;
   };
@@ -440,6 +441,7 @@
       if(!Number.isFinite(value))return;
       var constructing=Module.mobileUI&&Module.mobileState?.constructing,minimum=constructing?1:.25;
       var targetZoom=Math.max(minimum,Math.min(3,value));
+      Module.cancelVertexHistoryRequest();
       if(targetZoom!==view.zoom&&!view.zooming)Module.resetSmoothPan?.('zoom');
       view.zooming=true;
       if(Module.aimMode)Module.setAimMode(false);
@@ -467,6 +469,7 @@
       }
       var ownershipChanged=view.course!==!!course||view.mobileUI!==Module.mobileUI;
       if(!changed&&!ownershipChanged)return;
+      Module.cancelVertexHistoryRequest();
       view.course=!!course;view.mobileUI=Module.mobileUI;
       if(ownershipChanged){Module.cancelMapGesture();if(!course&&Module.aimMode)Module.setAimMode(false);}
       Module.refreshCanvasPresentation();schedule();
@@ -482,7 +485,10 @@
       var onMap=Module.mobileUI&&Module.mapPresentation?.course&&!Module.uiPresentation;var frame=onMap?(inputFrame===undefined?Module.panVisual?.frame:inputFrame):null;event.push(frame?.valid?1:0,frame?.x||0,frame?.y||0,frame?.rotation||0,frame?.zoom||0,frame?.width||0,frame?.height||0,Module.panVisual?.serial||0);
       if ((type===0||type===2||type===8||type===14) && q.length && q[q.length-1][0] === type) q[q.length-1] = event;
       else if (q.length < 128) q.push(event);
-      else { q.length = 0; q.push([4,0,0,0,0]); }
+      else {
+        Module.cancelVertexHistoryRequest();
+        q.length = 0; q.push([4,0,0,0,0]);
+      }
     }
     var directions=new Map();
     function releaseDirections(){directions.forEach(function(v){queue(7,v,0,0);});directions.clear();}
@@ -492,6 +498,7 @@
       cancelAnimationFrame(twoFingerFrame);twoFingerFrame=0;
       pinch=null;blocked=fingers.size>0;
       Module.lotPreview=null;Module.lotPending=false;Module.terrainPreview=null;
+      Module.cancelVertexHistoryRequest();
       Module.touchQueue.length = 0;
       queue(4,0,0,0);
       releaseDirections();
@@ -539,6 +546,50 @@
       var t=Module.aimTarget;gesture=null;pinch=null;blocked=fingers.size>0;queue(9,t.x,t.y,Module.aimSerial);Module.shotPending=true;return true;
     };
     Module.terrainMode=false;Module.terrainTarget=null;Module.terrainSerial=0;
+    Module.vertexHistoryEpoch=0;
+    Module.vertexHistoryRequestEpoch=0;
+    Module.vertexHistoryRequestPending=false;
+    const emptyVertexHistory={canUndo:false,canRedo:false,busy:false,reason:'',undoCount:0,redoCount:0};
+    Module.vertexHistory=emptyVertexHistory;
+    Module.cancelVertexHistoryRequest=function(){
+      if(!Module.vertexHistoryRequestPending)return;
+      Module.vertexHistoryRequestEpoch=(Module.vertexHistoryRequestEpoch+1)&0x7fffffff;
+      Module.vertexHistoryRequestPending=false;
+      const queue=Module.touchQueue;
+      for(let i=queue.length-1;i>=0;i--)if(queue[i][0]===17)queue.splice(i,1);
+      Module.refreshVertexHistory?.();
+    };
+    Module.clearVertexHistory=function(){
+      Module.vertexHistoryEpoch=(Module.vertexHistoryEpoch+1)&0x7fffffff;
+      Module.cancelVertexHistoryRequest();
+      if(Module.vertexHistory!==emptyVertexHistory){
+        Module.vertexHistory=emptyVertexHistory;
+        Module.refreshVertexHistory?.();
+      }
+    };
+    Module.vertexHistoryInputIdle=function(){
+      const pan=Module.panVisual,view=Module.mapPresentation;
+      return !document.hidden&&!fingers.size&&!pinch&&!blocked&&!view.zooming&&
+        !Module.smoothPanRequest&&!pan?.nativeOwned&&!pan?.rest?.pending;
+    };
+    Module.requestVertexHistory=function(direction){
+      const s=Module.mobileState,history=Module.vertexHistory;
+      if((direction!==-1&&direction!==1)||!Module.hasGameFeature('constructionUndoRedo')||
+        !Module.vertexHistoryBuildActive||!Module.mobileUI||!s?.course||!Module.mapCourseReady||
+        s.textInput||s.roundActive||s.shotTurn||s.photoActive||Module.shotPending||Module.analyticsActive||
+        Module.uiPresentation||!Module.vertexHistoryInputIdle()||
+        history.busy||Module.vertexHistoryRequestPending||Module.terrainPreview?.pending||
+        Module.touchQueue.length||Module.menuQueue.length||!(direction===-1?history.canUndo:history.canRedo))return false;
+      Module.vertexHistoryRequestEpoch=(Module.vertexHistoryRequestEpoch+1)&0x7fffffff;
+      queue(17,direction,Module.vertexHistoryRequestEpoch,Module.vertexHistoryEpoch);
+      Module.vertexHistoryRequestPending=true;
+      return true;
+    };
+    for(const event of ['simgolf-ruleset-change','simgolf-edition-change','pagehide'])
+      addEventListener(event,Module.clearVertexHistory);
+    for(const event of ['simgolf-screen-resize','resize','orientationchange','blur'])
+      addEventListener(event,Module.cancelVertexHistoryRequest);
+    document.addEventListener('visibilitychange',function(){if(document.hidden)Module.cancelVertexHistoryRequest();});
     var terrainReticle=aimReticle.cloneNode(true);terrainReticle.id='map-terrain-reticle';terrainReticle.style.borderColor='#ffe683';terrainReticle.style.color='#ffe683';document.body.appendChild(terrainReticle);
     Module.refreshTerrainReticle=function(){
       var p=Module.terrainPreview,t=p?.valid&&p.serial===Module.terrainSerial?{x:p.point[0],y:p.point[1]}:Module.terrainTarget,show=Module.terrainMode&&Module.mobileState?.course&&Module.mobileState?.elevation&&t;
@@ -558,12 +609,13 @@
     Module.setTerrainMode=function(enabled){
       if(enabled)Module.resetSmoothPan?.('precise-tool');
       if(enabled){if(Module.aimMode)Module.setAimMode(false);if(Module.lotMode)Module.setLotMode(false);}
-      Module.cancelMapGesture();Module.terrainMode=!!enabled&&!!Module.mobileState?.course&&!!Module.mobileState?.elevation&&!Module.mobileState?.photoActive;measuring=Module.terrainMode?5:0;Module.mapMode=measuring;Module.terrainView=terrainViewStamp();
+      const next=!!enabled&&!!Module.mobileState?.course&&!!Module.mobileState?.elevation&&!Module.mobileState?.photoActive;
+      Module.cancelMapGesture();Module.terrainMode=next;measuring=Module.terrainMode?5:0;Module.mapMode=measuring;Module.terrainView=terrainViewStamp();
       if(Module.terrainMode){var r=stage.getBoundingClientRect(),bar=document.getElementById('mobile-terrain-controls'),bottom=bar&&!bar.hidden?Math.min(r.bottom,bar.getBoundingClientRect().top-12):r.bottom,top=Math.max(r.top,Module.headerHeight()),t=nativePoint({clientX:r.left+r.width/2,clientY:top+(bottom-top)/2});Module.setTerrainTarget(t[0],t[1]);}else Module.terrainTarget=null;
       Module.refreshTerrainReticle();
     };
     Module.requestTerrainStep=function(direction){
-      var p=Module.terrainPreview;if(!Module.terrainMode||!p?.valid||p.serial!==Module.terrainSerial||![-1,1].includes(direction)||fingers.size||p.pending>=32)return false;
+      var p=Module.terrainPreview;if(!Module.terrainMode||!p?.valid||p.serial!==Module.terrainSerial||![-1,1].includes(direction)||fingers.size||p.pending>=32||Module.vertexHistory.busy||Module.vertexHistoryRequestPending)return false;
       queue(15,direction,0,Module.terrainSerial);return true;
     };
     Module.terrainEdgeActive=function(){return !!(Module.terrainMode&&gesture?.terrainStart&&fingers.size===1&&!pinch&&!blocked&&!document.hidden&&!Module.mobileState?.photoActive);};
@@ -647,6 +699,7 @@
       if(mapMouse&&!Module.terrainMode&&!Module.aimMode&&!Module.lotMode&&e.type==='pointermove'&&!gesture){var q=nativePoint(e);queue(0,q[0],q[1],0);}
       e.preventDefault(); e.stopImmediatePropagation();
       if (e.type === 'pointerdown') {
+        Module.cancelVertexHistoryRequest();
         fingers.set(e.pointerId,{x:e.clientX,y:e.clientY});
         canvas.setPointerCapture(e.pointerId);
         if(blocked&&!pinch)return;

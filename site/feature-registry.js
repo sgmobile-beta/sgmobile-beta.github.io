@@ -680,6 +680,36 @@
       },
       "playContexts": ["career"],
       "native": {"symbol":"SIMGOLF_FEATURE_BUILDING_UPGRADES","index":13}
+    },
+    {
+      "id": "constructionUndoRedo",
+      "name": "Construction Undo & Redo",
+      "category": "construction",
+      "description": "Undo or redo up to 100 supported course tile edits, pathways, Vertex changes, and eligible Improvement placements and removals.",
+      "icon": "history",
+      "featureVersion": "1.5.0",
+      "schemaVersion": 1,
+      "available": true,
+      "defaultEnabled": false,
+      "requires": [],
+      "integrations": [],
+      "conflicts": [],
+      "affectsSimulation": true,
+      "requiresPersistentState": false,
+      "mutableDuringPlay": true,
+      "saveCompatibility": {
+        "supportedSchemas": [1],
+        "supportedStateSchemas": [1],
+        "policy": "native-compatible"
+      },
+      "discovery": {
+        "menu": "Build → Undo / Redo",
+        "controls": "In Build, paint or remove eligible course tiles and pathways, edit a Vertex, or place or remove eligible Improvements. Use Undo or Redo in the Build toolbar.",
+        "screen": null,
+        "gameplay": "Keeps up to 100 edits as you switch tools and pan. Loading a save or revision clears the history."
+      },
+      "playContexts": ["career"],
+      "native": {"symbol":"SIMGOLF_FEATURE_CONSTRUCTION_UNDO_REDO","index":14}
     }
   ]
 }
