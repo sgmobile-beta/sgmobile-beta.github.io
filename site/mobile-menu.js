@@ -448,7 +448,6 @@
     if((type==='pointerdown'||type==='touchstart')&&speedPickerOpen&&!speedPicker.contains(e.target)&&!speedControl.contains(e.target)){closeSpeedPicker();speedDismissUntil=performance.now()+350;e.preventDefault();e.stopImmediatePropagation();}
   },{capture:true,passive:false});
   addEventListener('keydown',e=>{
-    if(Module.developerUsageOpen)return;
     const own=speedPickerOpen||e.target.closest?.('#mobile-speed');
     if(!own){if(speedKey===e.key){e.preventDefault();e.stopImmediatePropagation();}return;}
     e.stopImmediatePropagation();
@@ -1218,7 +1217,6 @@
       add('Measure yardage',function(){mode(1);});
       key('Save championship course','C');action('Save championship pro',8,11);action('Preferences',8,1);
       if(Module.saveHistoryUIEnabled)add('Save history / export',function(){Module.cancelMapGesture();open=false;render();if(Module.toggleSaveHistory)Module.toggleSaveHistory();});
-      if(Module.openDeveloperUsage)add('Development Usage',Module.openDeveloperUsage);
     }else if(page==='keyboard'){
       var p=document.createElement('p');p.textContent='Type a name in an open game dialog. Text is sent to that dialog.';panel.appendChild(p);
       var input=document.createElement('input');input.type='text';input.autocomplete='off';input.setAttribute('aria-label','Game text');panel.appendChild(input);
@@ -4518,7 +4516,6 @@ Module.getGolferDiagnostics=function(){
   for(const type of ['pointerdown','pointerup','mousedown','mouseup','click','dblclick','touchstart','touchend','keydown','keyup','keypress'])addEventListener(type,e=>{
     if(type.startsWith('key')&&releaseKey&&e.key===releaseKey){if(type==='keyup')releaseKey='';e.preventDefault();e.stopImmediatePropagation();return;}
     if(performance.now()<until){e.preventDefault();e.stopImmediatePropagation();return;}
-    if(Module.developerUsageOpen)return;
     const own=e.target.closest?.('#initial-loading,#course-loading');
     if(type.startsWith('key')&&own){
       const button=e.key==='Escape'?own.querySelector('#course-loading-back:not([hidden])'):e.target.closest?.('button');

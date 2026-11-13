@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icons/simgolf-mobile.png">
 <link rel="icon" type="image/png" href="icons/simgolf-mobile.png">
 <link rel="manifest" href="manifest.webmanifest">
-<title>SGMobile Beta 1.0.1</title>
+<title>SGMobile Beta 1.0.3</title>
 <style>
   /* Shared mobile presentation palette; original game artwork stays native. */
   :root{
@@ -97,7 +97,7 @@
 </style>
 </head>
 <body>
-<div id="build-header"><div id="build-label" title="SGMobile Beta 1.0.1 · sgmobile-beta101-profile-edit-v1-20261112">Beta 1.0.1<span id="build-edition"></span></div><div id="mobile-status" hidden></div></div>
+<div id="build-header"><div id="build-label" title="SGMobile Beta 1.0.3 · sgmobile-beta103-donation-dates-v1-20261113">Beta 1.0.3<span id="build-edition"></span></div><div id="mobile-status" hidden></div></div>
 <div id="safe-area-probe" aria-hidden="true"></div>
 <div id="game-stage"><canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas></div>
 <script src="golfer-history-model.js"></script>
@@ -133,7 +133,7 @@
     return landscape;
   };
   Module.localFiles = true;
-  Module.buildInfo = Object.freeze({version: '1.0.1', id: 'sgmobile-beta101-profile-edit-v1-20261112', channel: 'beta'});
+  Module.buildInfo = Object.freeze({version: '1.0.3', id: 'sgmobile-beta103-donation-dates-v1-20261113', channel: 'beta'});
   // Choose at launch; the ready initial loader permits one last change before
   // Continue. Future changes are shared unless explicitly
   // registered as Enhanced-only; save storage and formats remain shared.
@@ -728,7 +728,7 @@
       var code=e.code||('Key'+String(e.key).toUpperCase()),vk={KeyW:38,KeyA:37,KeyS:40,KeyD:39,ArrowUp:38,ArrowLeft:37,ArrowDown:40,ArrowRight:39}[code];
       if(!vk)return;
       if(type==='keyup'&&directions.has(code)){e.preventDefault();e.stopImmediatePropagation();queue(7,vk,0,0);directions.delete(code);return;}
-      if(Module.featureSettingsOpen||Module.editionModalOpen||Module.developerUsageOpen)return;
+      if(Module.featureSettingsOpen||Module.editionModalOpen)return;
       var field=e.target?.closest?.('input,textarea,select,[contenteditable="true"]');
       if(!Module.mobileUI||!Module.mobileState?.course||Module.courseLoading?.active||Module.mobileState?.textInput||field||e.ctrlKey||e.metaKey||e.altKey)return;
       e.preventDefault();e.stopImmediatePropagation();
@@ -1233,7 +1233,7 @@
   window.visualViewport?.addEventListener('scroll',layout);
 })();
 </script>
-<script src="bink-video.js"></script><script src="public-beta-usage.js" data-endpoint="https://sgmobile-beta-usage.sgmobile-fourtempers.workers.dev"></script><script src="local-install.js"></script><script src="offline.js"></script>
+<script src="bink-video.js"></script><script src="usage-totals.js"></script><script src="public-beta-usage.js" data-endpoint="https://sgmobile-beta-usage.sgmobile-fourtempers.workers.dev"></script><script src="local-install.js"></script><script src="offline.js"></script>
 <script src="save-rules.js"></script>
 <script src="autosave.js"></script>
 <script src="mobile-menu.js"></script>

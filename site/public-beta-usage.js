@@ -27,7 +27,9 @@
   let milliseconds = 0;
   let startedAt = null;
   let inFlight = null;
-  let renderUsage = () => {};
+  function renderUsage() {
+    Module.updateOwnUsageTotals?.(totals, synced);
+  }
 
   function read(key) {
     try { return JSON.parse(localStorage.getItem(key)); }
@@ -147,59 +149,7 @@
     sync();
   }
 
-  function node(tag, text, id) {
-    const element = document.createElement(tag);
-    element.textContent = text;
-    if (id) element.id = id;
-    return element;
-  }
-
-  Module.mountPublicBetaUsage = (version, privacy, footer) => {
-    const style = node('style', `
-      #public-usage-totals{margin:0 0 18px}
-      #public-usage-totals dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0}
-      #public-usage-totals dl>div{display:grid;grid-template-rows:1fr auto;gap:5px;padding:10px 6px;
-        border:1px solid var(--menu-border);border-radius:14px;background:linear-gradient(#f4f5ff,#e0e5fa)}
-      #public-usage-totals dl>div+div{background:linear-gradient(#fffaf0,#f7ebca)}
-      #public-usage-totals dt{font-size:13px;font-weight:700;line-height:1.25}
-      #public-usage-totals dd{margin:0;font-size:clamp(21px,5vw,29px);font-weight:800;
-        font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-      #public-usage-totals #public-usage-status{margin:7px 0 0}
-      #local-install .install-footer .install-privacy{max-width:440px;margin:14px auto 0}
-    `);
-    document.head.append(style);
-    const totalsPanel = node('section', '', 'public-usage-totals');
-    totalsPanel.setAttribute('aria-label', 'SGMobile Beta usage totals');
-    const values = node('dl', '');
-    const sessions = node('dd', '—', 'public-usage-sessions');
-    const hours = node('dd', '—', 'public-usage-hours');
-    for (const [label, value] of [['SG Mobile Sessions', sessions], ['Hours Played', hours]]) {
-      const item = node('div', '');
-      item.append(node('dt', label), value);
-      values.append(item);
-    }
-    const status = node('p', '', 'public-usage-status');
-    status.className = 'minor';
-    status.setAttribute('role', 'status');
-    totalsPanel.append(values, status);
-    version.after(totalsPanel);
-    privacy.textContent = 'Game files, saves and careers stay on this device. Public Beta reports playable-course sessions and active visible course time. Usage batches include a random receipt ID, build, launch stream and batch start time.';
-    footer.append(privacy);
-
-    const number = new Intl.NumberFormat();
-    const hoursNumber = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 });
-    function setText(element, text) {
-      if (element.textContent !== text) element.textContent = text;
-    }
-    renderUsage = () => {
-      setText(sessions, totals ? number.format(totals.sessions) : '—');
-      setText(hours, totals ? hoursNumber.format(totals.seconds / 3600) : '—');
-      setText(status, synced ? '' : totals ? 'Last synced totals' : 'Usage totals are not available yet.');
-    };
-    renderUsage();
-    sync();
-  };
-
+  sync();
   setInterval(sample, 1000);
   setInterval(() => { checkpoint(); sync(); }, 60000);
   document.addEventListener('visibilitychange', () => {

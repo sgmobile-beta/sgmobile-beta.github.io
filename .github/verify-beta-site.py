@@ -54,7 +54,13 @@ def main():
     require('dev-usage-preview.js' not in files, 'Developer telemetry is not a public app resource.')
     for name in listed:
         if name.endswith(('.js', '.html', '.json')):
-            require(b'sgmobile-dev-usage.sgmobile-' not in (site / name).read_bytes(), f'Developer collector in {name}')
+            data = (site / name).read_bytes()
+            if name == 'usage-totals.js':
+                endpoint = b'https://sgmobile-dev-usage.sgmobile-fourtempers.workers.dev/totals'
+                require(data.count(endpoint) == 1 and b"method: 'GET'" in data and
+                        b'/collect' not in data, 'Expected the read-only Development totals reader.')
+                data = data.replace(endpoint, b'', 1)
+            require(b'sgmobile-dev-usage.sgmobile-' not in data, f'Developer collector in {name}')
     print(f'Verified {len(files)} files for {build}.')
 
 

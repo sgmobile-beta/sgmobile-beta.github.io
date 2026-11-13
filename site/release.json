@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "build": "sgmobile-beta101-profile-edit-v1-20261112",
+  "build": "sgmobile-beta103-donation-dates-v1-20261113",
   "files": [
     {
       "path": "7zz.umd.js",
@@ -20,7 +20,7 @@
     {
       "path": "README.txt",
       "bytes": 3745,
-      "sha256": "93a7e656e7eef6231890eb0040880f3519423fc53cef05f3f157e17a32ab9046"
+      "sha256": "0b0bc326e0075d3ad5065f70884dd28339f5766b925e820cf16e7fa729ab7fcd"
     },
     {
       "path": "THIRD_PARTY_NOTICES.txt",
@@ -139,8 +139,8 @@
     },
     {
       "path": "golf.html",
-      "bytes": 98904,
-      "sha256": "39ec94a7c69490853a86f57d4473f1d78400f41439c163585e9d3f21bfa7dbd9"
+      "bytes": 98920,
+      "sha256": "705dfefee8cfaaec363152606acf281e0f16b3acd8972b0a1631781ed9bb14c4"
     },
     {
       "path": "golf.js",
@@ -304,8 +304,8 @@
     },
     {
       "path": "local-install.js",
-      "bytes": 139241,
-      "sha256": "7063991ffc739db414bc3d01a9c543eeacc790a739a22df4740d7c6be06571b9"
+      "bytes": 141490,
+      "sha256": "af3e37e6d21168acd836eb6a005581dee265f71b908c26795c439af7e846ace3"
     },
     {
       "path": "manifest.webmanifest",
@@ -314,8 +314,8 @@
     },
     {
       "path": "mobile-menu.js",
-      "bytes": 444134,
-      "sha256": "3e3a744cb2846660d8ec8712124eb28624b9e11630e5793d524f954550d7e7ef"
+      "bytes": 443965,
+      "sha256": "8bab98932e1a475cf00e8247cb92c891aacb1a1fdd6b918e12aa0d8846909bb2"
     },
     {
       "path": "offline.js",
@@ -324,8 +324,8 @@
     },
     {
       "path": "public-beta-usage.js",
-      "bytes": 8599,
-      "sha256": "029fe285fb5a9d80b736b6e93cb4994887b01b1965828d83a5905974a7c896fd"
+      "bytes": 5959,
+      "sha256": "e56a767a82c05c8e579a39b0599d571fe9f1d3637a2d2e5e4ecf7612e737a989"
     },
     {
       "path": "routing-map.js",
@@ -344,8 +344,8 @@
     },
     {
       "path": "service-worker.js",
-      "bytes": 4015,
-      "sha256": "a126087c7f72e60e13466b810f9c53e25add7b8612544ed5cff262b48da3951e"
+      "bytes": 4017,
+      "sha256": "e3cf278119c5a9ce9f892420d8f7721a2a43d729cdf4b6eb0b7a230cb06042fd"
     },
     {
       "path": "sources/7z-wasm-1.2.0-source.tar.gz",
@@ -381,6 +381,11 @@
       "path": "unshield.wasm",
       "bytes": 67260,
       "sha256": "5948d6d5abd89b8218cab2446b3a50ccb0fc0dd8a9f9def2401a0682d03a0e9c"
+    },
+    {
+      "path": "usage-totals.js",
+      "bytes": 6326,
+      "sha256": "999628457f928eeefdc5a0fca34b687eb2902087878340537fbb1256c2a8ec16"
     }
   ]
 }
