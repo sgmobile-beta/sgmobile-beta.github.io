@@ -1,0 +1,18 @@
+{
+  "id": "/sgmobile-beta",
+  "name": "SGMobile Beta",
+  "short_name": "SGMobile Beta",
+  "start_url": "/golf.html?hd=0&mobile=1",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#9e9ec8",
+  "icons": [
+    {
+      "src": "icons/simgolf-mobile.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

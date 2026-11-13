@@ -1,0 +1,1254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SGMobile Beta">
+<meta name="theme-color" content="#9e9ec8">
+<link rel="apple-touch-icon" href="icons/simgolf-mobile.png">
+<link rel="icon" type="image/png" href="icons/simgolf-mobile.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>SGMobile Beta 1.0</title>
+<style>
+  /* Shared mobile presentation palette; original game artwork stays native. */
+  :root{
+    --menu-bg:#9e9ec8;--menu-panel:#c7c7e7;--menu-overlay:rgba(199,199,231,.96);
+    --menu-button:#e1e1f3;--menu-selected:#c3cef6;--menu-preview:#ededf8;
+    --menu-text:#1c2541;--menu-muted:#343456;--menu-border:#727094;--menu-line:#79749c;
+    --golfer-card-scrim:rgba(199,199,231,.68);--golfer-profile-scrim:rgba(199,199,231,.82);
+    --menu-focus:#39315d;--menu-accent:#244781;--menu-good:#155239;--menu-warning:#69430b;--menu-danger:#9b241d;
+  }
+  :is(#mobile-ui,#mobile-mode-rail,#mobile-profile,#mobile-staff,#mobile-match,#mobile-golfer-card,#mobile-golfer-pairs,#local-save-files,#screen-diagnostics,#offline-notice) button:focus-visible,
+  :is(#mobile-cancel,#mobile-open-hole,#mobile-profile-return,#mobile-staff-return):focus-visible{outline:3px solid var(--menu-focus);outline-offset:2px}
+  :is(#screen-diagnostics,#offline-notice) button{min-height:44px;padding:8px 12px;border:1px solid var(--menu-border);border-radius:6px;background:var(--menu-button);color:var(--menu-text)}
+  #screen-diagnostics textarea{background:var(--menu-preview);color:var(--menu-text);border:1px solid var(--menu-border)}
+  #local-save-files input::file-selector-button{font:inherit;min-height:44px;padding:8px 12px;border:1px solid var(--menu-border);border-radius:6px;background:var(--menu-button);color:var(--menu-text)}
+
+  /* Title case applies to app controls and menu headings. Native text and
+     descriptive content keep their authored casing. */
+  :is(#mobile-ui,#mobile-mode-rail,#mobile-speed-picker,#mobile-startup,#local-title-actions,
+      #mobile-profile,#mobile-staff,#mobile-match,#mobile-golfer-card,#mobile-golfer-pairs,
+      #mobile-load,#mobile-hole-stats,#mobile-progress-screen,#local-save-files,
+      #screen-diagnostics,#course-analytics,#golfer-histories,#enhanced-settings,
+      .rules-dialog,#initial-loading,#course-loading) :is(button,h1,h2),
+  #mobile-locations :is(.location-native-action,#mobile-location-build,.location-label strong),
+  #game-edition :is(h1,button strong), #game-edition-back { text-transform:capitalize }
+  #mobile-load [data-save] { text-transform:none }
+
+  #mobile-startup{background:radial-gradient(ellipse at 38% 10%,#fff9e8 0%,#e3e2f8 38%,#a8a9d1 100%);--startup-ridge:#9da9bd;--startup-hills:#748d89;--startup-fairway:#b6c496}
+  .startup-landscape{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+
+  .menu-edition-medallion {
+    display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    box-sizing:border-box;min-width:152px;min-height:36px;flex:none;margin:0;padding:5px 13px;
+    border:1px solid #d8c491;border-radius:999px;
+    background:repeating-linear-gradient(120deg,transparent 0 7px,#fff1 7px 8px),
+      linear-gradient(180deg,#62638c,#404263 48%,#2b304f);
+    color:#fff9e4;box-shadow:inset 0 0 0 2px #25294966,inset 0 2px 2px #fff4,0 2px 5px #30264e44;
+    font:750 14px/18px system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;
+  }
+  .menu-edition-medallion::before,.menu-edition-medallion::after {
+    content:"";width:5px;height:5px;flex:none;transform:rotate(45deg);background:#e5ce92;
+  }
+  .menu-edition-medallion[hidden]{display:none}
+
+  /* Keep authored menu type sizes through viewport changes, including
+     refolding in iOS. Menus still reflow using their responsive CSS. */
+  html { -webkit-text-size-adjust: none; text-size-adjust: none; }
+  html, body { margin: 0; height: 100%; background: #111; }
+  body { overflow: hidden; }
+  #build-header {
+    position:fixed;z-index:100;top:calc(var(--screen-top,0px) + env(safe-area-inset-top,0px));
+    left:var(--screen-left,0px);right:auto;width:var(--screen-width,100%);
+    box-sizing:border-box;padding:2px calc(env(safe-area-inset-right,0px) + 6px) 2px calc(env(safe-area-inset-left,0px) + 6px);background:transparent;color:var(--menu-text);
+    display:flex;flex-wrap:nowrap;justify-content:space-between;gap:0 12px;
+    font:11px/18px system-ui,sans-serif;pointer-events:none;
+    height:22px;align-items:center;
+  }
+  body:has(#mobile-startup.difficulty:not([hidden])) #build-edition{display:none}
+  #build-label,#mobile-status{padding:0 4px;border-radius:3px;background:rgba(199,199,231,.68);box-sizing:border-box}
+  #build-label{flex:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:left}
+  #mobile-status{flex:0 1 auto;min-width:0;margin-left:auto;font-size:12px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    :is(#initial-loading #initial-loading-mute,#mobile-startup #startup-mute,#opening-video-mute){position:absolute;z-index:1;top:8px;right:max(8px,env(safe-area-inset-right));display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;padding:0;border:1px solid var(--menu-border);border-radius:50%;background:var(--menu-preview);color:var(--menu-text);touch-action:manipulation;cursor:pointer}
+    #initial-loading #initial-loading-mute{top:max(8px,env(safe-area-inset-top))}
+    :is(#initial-loading-mute,#startup-mute,#opening-video-mute) svg{width:22px;height:22px;pointer-events:none}
+    :is(#initial-loading-mute,#startup-mute,#opening-video-mute):focus-visible{outline:3px solid var(--menu-focus);outline-offset:2px}
+    #opening-video-mute{position:fixed;z-index:996;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right))}
+  #game-stage {
+    position:fixed;left:var(--screen-left,0px);top:var(--screen-top,0px);
+    width:var(--screen-width,100%);height:100vh;height:var(--screen-height,100dvh);box-sizing:border-box;
+    padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+             env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+  }
+  /* World pixels cover the whole visible viewport. Controls and original
+     menus retain their own safe areas; do not subtract those from pan coverage. */
+  #game-stage.world-view { padding: 0; }
+  #safe-area-probe {
+    position: fixed; width: 0; height: 0; visibility: hidden; pointer-events: none;
+    padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+             env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+  }
+  canvas { flex: none; display: block; image-rendering: pixelated; touch-action: none; }
+  #map-display[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div id="build-header"><div id="build-label" title="SGMobile Beta 1.0 · sgmobile-beta10-public-rc1-20112">Beta 1.0<span id="build-edition"></span></div><div id="mobile-status" hidden></div></div>
+<div id="safe-area-probe" aria-hidden="true"></div>
+<div id="game-stage"><canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas></div>
+<script src="golfer-history-model.js"></script>
+<script src="club-records-model.js"></script>
+<script src="design-challenge-model.js"></script>
+<script src="course-design-lab-model.js"></script>
+<script src="business-turnaround-model.js"></script>
+<script src="golfer-experience-model.js"></script>
+<script src="feature-registry.js"></script>
+<script>
+  var Module = { canvas: document.getElementById('canvas'), fsDebug: true, apiTrace: /apitrace/.test(location.search), noVideos: /novideos/.test(location.search) };
+  // Both startup screens use the same scene with local SVG references.
+  Module.createStartupLandscape = function (id) {
+    const landscape=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    landscape.id=id;landscape.classList.add('startup-landscape');landscape.setAttribute('aria-hidden','true');
+    landscape.setAttribute('viewBox','0 0 1200 760');landscape.setAttribute('preserveAspectRatio','xMidYMax slice');
+    landscape.innerHTML=`<defs>
+      <linearGradient id="${id}-mist" x2="0" y2="1"><stop stop-color="#f4f0fa" stop-opacity=".08"/><stop offset="1" stop-color="#72779e" stop-opacity=".3"/></linearGradient>
+      <pattern id="${id}-mow" width="44" height="44" patternUnits="userSpaceOnUse" patternTransform="rotate(27)"><rect width="22" height="44" fill="#f9f4d9" opacity=".29"/></pattern>
+      <path id="${id}-pine" d="M0 0l-14 24h7l-13 20h10l-15 22h22v13h6V66h22L10 44h10L7 24h7Z"/>
+      <path id="${id}-fairway" d="M0 719C149 718 276 670 381 617s153-87 235-104c84-18 153-7 156 21 4 30-97 68-131 98-51 44-27 77 56 128H0Z"/>
+    </defs>
+    <circle cx="735" cy="174" r="67" fill="#fff5d3" opacity=".54"/>
+    <path d="M0 376Q183 288 389 381T809 379t391-31v412H0Z" fill="var(--startup-ridge)" opacity=".46"/>
+    <path d="M0 490q182-115 364-64t289 20q281-126 547-17v331H0Z" fill="var(--startup-hills)" opacity=".53"/>
+    <path d="M0 530q198-54 381-7t385-25q241-74 434-16v278H0Z" fill="var(--startup-hills)" opacity=".51"/>
+    <use href="#${id}-fairway" fill="var(--startup-fairway)" opacity=".77"/><use href="#${id}-fairway" fill="url(#${id}-mow)"/>
+    <path d="M274 705q56-8 88 3t-18 27q-69 16-106 1t36-31ZM753 577q27-8 51-1t0 15q-40 13-60 5t9-19Z" fill="#f6ebcc" opacity=".72"/>
+    <ellipse cx="692" cy="532" rx="54" ry="16" fill="#cbd8a9" opacity=".77"/>
+    <path d="M691 532v-59" stroke="#4c4c69" stroke-width="3"/><path d="M693 474l28 7-28 10Z" fill="#f5edcb"/>
+    <g fill="#454f64" opacity=".32"><use href="#${id}-pine" transform="translate(285 452) scale(.58)"/><use href="#${id}-pine" transform="translate(317 443) scale(.8)"/><use href="#${id}-pine" transform="translate(351 466) scale(.47)"/><use href="#${id}-pine" transform="translate(944 448) scale(.64)"/><use href="#${id}-pine" transform="translate(983 428) scale(.94)"/><use href="#${id}-pine" transform="translate(1030 441) scale(.7)"/></g>
+    <path d="M0 376h1200v384H0z" fill="url(#${id}-mist)"/>`;
+    return landscape;
+  };
+  Module.localFiles = true;
+  Module.buildInfo = Object.freeze({version: '1.0', id: 'sgmobile-beta10-public-rc1-20112', channel: 'beta'});
+  // Choose at launch; the ready initial loader permits one last change before
+  // Continue. Future changes are shared unless explicitly
+  // registered as Enhanced-only; save storage and formats remain shared.
+  (function(){
+    var edition=null;
+    var registry=SGFeatureRegistry.registry,catalog=registry.catalog;
+    var scopes=Object.freeze(Object.fromEntries(catalog.map(function(f){return [f.id,'enhanced'];})));
+    var key='simgolf-enhanced-preferences-v1',stored=null;
+    try{stored=JSON.parse(localStorage.getItem(key));}catch(e){}
+    var preferences=registry.defaults(stored);
+    Module.featureRegistry=registry;
+    Module.enhancedFeatureCatalog=catalog;
+    Object.defineProperty(Module,'enhancedPreferences',{get:function(){return preferences;}});
+    function mayEdit(){return edition===null||Module.featureSettingsOpen===true;}
+    Module.planEnhancedPreferences=function(changes){return registry.plan(preferences,changes);};
+    Module.applyEnhancedPlan=function(plan){
+      if(!mayEdit()||!plan?.ok||JSON.stringify(plan.before)!==JSON.stringify(preferences))return false;
+      return Module.setEnhancedPreferences(plan.configuration);
+    };
+    Module.setEnhancedPreferences=function(config){
+      if(!mayEdit())return false;
+      try{preferences=registry.validate(config);}catch(e){Module.enhancedConfigurationError=e.message;return false;}
+      Module.enhancedConfigurationError='';
+      try{localStorage.setItem(key,JSON.stringify(preferences));Module.enhancedPreferencesSaved=true;}catch(e){Module.enhancedPreferencesSaved=false;}
+      return true;
+    };
+    Module.setEnhancedPreference=function(id,value){
+      const plan=registry.plan(preferences,{[id]:value});
+      return plan.ok&&!plan.requiresConfirmation&&Module.applyEnhancedPlan(plan);
+    };
+    Object.defineProperty(Module,'gameEdition',{get:function(){return edition;}});
+    Module.gameFeatureScopes=scopes;
+    // This function is a gate for registered enhancements. Shared mobile
+    // compatibility code remains shared and does not request this permission.
+    Module.hasGameFeature=function(name){return !!registry.get(name)&&edition==='enhanced'&&Module.saveRules?.hasFeature(name)===true;};
+    var editionLabel=document.getElementById('build-edition');
+    function applyEdition(value){
+      edition=value;document.body.dataset.gameEdition=value;
+      editionLabel.textContent=' · '+(value==='classic'?'Classic':'Enhanced');
+      dispatchEvent(new Event('simgolf-edition-change'));return true;
+    }
+    Module.selectGameEdition=function(value){
+      if(edition!==null||(value!=='classic'&&value!=='enhanced'))return false;
+      return applyEdition(value);
+    };
+    // The native title is ready but has not received any player input yet.
+    // Never permit a switch after Continue, a preview load, or course entry.
+    Module.canChangeLoadingEdition=function(){
+      var s=Module.initialLoading,m=Module.startupMenu;
+      return edition!==null&&!!s?.active&&!!s.readyToContinue&&!s.complete&&!s.acknowledged&&
+        !!Module.atTitle&&!!m?.active&&m.kind==='title'&&!!m.frame&&!m.busy&&!m.fallback&&
+        !Module.startupQueue?.length&&!Module.mapCourseReady&&!Module.mobileState?.wasCourse&&
+        !Module.loadState&&!Module.locationState&&!Module.profileState&&
+        !Module.binkVideoActive&&!document.querySelector('video');
+    };
+    Module.switchLoadingEdition=function(value){
+      if((value!=='classic'&&value!=='enhanced')||value===edition||!Module.canChangeLoadingEdition())return false;
+      return applyEdition(value);
+    };
+  })();
+  // A separate user gate keeps mute independent of original fades and the
+  // opening-movie gate. Keep audio clocks running so unmuting never queues
+  // missed effects or stalls the movie/game.
+  Module.audioMuted=false;
+  try{Module.audioMuted=localStorage.getItem('simgolf-audio-muted')==='1';}catch(e){}
+  (function(){
+    var outputs=new WeakMap(),live=new Set();
+    Module.getAudioOutput=function(ctx){
+      var node=outputs.get(ctx);if(node)return node;
+      for(var entry of live)if(entry.ctx.state==='closed')live.delete(entry);
+      node=ctx.createGain();node.gain.value=Module.audioMuted?0:1;node.connect(ctx.destination);
+      outputs.set(ctx,node);live.add({ctx:ctx,node:node});return node;
+    };
+    // Converted media uses the same preference without changing the native
+    // movie bridge. Apply it before play, including detached/new elements.
+    var playMedia=HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play=function(){if(Module.audioMuted)this.muted=true;return playMedia.apply(this,arguments);};
+    Module.setAudioMuted=function(muted){
+      Module.audioMuted=!!muted;
+      for(var entry of live){if(entry.ctx.state==='closed'){live.delete(entry);continue;}entry.node.gain.cancelScheduledValues(entry.ctx.currentTime);entry.node.gain.value=Module.audioMuted?0:1;}
+      for(var media of document.querySelectorAll('video,audio'))media.muted=Module.audioMuted;
+      try{localStorage.setItem('simgolf-audio-muted',Module.audioMuted?'1':'0');}catch(e){}
+      dispatchEvent(new Event('simgolf-audio-change'));
+    };
+  })();
+  Module.createAudioMuteButton=function(id,signal){
+  const button=document.createElement('button');button.type='button';button.id=id;
+  button.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path/></svg>';
+  const path=button.querySelector('path');
+  function sync(){
+    const muted=!!Module.audioMuted,action=muted?'Unmute':'Mute';
+    button.setAttribute('aria-label',action+' all sounds');button.title=action+' all sounds';
+    button.setAttribute('aria-pressed',String(muted));
+    path.setAttribute('d','M3 9h4l5-4v14l-5-4H3z'+(muted?'M16 9l6 6M22 9l-6 6':'M16 8a6 6 0 0 1 0 8M19 5a10 10 0 0 1 0 14'));
+  }
+  button.onclick=()=>Module.setAudioMuted(!Module.audioMuted);
+  addEventListener('simgolf-audio-change',sync,{signal});sync();
+  return button;
+};
+  // Fixed-position CSS is anchored to the layout viewport. Other browser
+  // measurements can briefly retain a previous folded/orientation size.
+  Module.getLayoutViewport=function(){return {width:document.documentElement.clientWidth||innerWidth,height:document.documentElement.clientHeight||innerHeight};};
+  // Use live browser bounds, never a device/model-specific display size.
+  Module.getScreenBounds=function(){
+    var v=window.visualViewport,probe=document.getElementById('safe-area-probe'),css=getComputedStyle(probe),layout=Module.getLayoutViewport();
+    var w=layout.width,h=layout.height;
+    // At unit page scale, a visual viewport wider but shorter (or narrower
+    // but taller) than layout cannot be a smaller visible rectangle. Treat
+    // that crossed pair as stale during rotation. Genuine keyboard reductions
+    // and page zoom retain their smaller bounds and offsets.
+    var crossed=v&&v.width>0&&v.height>0&&Math.abs((v.scale||1)-1)<.01&&Math.abs(v.offsetLeft||0)<1&&Math.abs(v.offsetTop||0)<1&&((v.width>w+2&&v.height<h-2)||(v.width<w-2&&v.height>h+2));
+    if(crossed)v=null;
+    var left=v&&Number.isFinite(v.offsetLeft)&&v.offsetLeft>=0&&v.offsetLeft<w?v.offsetLeft:0;
+    var top=v&&Number.isFinite(v.offsetTop)&&v.offsetTop>=0&&v.offsetTop<h?v.offsetTop:0;
+    // A resumed viewport can briefly report the old larger display. Keep all
+    // consumers inside the current layout while those reports settle. Smaller
+    // visual viewports (keyboard/page zoom) remain smaller; do not infer them.
+    return {left:left,top:top,width:Math.min(w-left,v&&v.width>0?v.width:w),height:Math.min(h-top,v&&v.height>0?v.height:h),
+      safe:{left:parseFloat(css.paddingLeft)||0,right:parseFloat(css.paddingRight)||0,top:parseFloat(css.paddingTop)||0,bottom:parseFloat(css.paddingBottom)||0}};
+  };
+  (function(){
+    var pending=false,frame=0,fallback=0,last='',timers=[];Module.screenLayoutTrace=[];
+    function sync(reason){pending=false;cancelAnimationFrame(frame);clearTimeout(fallback);frame=0;fallback=0;if(document.hidden)return;
+      var b=Module.getScreenBounds(),v=window.visualViewport,layout=Module.getLayoutViewport(),style=document.documentElement.style;
+      var key=JSON.stringify([b,innerWidth,innerHeight,v&&v.scale,screen.width,screen.height]);if(key===last)return;last=key;
+      for(var name of ['left','top','width','height'])style.setProperty('--screen-'+name,b[name]+'px');
+      style.setProperty('--screen-right-gap',Math.max(0,layout.width-b.left-b.width)+'px');
+      style.setProperty('--screen-bottom-gap',Math.max(0,layout.height-b.top-b.height)+'px');
+      Module.screenBounds=b;
+      Module.screenLayoutTrace.push({time:Date.now(),reason:reason||'explicit',bounds:b,layout:[document.documentElement.clientWidth,document.documentElement.clientHeight],inner:[innerWidth,innerHeight],visual:v?{width:v.width,height:v.height,left:v.offsetLeft,top:v.offsetTop,scale:v.scale}:null});
+      if(Module.screenLayoutTrace.length>32)Module.screenLayoutTrace.shift();
+      dispatchEvent(new Event('simgolf-screen-resize'));Module.refreshCanvasPresentation?.();
+    }
+    function schedule(reason){if(!pending){pending=true;frame=requestAnimationFrame(function(){sync(reason);});fallback=setTimeout(function(){sync(reason+'-timer');},120);}}
+    function settle(event){timers.forEach(clearTimeout);timers=[];var reason=event?.type||'resume';schedule(reason);
+      for(var ms of [120,360,800,1600])timers.push(setTimeout(function(){schedule(reason+'-settle');},ms));
+    }
+    Module.refreshScreenBounds=function(){sync('explicit');};
+    for(var type of ['resize','orientationchange','pageshow','focus'])addEventListener(type,settle);
+    document.addEventListener('visibilitychange',function(event){if(!document.hidden)settle(event);});
+    if(window.visualViewport){visualViewport.addEventListener('resize',settle);visualViewport.addEventListener('scroll',settle);}
+    // Some display transitions emit their last event before new metrics arrive.
+    // This read-only comparison makes late changes recover without a reload;
+    // unchanged samples do not dispatch events or re-enter/resize the engine.
+    setInterval(function(){if(!document.hidden)sync('geometry-check');},500);
+    sync('initial');
+    // Read-only, on-demand evidence: native saves refer to external BMPs.
+    // Do not invent or replace a historical photo when its file is absent.
+    Module.getAccomplishmentDiagnostics=function(){
+      var out={io:Module.snapshotIO||[],records:[],files:[]};
+      if(!Module.HEAPU8||typeof FS==='undefined')return out;
+      var heap=new DataView(Module.HEAPU8.buffer);out.active=heap.getInt32(0x4e3db8,true);
+      for(var i=0;i<22;i++){var date=heap.getUint32(0x4c15a0+i*48,true);if(date)out.records.push({id:i,date:date,file:'accomp'+i+'.bmp'});}
+      for(var root of ['/game','/persist'])try{
+        var dir=root+'/'+FS.readdir(root).find(n=>n.toLowerCase()==='snapshots');
+        for(var name of FS.readdir(dir).filter(n=>/^accomp[0-9]+\.bmp$/i.test(n)).slice(0,32)){
+          var file={root:root,name:name},b=FS.readFile(dir+'/'+name);file.bytes=b.length;
+          if(b.length>=54){var h=new DataView(b.buffer,b.byteOffset,b.byteLength);file.bmp=b[0]===66&&b[1]===77;file.width=h.getInt32(18,true);file.height=h.getInt32(22,true);file.depth=h.getUint16(28,true);var offset=h.getUint32(10,true),samples=new Set();for(var k=offset;k+2<b.length;k+=Math.max(3,Math.floor((b.length-offset)/1024/3)*3))samples.add((b[k]<<16)|(b[k+1]<<8)|b[k+2]);file.sampleColors=samples.size;}
+          out.files.push(file);
+        }
+      }catch(e){/* A fresh course or imported .sve can have no snapshot files. */}
+      out.missing=out.records.filter(r=>!out.files.some(f=>f.root==='/game'&&f.name.toLowerCase()===r.file));return out;
+    };
+    Module.getViewportSurfaces=function(){
+      if(!Module.HEAPU8||Module.HEAPU8.byteLength<0x10128424)return [];
+      var h=new DataView(Module.HEAPU8.buffer),u=a=>h.getUint32(a,true),display=u(0x10128420);
+      return [u(0x4c1570),u(0x4c1574),display?u(display+0x148):0].map(function(w){var s=w?u(w+4):0;return s&&s+0x4d0<=h.byteLength?{wrapper:w,surface:s,width:u(s+0x38),height:u(s+0x3c),pixelLocks:u(s+0x4c8),cachedPixels:!!u(s+0x4cc)}:null;});
+    };
+    Module.getScreenDiagnostics=function(){var elements={};
+      for(var id of ['build-header','game-stage','canvas','mobile-ui','mobile-mode-rail','mobile-menu','mobile-camera','mobile-cancel']){
+        var e=document.getElementById(id);if(e)elements[id]={rect:e.getBoundingClientRect().toJSON(),hidden:e.hidden,display:getComputedStyle(e).display};
+      }
+      var v=window.visualViewport,b=Module.getScreenBounds(),c=Module.canvas.getBoundingClientRect(),p=Module.panVisual;return {build:Module.buildInfo,edition:Module.gameEdition,featureScopes:Module.gameFeatureScopes,savedGameRules:Module.saveRules?.diagnostic(),savePersistence:Module.persistState,enhancedPreferences:Module.enhancedPreferences,time:new Date().toISOString(),bounds:b,viewport:{layout:Module.getLayoutViewport(),inner:[innerWidth,innerHeight],screen:[screen.width,screen.height],pixelRatio:devicePixelRatio,visual:v?{width:v.width,height:v.height,left:v.offsetLeft,top:v.offsetTop,scale:v.scale}:null},rendering:{native:[Module.canvas.width,Module.canvas.height],target:Module.adaptiveTarget,resize:Module.viewportResize,surfaces:Module.getViewportSurfaces(),snapshotLocksBalanced:Module.snapshotLocksBalanced||0,zoom:Module.mapPresentation?.zoom,zoomState:{applied:Module.mapPresentation?.appliedZoom,native:Module.mapPresentation?.nativeZoom,rendered:p?.pixelFrame?.zoom,refining:!!Module.mapPresentation?.zooming,pending:Module.mapPresentation?.pendingNative||null},scale:Module.canvasScale,coverage:{width:c.width-b.width,height:c.height-b.height},coarse:!!p?.coarse,offset:p?[p.appliedX,p.appliedY]:null,panning:p?{drag:!!p.drag,held:!!p.held,nativeOwned:!!p.nativeOwned,pendingRest:!!p.rest?.pending,restAcknowledged:!!p.rest?.acknowledged,completed:p.presentSerial||0,fresh:p.pixelSerial||0,deferred:p.deferredFrames||0,recoveries:p.recoveries||0,nativeAgeMs:p.lastNativeAt?performance.now()-p.lastNativeAt:null,pixelAgeMs:p.lastPixelAt?performance.now()-p.lastPixelAt:null,lastRecovery:p.lastRecovery||null}:null,characters:Module.characterReplay||null,autosave:Module.autosaveState,gameClock:Module.gameClock||null,simulationFrame:Module.HEAPU8?.byteLength>0x834174?new DataView(Module.HEAPU8.buffer).getUint32(0x834170,true):null},history:Module.screenLayoutTrace.slice(),input:{courseLoading:Module.courseLoading||null,initialLoading:Module.initialLoading||null,startup:Module.startupMenu||null,startupArtwork:Module.startupArtwork||null,startupPresentation:Module.startupPresentation||null,home:Module.homeInfo||null,holeStats:Module.holeStats||null,progressScreen:Module.progressScreen||null,golfers:Module.getGolferDiagnostics?.()||null,locations:Module.locationState||null,locationArtwork:Module.locationArtwork||null,locationPresentation:Module.locationPresentation||null,courseState:Module.mobileState||null,erase:Module.eraseState||null,choice:Module.originalChoice||null,profile:Module.profileState?{kind:Module.profileState.kind,serial:Module.profileState.serial,frame:Module.profileState.frame,busy:Module.profileState.busy,fallback:Module.profileState.fallback,clubhouseDemolition:!!Module.profileState.clubhouseDemolition}:null,queues:{touch:Module.touchQueue?.length||0,menu:Module.menuQueue?.length||0,profile:Module.profileQueue?.length||0},mapMode:Module.mapMode,profileVisible:!!document.getElementById("mobile-profile")&&!document.getElementById("mobile-profile").hidden},accomplishments:Module.getAccomplishmentDiagnostics(),elements:elements,mobileUI:Module.mobileUI,course:!!Module.mobileState?.course,atTitle:!!Module.atTitle};
+    };
+    Module.openScreenDiagnostics=function(){var dialog=document.getElementById('screen-diagnostics');
+      if(!dialog){dialog=document.createElement('section');dialog.id='screen-diagnostics';dialog.setAttribute('role','dialog');dialog.setAttribute('aria-label','Screen diagnostics');
+        dialog.style.cssText='position:fixed;z-index:1000;left:var(--screen-left,0px);top:var(--screen-top,0px);width:var(--screen-width,100%);height:var(--screen-height,100dvh);box-sizing:border-box;padding:24px max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:var(--menu-bg);color:var(--menu-text);overflow:auto;font:16px system-ui';
+        var heading=document.createElement('h2');heading.textContent='Screen diagnostics';var help=document.createElement('p');help.textContent='Share this layout report if controls disappear after folding. It contains screen measurements and the build label; no game files or saves.';
+        var report=document.createElement('textarea');report.readOnly=true;report.setAttribute('aria-label','Screen layout report');report.style.cssText='display:block;width:100%;height:50%;box-sizing:border-box;font:12px monospace';
+        var toolbar=document.createElement('div');toolbar.style.cssText='display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:12px';
+        var copy=document.createElement('button');copy.id='screen-diagnostics-copy';copy.textContent='Copy diagnostics';copy.style.cssText='min-height:48px;font:inherit';
+        var status=document.createElement('span');status.id='screen-diagnostics-copy-status';status.setAttribute('role','status');
+        copy.onclick=async function(){copy.disabled=true;status.textContent='';
+          try {
+            try {if(!navigator.clipboard?.writeText)throw new Error('Clipboard unavailable');await navigator.clipboard.writeText(report.value);}
+            catch(error){report.focus();report.select();report.setSelectionRange(0,report.value.length);if(!document.execCommand('copy'))throw error;}
+            status.textContent='Copied';
+          } catch(error){status.textContent='Text selected. Use Copy from the text selection menu.';}
+          finally {copy.disabled=false;}
+        };
+        var close=document.createElement('button');close.textContent='Close diagnostics';close.style.cssText='min-height:48px;font:inherit';close.onclick=function(){dialog.remove();};toolbar.append(copy,close,status);dialog.append(heading,help,toolbar,report);document.body.append(dialog);
+        for(var type of ['pointerdown','pointerup','pointermove','click','mousedown','mouseup','touchstart','touchmove','touchend','wheel','keydown','keyup'])dialog.addEventListener(type,function(e){e.stopPropagation();});
+      }
+      dialog.querySelector('textarea').value=JSON.stringify(Module.getScreenDiagnostics(),null,2);
+    };
+    var label=document.getElementById('build-label');label.style.pointerEvents='auto';label.setAttribute('role','button');label.tabIndex=0;label.setAttribute('aria-label','Screen diagnostics');label.addEventListener('click',Module.openScreenDiagnostics);label.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();Module.openScreenDiagnostics();}});
+  })();
+  Module.headerHeight=function(){return document.getElementById('build-header').getBoundingClientRect().bottom;};
+  new ResizeObserver(function(){dispatchEvent(new Event('simgolf-header-resize'));}).observe(document.getElementById('build-header'));
+  // Original Windows strings are byte-oriented Windows-1252, including the
+  // Simoleon sign and smart punctuation. UTF-8 decoding loses those bytes.
+  var gameTextDecoder = new TextDecoder('windows-1252');
+  Module.readGameText = function(pointer, limit) {
+    var heap=Module.HEAPU8, start=Number(pointer), end=start;
+    if(!heap||!Number.isInteger(start)||start<=0||start>=heap.length)return '';
+    var stop=Math.min(heap.length,start+(limit||4096));
+    while(end<stop&&heap[end])end++;
+    return gameTextDecoder.decode(heap.subarray(start,end)).replace(/§/g,'$');
+  };
+  // Internal controlled resize API: queue a request; never enter running WASM
+  // from a browser event. The course-render boundary consumes the latest one.
+  Module.requestViewport = function (width, height) {
+    if (!Number.isInteger(width) || !Number.isInteger(height)) return 0;
+    var seq = (Module.viewportRequest?.seq || 0) + 1;
+    Module.viewportRequest = {width:width, height:height, seq:seq};
+    return seq;
+  };
+  // Presentation only: retain the engine's native world/UI coordinates. SDL
+  // maps browser input through the canvas's actual CSS rectangle. Never resize
+  // the backing surface here; changing it also needs an engine resize contract.
+  (function () {
+    var stage = document.getElementById('game-stage');
+    var nativeWidth = 800, nativeHeight = 600, pending = false;
+    function fit() {
+      pending = false;
+      if (Module.mobileSaveNameActive) return;
+      stage.classList.toggle('world-view',!!(Module.mobileUI && Module.mapPresentation?.course));
+      var css = getComputedStyle(stage);
+      var width = stage.clientWidth - parseFloat(css.paddingLeft) - parseFloat(css.paddingRight);
+      var height = stage.clientHeight - parseFloat(css.paddingTop) - parseFloat(css.paddingBottom);
+      if (width <= 0 || height <= 0) return;
+      // Original menu/dialog artwork occupies the800x600 UI plane even when
+      // the retained map buffers are tall/wide. Fit and centre that plane;
+      // clip stale world pixels beyond it, keeping inverse canvas input exact.
+      var legacy=(Module.mobileUI||Module.atTitle)&&!Module.mapPresentation?.course;
+      var header=legacy?document.getElementById('build-header').getBoundingClientRect().height:0;
+      var backup=document.getElementById('local-title-actions'),footer=legacy&&backup&&!backup.hidden?backup.getBoundingClientRect().height+16:0;
+      var scale = Math.min(width / (legacy?800:nativeWidth), Math.max(1,height-header-footer) / (legacy?600:nativeHeight));
+      if (Module.mobileUI && Module.mapPresentation?.course) {
+        var view=Module.mapPresentation;
+        scale = view.baseScale * view.appliedZoom / (view.nativeZoom/4);
+      }
+      Module.canvas.style.width = nativeWidth * scale + 'px';
+      Module.canvas.style.height = nativeHeight * scale + 'px';
+      Module.canvasBaseTransform=legacy?'translate('+((nativeWidth-800)*scale/2)+'px,'+((nativeHeight-600)*scale/2+(header-footer)/2)+'px)':'';
+      Module.canvas.style.transform=Module.canvasBaseTransform;
+      Module.canvas.style.clipPath=legacy?'inset(0 '+((nativeWidth-800)/nativeWidth*100)+'% '+((nativeHeight-600)/nativeHeight*100)+'% 0)':'';
+      Module.uiPresentation=legacy?{width:800,height:600,scale:scale,header:header,footer:footer}:null;
+      Module.canvasScale = scale;Module.applySmoothPan?.(true);
+    }
+    function schedule() { if (!pending) { pending = true; requestAnimationFrame(fit); } }
+    Module.fitCanvas = function (width, height) {
+      nativeWidth = width; nativeHeight = height; fit();
+    };
+    Module.refreshCanvasPresentation = fit;
+    addEventListener('resize', schedule);
+    addEventListener('orientationchange', schedule);
+    addEventListener('simgolf-header-resize',schedule);
+    addEventListener('simgolf-screen-resize',schedule);
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', schedule);
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(schedule).observe(stage);
+    schedule();
+  })();
+  // Mobile map layer: DOM events only queue work. Native code consumes it at
+  // the ordinary message pump, never by reentering suspended JSPI calls.
+  (function () {
+    var params = new URLSearchParams(location.search);
+    var active = params.get('mobile') === '1' || (Module.localFiles && params.get('mobile') !== '0') || (params.get('mobile') !== '0' && matchMedia('(pointer: coarse)').matches);
+    Module.mobileMap = active;
+    Module.mobileUI = active && params.get('legacyui') !== '1';
+    Module.menuQueue = [];
+    Module.mapMode = 0;
+    Module.gameTextQueue = [];
+    Module.sendGameText = function(text) {
+      if(!Module.mobileState?.textInput){Module.gameTextError='Open a name field in the game first.';return false;}
+      if(/[^\x20-\x7e]/.test(text)){Module.gameTextError='Use letters, numbers and standard punctuation.';return false;}
+      if(Module.gameTextQueue.length+text.length>4096){Module.gameTextError='Wait for the current text to finish, then try again.';return false;}
+      for(var i=0;i<text.length;i++)Module.gameTextQueue.push(text.charCodeAt(i));
+      Module.mobileTextPending=Module.gameTextQueue.length;Module.gameTextError='';return true;
+    };
+    Module.touchQueue = [];
+    var canvas = Module.canvas, stage = document.getElementById('game-stage');
+    var gesture = null, debounce, geometryTimer=0, measuring = false, fingers = new Map(), pinch = null, twoFingerFrame = 0, blocked = false;
+    Module.mapPresentation = {course:false, zoom:1, appliedZoom:1, nativeZoom:4, baseScale:1};
+    // Use the physical screen's short CSS side, not the orientation-dependent
+    // fitting ratio. Magnification is a uniform close-up of the rendered world;
+    // the engine keeps its genuine native zoom values and projection/picking.
+    function baseScale() {
+      return Math.max(1, Math.min(screen.width,screen.height)) / 600;
+    }
+    function nativeDetail(zoom){
+      if(zoom>=1)return 4;
+      var b=Module.getScreenBounds(),wide=b.width>b.height,maxWidth=wide?1920:1600,maxHeight=wide?1600:1920;
+      // Retain the finest original artwork that can cover this display with
+      // pan overscan inside the existing allocation budget. A fixed1x cutoff
+      // unnecessarily enlarged half-detail sprites on otherwise fitting views.
+      for(var detail of [4,2]){var scale=baseScale()*zoom/(detail/4);
+        if(maxWidth*scale>=b.width+96&&maxHeight*scale>=b.height+96)return detail;
+      }
+      return 1;
+    }
+    Module.setMapZoom = function(value) {
+      var view=Module.mapPresentation;
+      if(!Number.isFinite(value))return;
+      var constructing=Module.mobileUI&&Module.mobileState?.constructing,minimum=constructing?1:.25;
+      var targetZoom=Math.max(minimum,Math.min(3,value));
+      if(targetZoom!==view.zoom&&!view.zooming)Module.resetSmoothPan?.('zoom');
+      view.zooming=true;
+      if(Module.aimMode)Module.setAimMode(false);
+      if(Module.lotMode)Module.setLotMode(false);
+      if(Module.terrainMode)Module.setTerrainMode(false);
+      view.zoom=targetZoom;view.changed=Date.now();
+      if(constructing&&value<1)Module.mapZoomNotice={text:'Build: 1× minimum',until:Date.now()+2400};
+      // Scale the last complete map immediately. Native detail changes and
+      // buffer reallocations settle once the gesture/wheel input is quiet.
+      view.appliedZoom=view.zoom;
+      Module.refreshCanvasPresentation();schedule();
+    };
+    Module.updateMapPresentation = function(course) {
+      if(Module.mobileSaveNameActive)return;
+      var view=Module.mapPresentation;
+      var nativeZoom=Module.mobileState?.zoom||4,changed=false;
+      if(view.pendingNative&&view.pendingNative===view.nativeAck&&view.serial===view.nativeAckSerial){
+        nativeZoom=view.nativeAck;delete view.pendingNative;view.appliedZoom=view.zoom;changed=true;
+      }
+      if(!view.pendingNative&&nativeZoom!==view.nativeZoom){
+        // Original keyboard/fallback commands remain valid inputs to the same
+        // scale. A queued gesture already supplied its desired overall zoom.
+        if(!changed&&!view.zooming)view.zoom=Math.max(.25,Math.min(3,view.zoom*nativeZoom/view.nativeZoom));
+        view.nativeZoom=nativeZoom;view.appliedZoom=view.zoom;changed=true;
+      }
+      var ownershipChanged=view.course!==!!course||view.mobileUI!==Module.mobileUI;
+      if(!changed&&!ownershipChanged)return;
+      view.course=!!course;view.mobileUI=Module.mobileUI;
+      if(ownershipChanged){Module.cancelMapGesture();if(!course&&Module.aimMode)Module.setAimMode(false);}
+      Module.refreshCanvasPresentation();schedule();
+    };
+    Module.mapZoomFrameReady=function(frame){
+      var v=Module.mapPresentation;if(!v.zooming)return;
+      if(!pinch&&!v.pendingNative&&frame.valid&&frame.zoom===nativeDetail(v.zoom)&&frame.width===canvas.width&&frame.height===canvas.height&&Module.viewportResize?.status===1&&Module.viewportResize.seq===Module.viewportRequest?.seq){v.zooming=false;}
+    };
+    function queue(type, x, y, distance, mode, inputFrame) {
+      if(Module.analyticsActive){if(type===0||type===8||type===9||type===10||type>=11)return;if(type>=1&&type<=4)mode=6;}
+      var q = Module.touchQueue;
+      var event = [type, x|0, y|0, distance|0, mode===undefined?measuring|0:mode|0];
+      var onMap=Module.mobileUI&&Module.mapPresentation?.course&&!Module.uiPresentation;var frame=onMap?(inputFrame===undefined?Module.panVisual?.frame:inputFrame):null;event.push(frame?.valid?1:0,frame?.x||0,frame?.y||0,frame?.rotation||0,frame?.zoom||0,frame?.width||0,frame?.height||0,Module.panVisual?.serial||0);
+      if ((type===0||type===2||type===8||type===14) && q.length && q[q.length-1][0] === type) q[q.length-1] = event;
+      else if (q.length < 128) q.push(event);
+      else { q.length = 0; q.push([4,0,0,0,0]); }
+    }
+    var directions=new Map();
+    function releaseDirections(){directions.forEach(function(v){queue(7,v,0,0);});directions.clear();}
+    Module.cancelMapGesture = function () {
+      Module.releaseSmoothPan?.(false);
+      gesture = null;
+      cancelAnimationFrame(twoFingerFrame);twoFingerFrame=0;
+      pinch=null;blocked=fingers.size>0;
+      Module.lotPreview=null;Module.lotPending=false;Module.terrainPreview=null;
+      Module.touchQueue.length = 0;
+      queue(4,0,0,0);
+      releaseDirections();
+    };
+    Module.setMapMode = function(mode) {if(Module.lotMode)Module.setLotMode(false);
+      if(Module.terrainMode)Module.setTerrainMode(false);if(Module.aimMode)Module.setAimMode(false);Module.cancelMapGesture();measuring=mode;Module.mapMode=mode;if(mode===0)queue(5,0,0,0);};
+    Module.keyboardInput = function(key,character){
+      if(Module.mobileState?.textInput&&character){Module.gameTextQueue.push(character);Module.mobileTextPending=Module.gameTextQueue.length;}
+      else queue(6,key,character,0);
+    };
+    function nativePoint(e) {
+      var r = canvas.getBoundingClientRect();
+      return [(e.clientX-r.left)*canvas.width/r.width, (e.clientY-r.top)*canvas.height/r.height];
+    }
+    var aimReticle=document.createElement('div');aimReticle.id='map-aim-reticle';aimReticle.setAttribute('aria-hidden','true');
+    aimReticle.style.cssText='position:fixed;z-index:25;pointer-events:none;width:26px;height:26px;border:2px solid white;border-radius:50%;box-shadow:0 0 0 2px #15291d;transform:translate(-50%,-50%);display:none';
+    aimReticle.textContent='+';aimReticle.style.textAlign='center';aimReticle.style.font='24px/26px monospace';aimReticle.style.color='white';document.body.appendChild(aimReticle);
+    Module.aimMode=false;Module.aimTarget=null;Module.aimSerial=0;
+    Module.refreshAimReticle=function(){
+      var t=Module.aimTarget,visible=Module.aimMode&&Module.mobileState?.course&&Module.mobileState?.shotTurn&&t;
+      aimReticle.style.display=visible?'block':'none';if(!visible)return;
+      var r=canvas.getBoundingClientRect();aimReticle.style.left=(r.left+t.x*r.width/canvas.width)+'px';aimReticle.style.top=(r.top+t.y*r.height/canvas.height)+'px';
+    };
+    Module.setAimTarget=function(x,y){
+      if(!Module.aimMode||Module.shotPending)return;
+      Module.aimSerial++;Module.aimAck=null;
+      var r=canvas.getBoundingClientRect(),v=stage.getBoundingClientRect(),margin=16;
+      var left=Math.max(0,(Math.max(0,v.left)+margin-r.left)*canvas.width/r.width),right=Math.min(canvas.width-1,(Math.min(innerWidth,v.right)-margin-r.left)*canvas.width/r.width);
+      var top=Math.max(0,(Math.max(0,v.top,Module.headerHeight())+margin-r.top)*canvas.height/r.height),bottom=Math.min(canvas.height-1,(Math.min(innerHeight,v.bottom)-margin-r.top)*canvas.height/r.height);
+      Module.aimTarget={x:Math.max(left,Math.min(right,x)),y:Math.max(top,Math.min(bottom,y))};
+      Module.refreshAimTarget();Module.refreshAimReticle();
+    };
+    Module.refreshAimTarget=function(){var t=Module.aimTarget;if(Module.aimMode&&t)queue(8,t.x,t.y,Module.aimSerial);};
+    Module.setAimMode=function(enabled){
+      if(enabled)Module.resetSmoothPan?.('precise-tool');
+      if(Module.terrainMode)Module.setTerrainMode(false);
+      Module.cancelMapGesture();Module.aimMode=!!enabled&&!!Module.mobileState?.shotTurn&&!Module.mobileState?.photoActive;measuring=Module.aimMode?3:0;Module.mapMode=measuring;
+      if(Module.aimMode){var r=stage.getBoundingClientRect(),t=nativePoint({clientX:r.left+r.width/2,clientY:r.top+r.height/2});Module.setAimTarget(t[0],t[1]);}
+      else Module.aimTarget=null;
+      Module.refreshAimReticle();
+    };
+    Module.aimCanShoot=function(){return !!Module.aimTarget&&Module.aimAck?.serial===Module.aimSerial;};
+    Module.requestShot=function(){
+      if(!Module.mobileState?.course||Module.mobileState?.photoActive||!Module.mobileState?.shotReady||!Module.aimMode||!Module.aimCanShoot()||Module.shotPending)return false;
+      var t=Module.aimTarget;gesture=null;pinch=null;blocked=fingers.size>0;queue(9,t.x,t.y,Module.aimSerial);Module.shotPending=true;return true;
+    };
+    Module.terrainMode=false;Module.terrainTarget=null;Module.terrainSerial=0;
+    var terrainReticle=aimReticle.cloneNode(true);terrainReticle.id='map-terrain-reticle';terrainReticle.style.borderColor='#ffe683';terrainReticle.style.color='#ffe683';document.body.appendChild(terrainReticle);
+    Module.refreshTerrainReticle=function(){
+      var p=Module.terrainPreview,t=p?.valid&&p.serial===Module.terrainSerial?{x:p.point[0],y:p.point[1]}:Module.terrainTarget,show=Module.terrainMode&&Module.mobileState?.course&&Module.mobileState?.elevation&&t;
+      terrainReticle.style.display=show?'block':'none';if(!show)return;var r=canvas.getBoundingClientRect();terrainReticle.style.left=(r.left+t.x*r.width/canvas.width)+'px';terrainReticle.style.top=(r.top+t.y*r.height/canvas.height)+'px';
+    };
+    function terrainViewStamp(){var r=canvas.getBoundingClientRect(),v=Module.mobileState;return JSON.stringify([canvas.width,canvas.height,r.left,r.top,r.width,r.height,v?.rotation,v?.zoom,v?.terrainShape]);}
+    Module.setTerrainTarget=function(x,y){
+      if(!Module.terrainMode)return;
+      var r=canvas.getBoundingClientRect(),v=stage.getBoundingClientRect(),bar=document.getElementById('mobile-terrain-controls'),bottom=bar&&!bar.hidden?Math.min(innerHeight,v.bottom,bar.getBoundingClientRect().top-12):Math.min(innerHeight,v.bottom),margin=18;
+      var left=Math.max(0,(Math.max(0,v.left)+margin-r.left)*canvas.width/r.width),right=Math.min(canvas.width-1,(Math.min(innerWidth,v.right)-margin-r.left)*canvas.width/r.width),top=Math.max(0,(Math.max(0,v.top,Module.headerHeight())+margin-r.top)*canvas.height/r.height),end=Math.min(canvas.height-1,(bottom-margin-r.top)*canvas.height/r.height);
+      Module.terrainSerial++;Module.terrainPreview=null;Module.terrainTarget={x:Math.round(Math.max(left,Math.min(right,x))),y:Math.round(Math.max(top,Math.min(end,y)))};Module.refreshTerrainTarget();Module.refreshTerrainReticle();
+    };
+    Module.refreshTerrainTarget=function(){
+      if(Module.terrainMode&&Module.terrainView!==terrainViewStamp()){Module.cancelMapGesture();Module.terrainView=terrainViewStamp();}
+      var t=Module.terrainTarget;if(Module.terrainMode&&t&&Module.terrainPreview?.serial!==Module.terrainSerial&&!Module.touchQueue.some(e=>e[0]===14&&e[3]===Module.terrainSerial)){Module.touchQueue=Module.touchQueue.filter(e=>e[0]!==14);queue(14,t.x,t.y,Module.terrainSerial);}
+    };
+    Module.setTerrainMode=function(enabled){
+      if(enabled)Module.resetSmoothPan?.('precise-tool');
+      if(enabled){if(Module.aimMode)Module.setAimMode(false);if(Module.lotMode)Module.setLotMode(false);}
+      Module.cancelMapGesture();Module.terrainMode=!!enabled&&!!Module.mobileState?.course&&!!Module.mobileState?.elevation&&!Module.mobileState?.photoActive;measuring=Module.terrainMode?5:0;Module.mapMode=measuring;Module.terrainView=terrainViewStamp();
+      if(Module.terrainMode){var r=stage.getBoundingClientRect(),bar=document.getElementById('mobile-terrain-controls'),bottom=bar&&!bar.hidden?Math.min(r.bottom,bar.getBoundingClientRect().top-12):r.bottom,top=Math.max(r.top,Module.headerHeight()),t=nativePoint({clientX:r.left+r.width/2,clientY:top+(bottom-top)/2});Module.setTerrainTarget(t[0],t[1]);}else Module.terrainTarget=null;
+      Module.refreshTerrainReticle();
+    };
+    Module.requestTerrainStep=function(direction){
+      var p=Module.terrainPreview;if(!Module.terrainMode||!p?.valid||p.serial!==Module.terrainSerial||![-1,1].includes(direction)||fingers.size||p.pending>=32)return false;
+      queue(15,direction,0,Module.terrainSerial);return true;
+    };
+    Module.terrainEdgeActive=function(){return !!(Module.terrainMode&&gesture?.terrainStart&&fingers.size===1&&!pinch&&!blocked&&!document.hidden&&!Module.mobileState?.photoActive);};
+    Module.lotMode=false;Module.lotTarget=null;Module.lotSerial=0;
+    Module.lotCanStart=function(){return !pinch&&!fingers.size&&!blocked;};
+    Module.setLotTarget=function(x,y){
+      if(!Module.lotMode||Module.lotPending)return;
+      var r=canvas.getBoundingClientRect(),v=stage.getBoundingClientRect(),margin=18;
+      var left=Math.max(0,(Math.max(0,v.left)+margin-r.left)*canvas.width/r.width),right=Math.min(canvas.width-1,(Math.min(innerWidth,v.right)-margin-r.left)*canvas.width/r.width);
+      var panel=document.getElementById('mobile-lot-controls'),mapBottom=panel&&!panel.hidden?Math.min(innerHeight,v.bottom,panel.getBoundingClientRect().top-12):Math.min(innerHeight,v.bottom);
+      var top=Math.max(0,(Math.max(0,v.top,Module.headerHeight())+margin-r.top)*canvas.height/r.height),bottom=Math.min(canvas.height-1,(mapBottom-margin-r.top)*canvas.height/r.height);
+      Module.lotSerial++;Module.lotPreview=null;Module.lotTarget={x:Math.round(Math.max(left,Math.min(right,x))),y:Math.round(Math.max(top,Math.min(bottom,y)))};Module.refreshLotTarget();
+    };
+    Module.centreLotTarget=function(){var r=stage.getBoundingClientRect(),panel=document.getElementById('mobile-lot-controls'),bottom=panel&&!panel.hidden?Math.min(r.bottom,panel.getBoundingClientRect().top-12):r.bottom,top=Math.max(r.top,Module.headerHeight()),p=nativePoint({clientX:r.left+r.width/2,clientY:top+Math.max(0,bottom-top)/2});Module.setLotTarget(p[0],p[1]);};
+    function lotViewStamp(){var r=canvas.getBoundingClientRect();return JSON.stringify([canvas.width,canvas.height,r.left,r.top,r.width,r.height,Module.mobileState?.object,Module.mobileState?.variation?.selected??-1]);}
+    Module.refreshLotTarget=function(){
+      if(Module.lotMode&&Module.lotView!==lotViewStamp()){Module.cancelMapGesture();Module.lotView=lotViewStamp();Module.centreLotTarget();return;}
+      var t=Module.lotTarget;if(Module.lotMode&&t&&!Module.lotPending&&Module.lotPreview?.serial!==Module.lotSerial&&!Module.touchQueue.some(e=>e[0]===11))queue(11,t.x,t.y,Module.lotSerial);};
+    Module.setLotMode=function(enabled){
+      if(enabled)Module.resetSmoothPan?.('precise-tool');
+      Module.cancelMapGesture();Module.lotMode=!!enabled&&([1,2,4,5,6,7,8,9,10,11,12,13,14,16,19].includes(Module.mobileState?.object)||(Module.mobileState?.object===15&&Module.mobileState?.rebuildClubhouse))&&Module.mobileState?.course;measuring=Module.lotMode?4:0;Module.mapMode=measuring;Module.lotView=lotViewStamp();
+      if(Module.lotMode){var r=stage.getBoundingClientRect(),t=nativePoint({clientX:r.left+r.width/2,clientY:r.top+r.height/2});Module.setLotTarget(t[0],t[1]);}else Module.lotTarget=null;
+    };
+    Module.requestLot=function(){
+      var p=Module.lotPreview,t=Module.lotTarget;
+      if(!Module.lotMode||Module.lotPending||!p?.valid||p.serial!==Module.lotSerial||!t)return false;
+      gesture=null;pinch=null;blocked=fingers.size>0;queue(12,t.x,t.y,Module.lotSerial);Module.lotPending=true;return true;
+    };
+    Module.lotEdgeActive=function(){return !!(Module.lotMode&&gesture?.lotStart&&fingers.size===1&&!pinch&&!blocked&&!Module.lotPending&&!document.hidden);};
+    addEventListener('resize',function(){if(Module.aimMode)Module.setAimMode(false);if(Module.lotMode)Module.setLotMode(false);
+      if(Module.terrainMode)Module.setTerrainMode(false);});
+    // Changed screen coordinates invalidate a held two-finger anchor.
+    addEventListener('simgolf-screen-resize',function(){if(pinch)Module.cancelMapGesture();});
+    // Edge scrolling belongs to an active Aim drag, never a released/locked
+    // target. Native polling applies the ordinary bounded camera transform.
+    Module.aimEdgeActive=function(){return !!(Module.aimMode&&gesture?.aimStart&&fingers.size===1&&!pinch&&!blocked&&!Module.shotPending&&!document.hidden&&!Module.mobileState?.photoActive&&Module.mobileState?.shotTurn);};
+    setInterval(function(){
+      var terrain=Module.terrainEdgeActive(),lot=Module.lotEdgeActive();if(!terrain&&!lot&&!Module.aimEdgeActive())return;
+      var t=terrain?Module.terrainTarget:lot?Module.lotTarget:Module.aimTarget,r=canvas.getBoundingClientRect(),v=stage.getBoundingClientRect();
+      if(!t||!r.width||!r.height)return;
+      var x=r.left+t.x*r.width/canvas.width,y=r.top+t.y*r.height/canvas.height;
+      var left=Math.max(0,r.left,v.left),right=Math.min(innerWidth,r.right,v.right);
+      var top=Math.max(0,r.top,v.top,Module.headerHeight()),bottom=Math.min(innerHeight,r.bottom,v.bottom),edge=36,direction=0;
+      if(terrain){var bar=document.getElementById('mobile-terrain-controls');if(bar&&!bar.hidden)bottom=Math.min(bottom,bar.getBoundingClientRect().top-12);}
+      if(lot){var panel=document.getElementById('mobile-lot-controls');if(panel&&!panel.hidden)bottom=Math.min(bottom,panel.getBoundingClientRect().top-12);}
+      if(x-left<edge)direction|=1;else if(right-x<edge)direction|=4;
+      if(y-top<edge)direction|=2;else if(bottom-y<edge)direction|=8;
+      if(direction){if(terrain){Module.terrainPreview=null;queue(16,direction,0,Module.terrainSerial);}else if(lot){Module.lotPreview=null;queue(13,direction,0,Module.lotSerial);}else{Module.aimAck=null;queue(10,direction,0,Module.aimSerial);}}
+    },110);
+    function twoFingerSample(){
+      var points=Array.from(fingers.values());
+      return {x:(points[0].x+points[1].x)/2,y:(points[0].y+points[1].y)/2,distance:Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y)};
+    }
+    function updateTwoFinger(){
+      twoFingerFrame=0;if(!pinch||fingers.size!==2)return;
+      var point=twoFingerSample(),travel=Math.hypot(point.x-pinch.x,point.y-pinch.y),spread=Math.abs(point.distance-pinch.distance);
+      // Group the pair's initial pointer updates before choosing intent. A
+      // gesture owns pan OR zoom until release, avoiding accidental zoom while
+      // dragging and one-finger construction when the first finger lifts.
+      if(!pinch.mode){
+        if(performance.now()-pinch.time<50){twoFingerFrame=requestAnimationFrame(updateTwoFinger);return;}
+        if(spread>=8&&spread>travel){pinch.mode='zoom';Module.resetSmoothPan?.('pinch');}
+        else if(travel>=8){pinch.mode='pan';Module.releaseSmoothPan?.(true);queue(1,pinch.point[0],pinch.point[1],0,6);}
+      }
+      if(pinch.mode==='zoom'){
+        var zoom=pinch.zoom*point.distance/pinch.distance;
+        if(Math.abs(zoom-Module.mapPresentation.zoom)>.001)Module.setMapZoom(zoom);
+      }else if(pinch.mode==='pan'){
+        var r=canvas.getBoundingClientRect(),p=[pinch.point[0]+(point.x-pinch.x)*canvas.width/r.width,pinch.point[1]+(point.y-pinch.y)*canvas.height/r.height];pinch.last=p;Module.updateSmoothDrag?.(point.x-pinch.x,point.y-pinch.y);queue(2,p[0],p[1],travel,6);
+      }
+    }
+    function scheduleTwoFinger(){if(!twoFingerFrame)twoFingerFrame=requestAnimationFrame(updateTwoFinger);}
+    function pointer(e) {
+      var mapMouse=e.pointerType==='mouse'&&e.button!==2&&!(e.buttons&2)&&Module.mobileUI&&Module.mobileState?.course;
+      if(active&&Module.mobileUI&&Module.mobileState?.course){
+        if(e.type==='pointerdown'&&!fingers.size)Module.holdSmoothPan?.();
+        else if(e.type!=='pointermove'&&e.type!=='pointerdown'&&!fingers.has(e.pointerId))Module.releaseSmoothPan?.(false);
+      }
+      if (!active || (e.pointerType!=='touch'&&!mapMouse)) return;
+      if(mapMouse&&e.type==='pointerdown'&&e.button!==0)return;
+      if(mapMouse&&!Module.terrainMode&&!Module.aimMode&&!Module.lotMode&&e.type==='pointermove'&&!gesture){var q=nativePoint(e);queue(0,q[0],q[1],0);}
+      e.preventDefault(); e.stopImmediatePropagation();
+      if (e.type === 'pointerdown') {
+        fingers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+        canvas.setPointerCapture(e.pointerId);
+        if(blocked&&!pinch)return;
+        if(fingers.size===2 && Module.mobileUI && Module.mapPresentation.course) {
+          var point=twoFingerSample();
+          if(!Module.analyticsActive){if(Module.aimMode)Module.setAimMode(false);if(Module.lotMode)Module.setLotMode(false);if(Module.terrainMode)Module.setTerrainMode(false);}
+          Module.cancelMapGesture();
+          pinch={x:point.x,y:point.y,point:nativePoint({clientX:point.x,clientY:point.y}),distance:Math.max(1,point.distance),zoom:Module.mapPresentation.zoom,time:performance.now(),mode:''};return;
+        }
+        if(fingers.size>2){Module.cancelMapGesture();return;}
+        if (fingers.size!==1 || blocked) return;
+        // A newly-started pinch can supersede a pending refinement, but a
+        // lone tap must not build/aim against a different native projection.
+        var view=Module.mapPresentation,pixels=Module.panVisual?.pixelFrame;
+        if(Module.mapPresentation.course&&view.zooming&&(view.pendingNative||!pixels||pixels.zoom!==view.nativeZoom||pixels.width!==canvas.width||pixels.height!==canvas.height||Module.viewportResize?.seq!==Module.viewportRequest?.seq)){gesture=null;return;}
+        var p = nativePoint(e);
+        gesture = {id:e.pointerId,x:e.clientX,y:e.clientY,dist:0,point:p,frame:Module.mapPresentation.course?(Module.panVisual?.frame||null):null,sent:false,navigation:Module.mapPresentation.course&&(Module.analyticsActive||(!Module.aimMode&&!Module.lotMode&&!Module.terrainMode&&((Module.mapMode===0&&!Module.mobileState?.constructing)||Module.mapMode===6)))};
+        if(!Module.analyticsActive&&Module.mapPresentation.course&&Module.terrainMode){gesture.terrainStart={...Module.terrainTarget};if(mapMouse)Module.setTerrainTarget(p[0],p[1]);}
+        if(!Module.analyticsActive&&Module.mapPresentation.course&&Module.lotMode){gesture.lotStart={...Module.lotTarget};if(mapMouse)Module.setLotTarget(p[0],p[1]);}
+        if(!Module.analyticsActive&&Module.mapPresentation.course&&Module.aimMode){gesture.aimStart={...Module.aimTarget};if(mapMouse)Module.setAimTarget(p[0],p[1]);}
+        // Defer the original press until a move/release, so a two-finger start
+        // cannot paint a tile before the second finger claims pinch ownership.
+      } else {
+        if(!fingers.has(e.pointerId))return;
+        fingers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+        if(pinch) {
+          if(e.type==='pointermove')scheduleTwoFinger();
+          else {
+            cancelAnimationFrame(twoFingerFrame);twoFingerFrame=0;
+            if(e.type==='pointercancel'){Module.cancelMapGesture();}
+            else {
+              updateTwoFinger();cancelAnimationFrame(twoFingerFrame);twoFingerFrame=0;
+              if(pinch?.mode==='pan'){var p=pinch.last||pinch.point;queue(3,p[0],p[1],8,6);}
+              pinch=null;Module.releaseSmoothPan?.(false);
+            }
+            fingers.delete(e.pointerId);blocked=fingers.size>0;if(!fingers.size)Module.releaseSmoothPan?.(false);schedule();
+          }
+          return;
+        }
+        if (gesture && e.pointerId === gesture.id) {
+        var p = nativePoint(e);
+        gesture.dist = Math.max(gesture.dist,Math.hypot(e.clientX-gesture.x,e.clientY-gesture.y));
+        if(gesture.navigation&&gesture.dist>=8){
+          Module.releaseSmoothPan?.(true);Module.updateSmoothDrag?.(e.clientX-gesture.x,e.clientY-gesture.y);var r=canvas.getBoundingClientRect();
+          p=[gesture.point[0]+(e.clientX-gesture.x)*canvas.width/r.width,gesture.point[1]+(e.clientY-gesture.y)*canvas.height/r.height];
+        }
+        if(gesture.terrainStart&&Module.terrainMode){
+          if(e.type!=='pointercancel')Module.setTerrainTarget(mapMouse?p[0]:gesture.terrainStart.x+(p[0]-gesture.point[0])*.65,mapMouse?p[1]:gesture.terrainStart.y+(p[1]-gesture.point[1])*.65);
+        }else if(gesture.lotStart&&Module.lotMode){
+          if(e.type!=='pointercancel')Module.setLotTarget(mapMouse?p[0]:gesture.lotStart.x+(p[0]-gesture.point[0])*1.15,mapMouse?p[1]:gesture.lotStart.y+(p[1]-gesture.point[1])*1.15);
+        }else if(gesture.aimStart&&Module.aimMode){
+          if(e.type!=='pointercancel')Module.setAimTarget(mapMouse?p[0]:gesture.aimStart.x+(p[0]-gesture.point[0])*1.15,mapMouse?p[1]:gesture.aimStart.y+(p[1]-gesture.point[1])*1.15);
+        }else{
+          if(!gesture.sent&&e.type!=='pointercancel'){queue(1,gesture.point[0],gesture.point[1],0,undefined,gesture.frame);gesture.sent=true;}
+          queue(e.type === 'pointermove' ? 2 : e.type === 'pointerup' ? 3 : 4,p[0],p[1],gesture.dist);
+        }
+        if (e.type !== 'pointermove') gesture = null;
+        }
+        if(e.type!=='pointermove'){fingers.delete(e.pointerId);if(!fingers.size){blocked=false;Module.releaseSmoothPan?.(false);if(Module.mapPresentation.zooming)schedule();}}
+      }
+    }
+    ['mousedown','mouseup','mousemove','click','dblclick'].forEach(function(type){canvas.addEventListener(type,function(e){if(Module.mobileUI&&Module.mobileState?.course&&e.button!==2&&!(e.buttons&2)){e.preventDefault();e.stopImmediatePropagation();}},{capture:true,passive:false});});
+    ['pointerdown','pointermove','pointerup','pointercancel'].forEach(function(type){canvas.addEventListener(type,pointer,{capture:true,passive:false});});
+    canvas.addEventListener('lostpointercapture',function(e){
+      // Normal release already removed the contact. Unexpected loss can
+      // send the remaining events elsewhere, leaving the map waiting for it.
+      if(!fingers.delete(e.pointerId))return;
+      Module.cancelMapGesture();
+      schedule();
+    });
+    canvas.addEventListener('wheel',function(e){
+      if(!Module.mobileUI||!Module.mobileState?.course)return;
+      e.preventDefault();e.stopImmediatePropagation();Module.cancelMapGesture();
+      var delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?innerHeight:1);
+      Module.setMapZoom(Module.mapPresentation.zoom*Math.pow(1.25,-delta/100));
+    },{capture:true,passive:false});
+    ['keydown','keyup','keypress'].forEach(function(type){addEventListener(type,function(e){
+      if(Module.routingMap?.active||Module.analyticsActive||Module.mobilePreferencesOpen||Module.mobileReportOpen||Module.clubRecordsOpen||Module.designChallengesOpen||Module.courseDesignLabOpen||Module.businessChallengesOpen||Module.courseReviewOpen||Module.clubhouseManagementOpen||Module.clubhousePairOpen)return;
+      var code=e.code||('Key'+String(e.key).toUpperCase()),vk={KeyW:38,KeyA:37,KeyS:40,KeyD:39,ArrowUp:38,ArrowLeft:37,ArrowDown:40,ArrowRight:39}[code];
+      if(!vk)return;
+      if(type==='keyup'&&directions.has(code)){e.preventDefault();e.stopImmediatePropagation();queue(7,vk,0,0);directions.delete(code);return;}
+      if(Module.featureSettingsOpen||Module.editionModalOpen||Module.developerUsageOpen)return;
+      var field=e.target?.closest?.('input,textarea,select,[contenteditable="true"]');
+      if(!Module.mobileUI||!Module.mobileState?.course||Module.courseLoading?.active||Module.mobileState?.textInput||field||e.ctrlKey||e.metaKey||e.altKey)return;
+      e.preventDefault();e.stopImmediatePropagation();
+      if(type==='keydown'&&!directions.has(code)){if(Module.terrainMode)Module.setTerrainMode(false);if(Module.aimMode)Module.setAimMode(false);directions.set(code,vk);queue(7,vk,1,0);}
+    },true);});
+    // SDL also installs legacy touch listeners. Suppress their mouse emulation;
+    // otherwise a pan can also become an original yardage/construction drag.
+    ['touchstart','touchmove','touchend','touchcancel'].forEach(function(type){canvas.addEventListener(type,function(e){if(active){e.preventDefault();e.stopImmediatePropagation();}},{capture:true,passive:false});});
+    if (active && !Module.mobileUI) {
+      var button = document.createElement('button');
+      button.textContent = 'Measure'; button.type='button'; button.id='map-measure';
+      button.setAttribute('aria-pressed','false');
+      button.style.cssText='position:fixed;right:max(8px,env(safe-area-inset-right));top:max(8px,env(safe-area-inset-top));min-width:74px;min-height:44px;z-index:10;background:var(--menu-overlay);color:var(--menu-text);border:1px solid var(--menu-border);border-radius:8px;font:14px sans-serif';
+      button.addEventListener('click',function(){Module.cancelMapGesture();measuring=!measuring;button.setAttribute('aria-pressed',String(measuring));button.textContent=measuring?'Measure: on':'Measure';});
+      document.body.appendChild(button);
+      var pan = document.createElement('button');
+      pan.textContent='Pan';pan.type='button';pan.id='map-pan';
+      pan.style.cssText=button.style.cssText+';right:calc(max(8px,env(safe-area-inset-right)) + 82px)';
+      pan.addEventListener('click',function(){Module.cancelMapGesture();measuring=false;button.setAttribute('aria-pressed','false');button.textContent='Measure';queue(5,0,0,0);});
+      document.body.appendChild(pan);
+    }
+    function target() {
+      var css=getComputedStyle(stage), w=stage.clientWidth-parseFloat(css.paddingLeft)-parseFloat(css.paddingRight), h=stage.clientHeight-parseFloat(css.paddingTop)-parseFloat(css.paddingBottom);
+      if(Module.mobileUI&&Module.mapPresentation?.course){var bounds=Module.getScreenBounds();w=bounds.width;h=bounds.height;}
+      if(w<1||h<1)return null;
+      var ratio=w/h, width=800, height=600;
+      if(Module.mobileUI) {
+        var view=Module.mapPresentation,scale=baseScale()*view.appliedZoom/(view.nativeZoom/4);
+        Module.mapPresentation.baseScale=baseScale();
+        // Rotate the existing pixel budget with the view. Portrait retains
+        // its accepted1600x1920 limit; landscape can use1920x1600, preserving
+        // the same maximum allocation and native tile scale.
+        var wide=w>h;
+        width=Math.min(wide?1920:1600,Math.max(800,Math.ceil(w/scale/2)*2+192));
+        height=Math.min(wide?1600:1920,Math.max(600,Math.ceil(h/scale/2)*2+192));
+        // Original world projection treats widths1024/1280 as different tile
+        // scales. Use the next even buffer width and crop the extra pixels,
+        // retaining original64x40 geometry and its inverse picker unchanged.
+        if(width===1024||width===1280)width+=2;
+        // Large/unfolded windows can need additional world on both axes at
+        // the same tile scale. The native boundary validates both dimensions
+        // and allocates all replacement buffers before committing them.
+        return {width:width,height:height,cssWidth:w,cssHeight:h,scale:scale};
+      }
+      if(ratio>=4/3)width=Math.min(1600,Math.max(800,Math.round(600*ratio/2)*2));
+      else height=Math.min(1920,Math.max(600,Math.round(800/ratio/2)*2));
+      if(width===1024||width===1280)width+=2;
+      return {width:width,height:height,cssWidth:w,cssHeight:h};
+    }
+    function request() {
+      if(!active || document.hidden || Module.mobileSaveNameActive)return;
+      var next=target(); if(!next)return;
+      var rect=canvas.getBoundingClientRect(),visible=Module.getScreenBounds();
+      var covered=!Module.mapPresentation.course||(rect.left<=visible.left+1&&rect.top<=visible.top+1&&rect.right>=visible.left+visible.width-1&&rect.bottom>=visible.top+visible.height-1);
+      if(pinch)return;
+      var view=Module.mapPresentation;
+      if(Module.mobileUI&&view.course&&view.zooming){
+        var desired=nativeDetail(view.zoom);
+        if(view.pendingNative)return;
+        if(view.nativeZoom!==desired){
+          view.serial=(view.serial||0)+1;view.pendingNative=desired;
+          Module.menuQueue=Module.menuQueue.filter(function(c){return c[0]!==11;});Module.menuQueue.push([11,desired]);return;
+        }
+      }
+      var prior=Module.adaptiveTarget;
+      if(covered&&prior&&next.cssWidth===prior.cssWidth&&next.cssHeight===prior.cssHeight&&next.scale===Module.canvasScale&&canvas.width>=next.width&&canvas.height>=next.height&&canvas.width*canvas.height<=next.width*next.height*1.15&&Module.viewportResize?.status===1&&Module.viewportResize.seq===Module.viewportRequest?.seq)return;
+      if(fingers.size) {
+        if(covered&&Module.adaptiveTarget&&next.cssWidth===Module.adaptiveTarget.cssWidth&&next.cssHeight===Module.adaptiveTarget.cssHeight)return;
+        // A native zoom/detail change can outgrow the previous buffer before
+        // a new gesture releases. Cancel that gesture, preserve its fingers
+        // until release, and let the validated native resize restore coverage.
+        Module.cancelMapGesture();
+      }
+      // Keep a slightly larger, already-covering buffer rather than reallocating
+      // for tiny zoom changes. Bound retained work to15% above the target area.
+      if(covered&&canvas.width>=next.width&&canvas.height>=next.height&&canvas.width*canvas.height<=next.width*next.height*1.15){next.width=canvas.width;next.height=canvas.height;}
+      Module.adaptiveTarget=next;
+      Module.refreshCanvasPresentation();
+      var old=Module.viewportRequest;
+      if(!old || old.width!==next.width || old.height!==next.height) {
+        if(view.course&&view.changed)view.zooming=true;Module.cancelMapGesture();Module.requestViewport(next.width,next.height);
+      }
+    }
+    // Geometry must make progress even while the browser keeps notifying us.
+    // Pinch/wheel refinement retains its separate quiet-period debounce.
+    function schedule(){clearTimeout(debounce);debounce=setTimeout(request,180);}
+    function scheduleGeometry(){if(!geometryTimer)geometryTimer=setTimeout(function(){geometryTimer=0;request();},180);}
+    addEventListener('resize',scheduleGeometry);addEventListener('orientationchange',scheduleGeometry);addEventListener('simgolf-screen-resize',scheduleGeometry);
+    function cancelAll(){Module.cancelMapGesture();fingers.clear();blocked=false;}
+    addEventListener('blur',cancelAll);
+    document.addEventListener('visibilitychange',function(){cancelAll();scheduleGeometry();});
+    if(window.visualViewport)visualViewport.addEventListener('resize',scheduleGeometry);
+    if(typeof ResizeObserver!=='undefined')new ResizeObserver(scheduleGeometry).observe(stage);
+    schedule();
+  })();
+
+  // Interpolate only the map bitmap between real native presentations. The
+  // integer camera, simulation and original projection/picker stay native.
+  (function(){
+    var state=Module.panVisual={x:0,y:0,appliedX:0,appliedY:0,held:false,navigation:false,recent:0,frame:null,drag:null,nativeOwned:false,serial:0,raf:0,dragRaf:0,time:0,samples:0};
+    // A single visible 2D surface commits native pixels and camera offset in
+    // one drawing operation. The transparent native canvas retains its exact
+    // input rectangle; submitted pixels and their offset stay together.
+    var display=document.createElement('canvas');display.id='map-display';display.hidden=true;
+    display.setAttribute('aria-hidden','true');display.style.cssText='position:fixed;z-index:1;pointer-events:none;image-rendering:pixelated';document.body.appendChild(display);
+    var output=display.getContext('2d',{alpha:false}),cache=document.createElement('canvas'),cacheContext=cache.getContext('2d',{alpha:false}),pixels=null,pixelFrame=null,pixelSerial=0,lastPaint=null;
+    function hideDisplay(){display.hidden=true;Module.canvas.style.opacity='';state.atomic=false;lastPaint=null;}
+    function capture(frame){
+      if(!frame.valid||!frame.rgba||!output||!cacheContext){pixelFrame=null;hideDisplay();return false;}
+      try {
+        var ptr=frame.rgba>>>0,count=frame.width*frame.height*4,heap=Module.HEAPU8;
+        if(!heap||frame.width<1||frame.height<1||ptr+count>heap.byteLength)throw Error('Invalid native map pixel range');
+        if(cache.width!==frame.width||cache.height!==frame.height){cache.width=frame.width;cache.height=frame.height;pixels=cacheContext.createImageData(frame.width,frame.height);}
+        pixels.data.set(heap.subarray(ptr,ptr+count));cacheContext.putImageData(pixels,0,0);pixelFrame=frame;pixelSerial++;state.pixelSerial=pixelSerial;state.lastPixelAt=performance.now();state.pixelFrame={x:frame.x,y:frame.y,zoom:frame.zoom,width:frame.width,height:frame.height};return true;
+      }catch(error){pixelFrame=null;Module.mapCopyError=String(error);hideDisplay();return false;}
+    }
+    function paint(){
+      var canvas=Module.canvas;
+      if(!pixelFrame||Module.uiPresentation||!Module.mobileUI||!Module.mapPresentation?.course||(!Module.mapPresentation.zooming&&(pixelFrame.width!==canvas.width||pixelFrame.height!==canvas.height))){hideDisplay();return;}
+      var b=Module.getScreenBounds(),r=canvas.getBoundingClientRect(),ratio=Math.min(devicePixelRatio||1,Math.max(1,1/(Module.canvasScale||1))),w=Math.max(1,Math.round(b.width*ratio)),h=Math.max(1,Math.round(b.height*ratio));
+      // Acknowledged native zoom can precede its completed pixels. Normalize
+      // using the cached frame's own detail level, never the pending level.
+      if(Module.mapPresentation.zooming||pixelFrame.zoom!==Module.mapPresentation.nativeZoom){
+        var v=Module.mapPresentation,scale=v.baseScale*v.appliedZoom/(pixelFrame.zoom/4),cw=pixelFrame.width*scale,ch=pixelFrame.height*scale;
+        r={left:b.left+(b.width-cw)/2,top:b.top+(b.height-ch)/2,width:cw,height:ch};
+      }
+      var key=[pixelSerial,b.left,b.top,b.width,b.height,r.left,r.top,r.width,r.height,ratio,Module.analyticsPaintRevision||0,Module.elevationPaintRevision||0].join(',');
+      if(lastPaint===key)return;lastPaint=key;
+      if(display.width!==w||display.height!==h){display.width=w;display.height=h;}
+      display.style.left=b.left+'px';display.style.top=b.top+'px';display.style.width=b.width+'px';display.style.height=b.height+'px';
+      output.setTransform(w/b.width,0,0,h/b.height,0,0);output.imageSmoothingEnabled=Module.mapPresentation.appliedZoom<1;display.style.imageRendering=Module.mapPresentation.appliedZoom<1?'auto':'pixelated';output.clearRect(0,0,b.width,b.height);
+      output.drawImage(cache,r.left-b.left,r.top-b.top,r.width,r.height);
+      Module.paintCourseAnalytics?.(output,pixelFrame,b,r);
+      Module.paintElevationMap?.(output,pixelFrame,b,r);
+      state.paintSerial=(state.paintSerial||0)+1;state.displayRatio=ratio;state.atomic=true;display.hidden=false;canvas.style.opacity='0';
+    }
+    function apply(refitted){
+      if(refitted)state.appliedX=state.appliedY=0;
+      var canvas=Module.canvas;
+      if(Module.uiPresentation||!Module.mobileUI||!Module.mapPresentation?.course){canvas.style.transform=Module.canvasBaseTransform||'';state.appliedX=state.appliedY=0;hideDisplay();return;}
+      var r=canvas.getBoundingClientRect(),b=Module.getScreenBounds(),left=r.left-state.appliedX,top=r.top-state.appliedY;
+      var limitX=left<=b.left&&left+r.width>=b.left+b.width,limitY=top<=b.top&&top+r.height>=b.top+b.height;
+      var x=limitX?Math.max(b.left+b.width-left-r.width,Math.min(b.left-left,state.x)):0;
+      var y=limitY?Math.max(b.top+b.height-top-r.height,Math.min(b.top-top,state.y)):0;
+      var ratio=devicePixelRatio||1;state.appliedX=Math.round(x*ratio)/ratio;state.appliedY=Math.round(y*ratio)/ratio;
+      canvas.style.transform='translate3d('+state.appliedX+'px,'+state.appliedY+'px,0)';paint();
+    }
+    // Only deliberate native/automatic camera changes interpolate. A released
+    // drag retains its fractional view instead of easing onto the tile grid.
+    function tick(now){state.raf=0;if(state.held||state.drag||state.rest)return;
+      var dt=Math.max(0,Math.min(50,now-state.time));state.time=now;
+      var decay=Math.exp(-dt/32);state.x*=decay;state.y*=decay;
+      if(Math.abs(state.x)<.08)state.x=0;if(Math.abs(state.y)<.08)state.y=0;
+      apply();state.samples++;if(state.x||state.y)state.raf=requestAnimationFrame(tick);
+    }
+    function run(){if(!state.held&&!state.drag&&!state.rest&&!state.raf&&(state.x||state.y)){state.time=performance.now();state.raf=requestAnimationFrame(tick);}}
+    Module.applySmoothPan=apply;
+    Module.resetSmoothPan=function(reason){cancelAnimationFrame(state.raf);cancelAnimationFrame(state.dragRaf);state.raf=state.dragRaf=0;state.x=state.y=0;state.held=false;state.navigation=false;state.drag=null;state.nativeOwned=false;state.frame=null;state.rest=null;state.coverageWait=null;state.settleTarget=null;state.pendingRelease=null;state.coarse=false;Module.smoothPanRequest=null;state.reason=reason;apply();};
+    Module.holdSmoothPan=function(){state.serial++;state.nativeOwned=false;cancelAnimationFrame(state.raf);cancelAnimationFrame(state.dragRaf);state.raf=state.dragRaf=0;state.drag=null;state.settleTarget=null;state.pendingRelease=null;Module.smoothPanRequest=null;state.held=true;state.navigation=false;apply();};
+    function project(dx,dy,frame,scale=(Module.canvasScale||1)*frame.zoom/4){var x=dx,y=dy;switch(frame.rotation&7){case 2:x=dy;y=-dx;break;case 4:x=-dx;y=-dy;break;case 6:x=-dy;y=dx;}
+      return {x:-32*(x+y)*scale,y:-20*(y-x)*scale};
+    }
+    function cameraFor(px,py,frame,scale=(Module.canvasScale||1)*frame.zoom/4){
+      px/=scale;py/=scale;
+      var x=-px/64+py/40,y=-px/64-py/40,wx=x,wy=y;switch(frame.rotation&7){case 2:wx=-y;wy=x;break;case 4:wx=-x;wy=-y;break;case 6:wx=y;wy=-x;break;}
+      return {x:Math.max(0,Math.min(49,frame.x+wx)),y:Math.max(0,Math.min(49,frame.y+wy))};
+    }
+    Module.mapCameraGeometry={project,cameraFor};
+    function desired(d){var c=cameraFor(d.startX+d.dx,d.startY+d.dy,d.frame);return project(c.x-d.frame.x,c.y-d.frame.y,d.frame);}
+    function requestCamera(d,lead){
+      var f=state.frame;if(!f||!d.accepted)return;
+      var target=desired(d),dx=target.x-d.viewX,dy=target.y-d.viewY,r=Module.canvas.getBoundingClientRect(),b=Module.getScreenBounds(),scale=(Module.canvasScale||1)*f.zoom/4;
+      // The next native bitmap must still cover the current visible camera.
+      // Keep lead inside spare coverage, including original tile rounding.
+      var mx=Math.max(0,Math.min(32,(r.width-b.width)/2-32*scale)),my=Math.max(0,Math.min(32,(r.height-b.height)/2-20*scale));
+      var amount=lead?Math.min(1,dx?mx/Math.abs(dx):1,dy?my/Math.abs(dy):1):0;
+      var c=cameraFor(d.viewX+dx*amount,d.viewY+dy*amount,d.frame);
+      state.coarse=r.width-b.width<64*scale||r.height-b.height<40*scale;
+      if(lead&&state.coarse){
+        // At a native size cap there may be no spare bitmap to translate.
+        // Retain navigation with bounded original tile steps, never deadlock.
+        var wanted=cameraFor(target.x,target.y,d.frame);
+        c.x=f.x+Math.max(-1,Math.min(1,Math.round(wanted.x)-f.x));c.y=f.y+Math.max(-1,Math.min(1,Math.round(wanted.y)-f.y));
+      }
+      Module.smoothPanRequest={x:Math.round(c.x),y:Math.round(c.y),serial:d.serial,rotation:f.rotation,zoom:f.zoom,width:f.width,height:f.height};
+    }
+    function dragOffset(){var d=state.drag,f=state.frame;if(!d||!f)return;
+      var drawn=project(f.x-d.frame.x,f.y-d.frame.y,f);state.x=d.viewX-drawn.x;state.y=d.viewY-drawn.y;apply();
+      d.viewX=drawn.x+state.appliedX;d.viewY=drawn.y+state.appliedY;requestCamera(d,true);
+    }
+    function dragTick(now){state.dragRaf=0;var d=state.drag;if(!d?.accepted)return;
+      if(now-d.time<15){state.dragRaf=requestAnimationFrame(dragTick);return;}
+      var dt=Math.max(0,Math.min(32,now-d.time));d.time=now;var target=desired(d),dx=target.x-d.viewX,dy=target.y-d.viewY,length=Math.hypot(dx,dy);
+      // Slow input follows directly. Fast or delayed input consumes only a
+      // bounded step per display frame, rather than replaying old positions.
+      var amount=length?Math.min(1,Math.min(32,dt*1.5)/length):0;
+      d.viewX+=dx*amount;d.viewY+=dy*amount;dragOffset();state.dragFrames=(state.dragFrames||0)+1;
+      target=desired(d);if(Math.hypot(target.x-d.viewX,target.y-d.viewY)>.2)state.dragRaf=requestAnimationFrame(dragTick);
+    }
+    function scheduleDrag(){if(state.drag?.accepted&&!state.dragRaf){state.drag.time=performance.now();state.dragRaf=requestAnimationFrame(dragTick);}}
+    function keepRest(frame){
+      var rest=state.rest;if(!rest)return false;
+      if(rest.acknowledged&&((frame.requestedX!==undefined&&frame.requestedX!==rest.target.x)||(frame.requestedY!==undefined&&frame.requestedY!==rest.target.y))){state.rest=null;return false;}
+      if(!rest.pending&&(frame.x!==rest.target.x||frame.y!==rest.target.y)){state.rest=null;return false;}
+      if(rest.acknowledged&&state.presentSerial>rest.ackFrame&&frame.x===rest.target.x&&frame.y===rest.target.y)rest.pending=false;
+      var offset=project(rest.camera.x-frame.x,rest.camera.y-frame.y,frame);state.x=offset.x;state.y=offset.y;apply();return true;
+    }
+    Module.finishSmoothPan=function(serial,x,y){
+      var rest=state.rest?.serial===serial?state.rest:state.drag?.previousRest;if(rest?.serial!==serial)return;
+      rest.target={x:x,y:y};rest.acknowledged=true;rest.ackFrame=state.presentSerial||0;
+    };
+    Module.releaseSmoothPan=function(navigation){state.held=false;state.navigation=!!navigation;
+      if(navigation){state.recent=performance.now();if(!state.drag&&state.frame?.valid){cancelAnimationFrame(state.raf);state.raf=0;var previousRest=state.rest;state.rest=null;state.drag={frame:state.frame,startX:state.appliedX,startY:state.appliedY,viewX:state.appliedX,viewY:state.appliedY,dx:0,dy:0,serial:state.serial,previousRest:previousRest,accepted:state.nativeOwned};}}
+      else {
+        var d=state.drag;
+        if(d&&state.frame){
+          // Stop at the last displayed point, including a swipe which finishes
+          // before native input acknowledges it. Never replay an unseen tail.
+          var c=cameraFor(d.viewX,d.viewY,d.frame),f=state.frame;
+          state.rest={camera:c,target:{x:Math.round(c.x),y:Math.round(c.y)},serial:d.serial,pending:true,acknowledged:false};
+          if(d.accepted)requestCamera(d,false);
+          else state.pendingRelease={x:Math.round(c.x),y:Math.round(c.y),serial:d.serial,rotation:f.rotation,zoom:f.zoom,width:f.width,height:f.height};
+        }
+        cancelAnimationFrame(state.dragRaf);cancelAnimationFrame(state.raf);state.dragRaf=state.raf=0;state.drag=null;
+      }
+      run();
+    };
+    Module.updateSmoothDrag=function(dx,dy){if(state.drag){state.drag.dx=dx;state.drag.dy=dy;scheduleDrag();}};
+    Module.acceptSmoothDrag=function(accepted,serial){if(serial&&serial!==state.serial)return;state.nativeOwned=!!accepted;if(!state.drag){if(accepted&&state.pendingRelease?.serial===serial)Module.smoothPanRequest=state.pendingRelease;state.pendingRelease=null;return;}if(accepted){state.drag.accepted=true;dragOffset();scheduleDrag();}else{var previousRest=state.drag.previousRest;state.drag=null;state.rest=previousRest||null;Module.smoothPanRequest=null;cancelAnimationFrame(state.dragRaf);state.dragRaf=0;state.navigation=false;run();}};
+    // Rendering may yield while the finger reverses. Keep the last complete
+    // bitmap if an in-flight native frame no longer covers the visible view.
+    // A later camera request brings usable coverage; never clamp the view to
+    // the obsolete bitmap or expose an unfinished native drawing surface.
+    function uncoveredPanFrame(frame,previous){
+      if(!previous?.valid||!frame.valid||!frame.rgba||!Module.mobileUI||Module.uiPresentation||!Module.mapPresentation?.course||Module.aimMode||Module.lotMode||Module.terrainMode||frame.rotation!==previous.rotation||frame.zoom!==previous.zoom||frame.width!==previous.width||frame.height!==previous.height)return false;
+      var d=state.drag,rest=state.rest,offset;
+      if(d){var drawn=project(frame.x-d.frame.x,frame.y-d.frame.y,frame);offset={x:d.viewX-drawn.x,y:d.viewY-drawn.y};}
+      else if(rest?.pending&&(!rest.acknowledged||((frame.requestedX===undefined||frame.requestedX===rest.target.x)&&(frame.requestedY===undefined||frame.requestedY===rest.target.y))))offset=project(rest.camera.x-frame.x,rest.camera.y-frame.y,frame);
+      else return false;
+      var r=Module.canvas.getBoundingClientRect(),b=Module.getScreenBounds(),left=r.left-state.appliedX,top=r.top-state.appliedY;
+      // At an existing native size cap no bitmap can cover the window. Keep
+      // its established coarse fallback rather than waiting indefinitely.
+      var scale=(Module.canvasScale||1)*frame.zoom/4;
+      if(r.width-b.width<64*scale||r.height-b.height<40*scale)return false;
+      if(left+offset.x<=b.left+.5&&left+r.width+offset.x>=b.left+b.width-.5&&top+offset.y<=b.top+.5&&top+r.height+offset.y>=b.top+b.height-.5)return false;
+      state.deferredFrames=(state.deferredFrames||0)+1;
+      if(d)requestCamera(d,true);
+      return true;
+    }
+    function deferUncoveredFrame(frame,previous){
+      if(!uncoveredPanFrame(frame,previous)){state.coverageWait=null;return false;}
+      var now=performance.now(),wait=state.coverageWait;
+      if(!wait||wait.serial!==state.serial)wait=state.coverageWait={serial:state.serial,start:now,frames:0};
+      wait.frames++;
+      if(wait.frames>=3&&now-wait.start>=350){
+        state.recoveries=(state.recoveries||0)+1;
+        state.lastRecovery={reason:'uncovered-pan-frame',time:now,frames:wait.frames};
+        state.coverageWait=null;return 'recover';
+      }
+      return true;
+    }
+    Module.onMapPresent=function(frame){frame.elevation=Module.captureElevationFrame?.(frame);state.presentSerial=(state.presentSerial||0)+1;state.lastNativeAt=performance.now();var previous=state.frame;
+      var disposition=deferUncoveredFrame(frame,previous);
+      if(disposition===true)return;
+      if(disposition==='recover'){
+        // A lost completion/ownership transition must not hide new frames
+        // forever. Cancel through the ordinary input queue, block remaining
+        // contacts until release, then show this complete native frame.
+        Module.cancelMapGesture?.();Module.resetSmoothPan('map-handoff-recovery');
+        if(capture(frame)){state.frame=frame;apply();}
+        return;
+      }
+      if(!capture(frame)){Module.resetSmoothPan('native-map-pixels-unavailable');return;}
+      Module.mapZoomFrameReady?.(frame);
+      var eligible=frame.valid&&Module.mobileUI&&Module.mapPresentation?.course&&(Module.analyticsActive||(!Module.aimMode&&!Module.lotMode&&!Module.terrainMode&&(!Module.mobileState?.constructing||state.rest||state.navigation||state.held||performance.now()-state.recent<180)));
+      if(!eligible||!previous||!previous.valid||frame.rotation!==previous.rotation||frame.zoom!==previous.zoom||frame.width!==previous.width||frame.height!==previous.height){Module.resetSmoothPan('frame-context');state.frame=frame;return;}
+      state.frame=frame;if(state.drag){if(state.drag.accepted)dragOffset();else apply();return;}if(keepRest(frame))return;var dx=frame.x-previous.x,dy=frame.y-previous.y;if(!dx&&!dy){apply();return;}
+      if(Math.abs(dx)>3||Math.abs(dy)>3){Module.resetSmoothPan('camera-jump');state.frame=frame;return;}
+      var x=dx,y=dy;switch(frame.rotation&7){case 2:x=dy;y=-dx;break;case 4:x=-dx;y=-dy;break;case 6:x=-dy;y=dx;}
+      var scale=(Module.canvasScale||1)*frame.zoom/4;
+      state.x+=32*(x+y)*scale;state.y+=20*(y-x)*scale;
+      apply();run();
+    };
+    addEventListener('simgolf-screen-resize',function(){Module.resetSmoothPan('screen-change');});
+    document.addEventListener('visibilitychange',function(){if(document.hidden)Module.resetSmoothPan('hidden');});
+    addEventListener('blur',function(){Module.resetSmoothPan('blur');});
+  })();
+
+</script>
+<script>
+  // Prefetch: the game opens its files one at a time and waits for each fetch,
+  // so the ~1,000 files read before the main menu (and ~700 more when a course
+  // loads) cost a round trip each. preload.txt lists them in the order a first
+  // run reads them; they're fetched a few at a time from page start, and the
+  // game's fetch of a listed file takes the prefetched copy. ?noprefetch turns
+  // it off.
+  (function () {
+    if (Module.localFiles || /noprefetch/.test(location.search)) return;
+    var realFetch = window.fetch.bind(window);
+    var ready = new Map(), taken = new Set(), list = [], next = 0, inflight = 0;
+    var MAX_INFLIGHT = 8, MAX_AHEAD = 400;
+    function get(url) {
+      inflight++;
+      return realFetch(url).then(function (r) {
+        return r.ok ? r.arrayBuffer().then(function (b) { return new Response(b); }) : r;
+      }).catch(function () { return realFetch(url); }).finally(function () { inflight--; pump(); });
+    }
+    function pump() {
+      while (inflight < MAX_INFLIGHT && ready.size < MAX_AHEAD && next < list.length) {
+        var url = list[next++];
+        if (!taken.has(url)) ready.set(url, get(url));
+      }
+    }
+    window.fetch = function (input, init) {
+      if (typeof input === 'string' && input.lastIndexOf('game/', 0) === 0) {
+        taken.add(input);
+        var p = ready.get(input);
+        if (p) { ready.delete(input); pump(); return p; }
+      }
+      return realFetch(input, init);
+    };
+    realFetch('preload.txt').then(function (r) { return r.ok ? r.text() : ''; }).then(function (text) {
+      list = text.split('\n').filter(Boolean).map(function (n) {
+        return 'game/' + n.split('/').map(encodeURIComponent).join('/');
+      });
+      pump();
+    }).catch(function () {});
+  })();
+</script>
+<script>
+  // Crash reports: the last console lines plus the error go to the dev server
+  // (tools/boxedwine/serve.mjs appends them to build/browser.log).
+  (function () {
+    if (Module.localFiles) return;
+    var lines = [], sent = 0;
+    ['log', 'warn', 'error'].forEach(function (k) {
+      var orig = console[k];
+      console[k] = function () {
+        var msg = Array.prototype.map.call(arguments, String).join(' ');
+        if (!/^fetch /.test(msg)) { lines.push(k + ' ' + msg); if (lines.length > 300) lines.shift(); }
+        return orig.apply(console, arguments);
+      };
+    });
+    function report(what) {
+      if (sent++ > 5) return;
+      var body = location.href + '\n' + navigator.userAgent + '\n' + what + '\n---- recent console\n' + lines.join('\n');
+      try { navigator.sendBeacon('/log', body); } catch (e) {}
+    }
+    addEventListener('error', function (e) { report('error: ' + e.message + '\n' + (e.error && e.error.stack || '')); });
+    addEventListener('unhandledrejection', function (e) { report('unhandledrejection: ' + (e.reason && (e.reason.stack || e.reason))); });
+    Module.onAbort = function (what) { report('abort: ' + what + '\n' + new Error().stack); };
+  })();
+</script>
+<style>
+  #mobile-save-name{position:fixed;inset:auto;margin:0;transform:translate(-50%,-50%);box-sizing:border-box;overflow:auto;overscroll-behavior:contain;min-width:0;padding:0;border:1px solid var(--menu-border);border-radius:17px;background:linear-gradient(#fffef0,#ece7d4);color:var(--menu-text);box-shadow:0 18px 45px #30304b55;font:16px/1.4 system-ui,sans-serif}
+  #mobile-save-name::backdrop{background:#161c3780}
+  #mobile-save-name header{padding:10px 16px;background:var(--menu-panel);color:var(--menu-text)}
+  #mobile-save-name h1{margin:0;font-size:clamp(20px,5vw,26px);font-weight:700}
+  #mobile-save-name form{margin:0;padding:12px 16px 14px}
+  #mobile-save-name label{display:block;margin-bottom:5px;font-weight:600}
+  #mobile-save-name-input{box-sizing:border-box;width:100%;min-height:46px;padding:8px 10px;border:1px solid var(--menu-border);border-radius:8px;background:var(--menu-preview);color:inherit;font:16px/1.25 system-ui,sans-serif}
+  #mobile-save-name button{min-height:44px;padding:6px 16px;border:1px solid var(--menu-border);border-radius:10px;background:var(--menu-button);color:inherit;font:600 16px/1.3 system-ui,sans-serif;touch-action:manipulation}
+  #mobile-save-name #mobile-save-name-submit{background:linear-gradient(#fffde6,#f4db90)}
+  #mobile-save-name-submit:disabled{opacity:.55}
+  #mobile-save-name :is(button,input):focus-visible{outline:3px solid var(--menu-focus);outline-offset:2px}
+  #mobile-save-name-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin-top:10px}
+  #mobile-save-name-error{margin:8px 0 0;color:var(--menu-danger);font-size:14px}
+  #mobile-save-name-error:empty{display:none}
+  #mobile-save-name.compact header{padding:6px 12px}
+  #mobile-save-name.compact h1{font-size:20px}
+  #mobile-save-name.compact form{padding:6px 12px 8px}
+  #mobile-save-name.compact #mobile-save-name-actions{margin-top:6px}
+</style>
+<dialog id="mobile-save-name" aria-labelledby="mobile-save-name-title">
+  <header><h1 id="mobile-save-name-title">Save Game</h1></header>
+  <form novalidate>
+    <label for="mobile-save-name-input">Save name</label>
+    <input type="text" id="mobile-save-name-input" placeholder="Enter a save name" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" aria-describedby="mobile-save-name-error" autofocus>
+    <p id="mobile-save-name-error" aria-live="polite"></p>
+    <div id="mobile-save-name-actions">
+      <button type="button" id="mobile-save-name-cancel">Cancel</button>
+      <button type="submit" id="mobile-save-name-submit" disabled>Save</button>
+    </div>
+  </form>
+</dialog>
+<script>
+(function(){
+  const dialog=document.getElementById('mobile-save-name');
+  if(typeof dialog.showModal!=='function')return;
+  const form=dialog.querySelector('form'),input=document.getElementById('mobile-save-name-input');
+  const submit=document.getElementById('mobile-save-name-submit'),error=document.getElementById('mobile-save-name-error');
+  const held=new Set(),stage=document.getElementById('game-stage');
+  let session=null;
+
+  function layout(){
+    if(!dialog.open)return;
+    const b=Module.getScreenBounds();
+    const left=b.left+Math.max(8,b.safe.left),right=b.left+b.width-Math.max(8,b.safe.right);
+    const top=b.top+Math.max(8,b.safe.top),bottom=b.top+b.height-Math.max(8,b.safe.bottom);
+    const height=Math.max(1,bottom-top),width=Math.max(1,Math.min(440,right-left));
+    dialog.classList.toggle('compact',height<230);
+    Object.assign(dialog.style,{width:width+'px',left:(left+right)/2+'px',
+      top:(top+bottom)/2+'px',maxHeight:height+'px'});
+  }
+  function begin(){
+    const s={answer:null,closed:false,edited:false,max:47,timer:0,opener:document.activeElement};
+    session=s;input.value='';input.maxLength=s.max;input.removeAttribute('aria-invalid');submit.disabled=true;error.textContent='';
+    const rect=stage.getBoundingClientRect();
+    for(const key of ['left','top','width','height'])stage.style[key]=rect[key]+'px';
+    Module.mobileSaveNameActive=true;
+    dialog.showModal();layout();
+    // Opening and focusing here keeps the system keyboard in the original
+    // Save Game tap's activation. The native request supplies its own default.
+    input.focus({preventScroll:true});
+    return s;
+  }
+  function finish(value){
+    const s=session;
+    if(!s||s.closed)return;
+    s.closed=true;
+    clearTimeout(s.timer);
+    dialog.close();Module.mobileSaveNameActive=false;
+    for(const key of ['left','top','width','height'])stage.style.removeProperty(key);
+    if(s.opener?.isConnected&&s.opener.getClientRects().length)s.opener.focus({preventScroll:true});
+    if(s.answer){session=null;s.answer(value);}
+    else s.timer=setTimeout(()=>{if(session===s)session=null;},2500);
+    // Refit once the browser keyboard's visual viewport has settled.
+    Module.refreshScreenBounds?.();
+    dispatchEvent(new Event('simgolf-screen-resize'));
+  }
+  Module.prepareMobileSaveName=function(){
+    if(!Module.mobileUI||session)return false;
+    const s=begin();
+    s.timer=setTimeout(()=>{if(session===s&&!s.answer)finish(null);},4000);
+    return true;
+  };
+  Module.requestMobileSaveName=function(seed,max){
+    if(session?.closed){
+      clearTimeout(session.timer);session=null;
+      return Promise.resolve(null);
+    }
+    const s=session||begin();
+    clearTimeout(s.timer);
+    s.max=max;input.maxLength=max;
+    if(!s.edited){
+      input.value=String(seed||'').trim().slice(0,max);
+      input.select();
+    }
+    return new Promise(resolve=>{s.answer=resolve;submit.disabled=false;});
+  };
+
+  function filename(raw,max){
+    const name=raw.trim().replace(/(?:\.sve\s*)+$/i,'').trim();
+    if(!name)return {error:'Enter a name for this save.'};
+    if(name.length>max)return {error:'Use up to '+max+' characters.'};
+    if(/[^\x20-\x7e]|[<>:"/\\|?*]|\.$/.test(name))return {error:'Use standard filename characters, with no slashes or trailing dot.'};
+    if(/^(?:con|prn|aux|nul|conin\$|conout\$|com[1-9]|lpt[1-9])$/i.test(name.split('.')[0].trimEnd())||
+       /^(?:&autosave[1-3]|&quitsave|while_browsing|top10)$/i.test(name))return {error:'That name is reserved. Choose another save name.'};
+    return {name};
+  }
+  input.addEventListener('input',()=>{
+    if(session)session.edited=true;
+    error.textContent='';input.removeAttribute('aria-invalid');
+  });
+  form.addEventListener('submit',event=>{
+    event.preventDefault();
+    if(!session?.answer||session.closed)return;
+    const result=filename(input.value,session.max);
+    if(result.error){
+      error.textContent=result.error;input.setAttribute('aria-invalid','true');input.focus({preventScroll:true});return;
+    }
+    finish(result.name);
+  });
+  document.getElementById('mobile-save-name-cancel').onclick=()=>finish(null);
+  dialog.addEventListener('cancel',event=>{event.preventDefault();finish(null);});
+  addEventListener('pagehide',()=>finish(null));
+  for(const type of ['pointerdown','pointerup','pointermove','pointercancel','mousedown','mouseup','mousemove','click','dblclick','touchstart','touchmove','touchend','touchcancel','wheel'])
+    dialog.addEventListener(type,event=>event.stopPropagation());
+  for(const type of ['keydown','keyup','keypress'])addEventListener(type,event=>{
+    const code=event.code||event.key;
+    if(type==='keyup'){
+      if(held.delete(code)){event.preventDefault();event.stopImmediatePropagation();}
+      return;
+    }
+    if(!dialog.open){
+      if(held.has(code)){event.preventDefault();event.stopImmediatePropagation();}
+      return;
+    }
+    event.stopImmediatePropagation();
+    if(type!=='keydown')return;
+    if(held.has(code)&&event.key==='Enter'){event.preventDefault();return;}
+    held.add(code);
+    if(event.isComposing||event.keyCode===229)return;
+    if(event.key==='Escape'){event.preventDefault();finish(null);}
+    else if(event.key==='Enter'&&event.target===input){
+      event.preventDefault();if(!submit.disabled)form.requestSubmit();
+    }
+  },true);
+  addEventListener('blur',()=>held.clear());
+  for(const type of ['simgolf-screen-resize','simgolf-header-resize','resize'])addEventListener(type,layout);
+  window.visualViewport?.addEventListener('resize',layout);
+  window.visualViewport?.addEventListener('scroll',layout);
+})();
+</script>
+<script src="bink-video.js"></script><script src="public-beta-usage.js" data-endpoint="https://sgmobile-beta-usage.sgmobile-fourtempers.workers.dev"></script><script src="local-install.js"></script><script src="offline.js"></script>
+<script src="save-rules.js"></script>
+<script src="autosave.js"></script>
+<script src="mobile-menu.js"></script>
+<script src="course-analytics.js"></script>
+<script src="course-review.js"></script>
+<script src="elevation-map.js"></script>
+<script src="routing-map.js"></script>
+<script src="golfer-histories.js"></script>
+<script src="business-turnaround-lifecycle.js"></script>
+<script src="club-records.js"></script>
+<script src="design-challenges.js"></script>
+<script src="course-design-lab.js"></script>
+<script src="business-challenges.js"></script>
+<script src="clubhouse-management.js"></script>
+<script src="save-bundle.js"></script>
+<script async type="text/javascript" src="golf.js"></script>
+</body>
+</html>

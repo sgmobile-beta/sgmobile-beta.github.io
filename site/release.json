@@ -1,0 +1,386 @@
+{
+  "schema": 1,
+  "build": "sgmobile-beta10-public-rc1-20112",
+  "files": [
+    {
+      "path": "7zz.umd.js",
+      "bytes": 83122,
+      "sha256": "163ddd968550dccf3da53afd0384f03868b33e5cb146a76080e6368721a75d08"
+    },
+    {
+      "path": "7zz.wasm",
+      "bytes": 1651931,
+      "sha256": "e16c6997e2eaa89575c0dd1f305074be629c3f4d87246244d37fd19debc8a285"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 1073,
+      "sha256": "f426c8ea4334afa7f12c957d9f2890705c9cde7e278178cdabaef6078dde0ef5"
+    },
+    {
+      "path": "README.txt",
+      "bytes": 3743,
+      "sha256": "94821418dee5edd14bfc2127c07e6d1df4f46e77c0185c3c7fc52f85222daee3"
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.txt",
+      "bytes": 3310,
+      "sha256": "9a7908fb5e7c3c4057ce757253200f58d859c0446dd9b92bde4ad2fe04509746"
+    },
+    {
+      "path": "apple-touch-icon.png",
+      "bytes": 2064219,
+      "sha256": "15ee00fe31d2c15217bdde73b97ee196ac6bd25a66cf7e4cf5e4c3c867b04d31"
+    },
+    {
+      "path": "autosave.js",
+      "bytes": 16149,
+      "sha256": "8541816933f3e8311575c1b370dd13116aefc6cf5e446a1e9ddb219e71374672"
+    },
+    {
+      "path": "bink-video-worker.js",
+      "bytes": 2816,
+      "sha256": "7c9361bf291e436840f511648a9189907671697f50a6667002fb3f6e6ea7c591"
+    },
+    {
+      "path": "bink-video.js",
+      "bytes": 5823,
+      "sha256": "2920aea983fecb4e3d7e3460b36f0491b673431e5d7a7b7656b8f9d90830564a"
+    },
+    {
+      "path": "bink.js",
+      "bytes": 72186,
+      "sha256": "66006e4b72bf4c26b8c7826ebe454269de752c8fd732558e956d59ec55c9e5d9"
+    },
+    {
+      "path": "bink.wasm",
+      "bytes": 733832,
+      "sha256": "f08a8cff5db7b95b0b2594d95d6863b25c8791df016553688e519c54d02f78ca"
+    },
+    {
+      "path": "business-challenges.js",
+      "bytes": 16419,
+      "sha256": "f2a6b4fdb5a02e50e5a73ad5be5c61f5c3db3db3b2502a2651799610b387f94a"
+    },
+    {
+      "path": "business-turnaround-lifecycle.js",
+      "bytes": 7497,
+      "sha256": "51aa133110527b5b5fbf29231fda3bca6447bbba42d71d026443b7e23e61ba01"
+    },
+    {
+      "path": "business-turnaround-model.js",
+      "bytes": 6953,
+      "sha256": "a89c58c17b139504fd6682e910b83792bd48b639caf928fba283e1f0fdc6d114"
+    },
+    {
+      "path": "club-records-model.js",
+      "bytes": 10305,
+      "sha256": "0d8184897c959e50f03ff6011269720310a3e7a17a466c58391c3dad6f271491"
+    },
+    {
+      "path": "club-records.js",
+      "bytes": 10230,
+      "sha256": "4ebfea057b17d140cacea955296e870fac1b8173acc2e0275d9effdff4f14561"
+    },
+    {
+      "path": "clubhouse-management.js",
+      "bytes": 13283,
+      "sha256": "19db381589752317b4e7a7edd082c3c49ecfd724f72bffbd9b6aa47203065552"
+    },
+    {
+      "path": "compatibility.json",
+      "bytes": 204,
+      "sha256": "da2a969275376d7e109635ebcf1c8003d833446d1da2cd3ea8aa2fe4bd315d7f"
+    },
+    {
+      "path": "course-analytics.js",
+      "bytes": 25084,
+      "sha256": "1ac865bcf46dd7baccdc5c46a60caf90924c02ce908d2e19b0b1e9b406851247"
+    },
+    {
+      "path": "course-design-lab-model.js",
+      "bytes": 6063,
+      "sha256": "746c8dd6ccd632d5e85aff8d23548606706d723c53f7f92646138b4037fbb53f"
+    },
+    {
+      "path": "course-design-lab.js",
+      "bytes": 18265,
+      "sha256": "7d6269eb78ea398097c733ecbb3ad3fb89b6e2c2616173b26de29a2b7ce13259"
+    },
+    {
+      "path": "course-review.js",
+      "bytes": 11186,
+      "sha256": "914eb872dcfd28fbe7d51c5e5f82262849494688f8f590f4720aa6fead2e6843"
+    },
+    {
+      "path": "design-challenge-model.js",
+      "bytes": 23404,
+      "sha256": "265f43c70ec277ff1fe8bdff4c8ffa489ee8e6b49613373f5b70ef35422fc180"
+    },
+    {
+      "path": "design-challenges.js",
+      "bytes": 22042,
+      "sha256": "7b7c89eec56833cdc1824451b2ca0786392792db37eac6a60c4383eaee188806"
+    },
+    {
+      "path": "elevation-map.js",
+      "bytes": 19848,
+      "sha256": "aa116524899b90955a16ee9702d7bfd40f00d7c74707d3e17504a8a4f1bb7a86"
+    },
+    {
+      "path": "feature-registry.js",
+      "bytes": 32097,
+      "sha256": "8c8cfa6ced8744cec1dd0471cb117a45a0d2b3c5aa775a7a716f33552b204704"
+    },
+    {
+      "path": "golf.data",
+      "bytes": 1255883,
+      "sha256": "3c52803ed730fa3663fab1a0e6c4decbcd34ca10e79e25b5ffbc006e548de6a2"
+    },
+    {
+      "path": "golf.html",
+      "bytes": 98878,
+      "sha256": "443c80b65601bdad7916c09b2b3109117c119ed4504e086035c0408cab8226e7"
+    },
+    {
+      "path": "golf.js",
+      "bytes": 494298,
+      "sha256": "1b24d39049de165530aea3c1e0fef596acef49fc26030a3087ba101b3eeee0b7"
+    },
+    {
+      "path": "golf.wasm",
+      "bytes": 3457173,
+      "sha256": "8eda0388feddf60477f75d43e0fb3af43f4847376f4c72bab4bb6231c9a4ac22"
+    },
+    {
+      "path": "golfer-experience-model.js",
+      "bytes": 4900,
+      "sha256": "c461e24ee813d9fe325d8a30a4d5178f9599cde4e9cc42bc061e94a44e9d94e6"
+    },
+    {
+      "path": "golfer-histories.js",
+      "bytes": 23311,
+      "sha256": "a038afb7931102e1fc202806cae4df2177264bba76c830ef8ff858b98c5c2e03"
+    },
+    {
+      "path": "golfer-history-model.js",
+      "bytes": 8338,
+      "sha256": "5d99235bf7eac1a9abc6d845e51540105e8a21cfb7c5741e9c9faf7573cc543b"
+    },
+    {
+      "path": "icons/barlow-condensed-OFL.txt",
+      "bytes": 4376,
+      "sha256": "10b0e6bb43166a50fbe7cde2895bd7f703738a5da843acb5c97c95dc9ea26817"
+    },
+    {
+      "path": "icons/barlow-condensed-bold.woff2",
+      "bytes": 40340,
+      "sha256": "bbe24c2eabc0ef5cb658c1d667577bbff0605e6f4708abf9e63e58f561ece27b"
+    },
+    {
+      "path": "icons/discord-symbol.svg",
+      "bytes": 1306,
+      "sha256": "eb3bf5a2e8b9f9aa39c1b1d38aeaa7c2997084567634c55f4141aa39cf426cec"
+    },
+    {
+      "path": "icons/professional-accomplishments-props.png",
+      "bytes": 110297,
+      "sha256": "c67378b6bce295138a36d11caff91ecb4fe49073e24a69a602d50a0295073d19"
+    },
+    {
+      "path": "icons/simgolf-mobile-wordmark.png",
+      "bytes": 912944,
+      "sha256": "62f8f1d56e814a29344b96146ea798851b040793527e6298037306fb996f64fb"
+    },
+    {
+      "path": "icons/simgolf-mobile.png",
+      "bytes": 2064219,
+      "sha256": "15ee00fe31d2c15217bdde73b97ee196ac6bd25a66cf7e4cf5e4c3c867b04d31"
+    },
+    {
+      "path": "icons/top-designers-oak.png",
+      "bytes": 301920,
+      "sha256": "fb642f69dfb4f6499127b8f607b9966b4f14ca79c67a07aaeb8cd35aff2f9a06"
+    },
+    {
+      "path": "icons/top-designers-trophy.png",
+      "bytes": 662319,
+      "sha256": "372b123abe3bee2d69465d5c0b3f3f2a75a76cf0a2dd68eb5480ebc4b8f887e5"
+    },
+    {
+      "path": "index.html",
+      "bytes": 277,
+      "sha256": "72c26f91a57dcf0fdffd7edec03658b80bc5db3cf3e2661c3b171e383a2c2e32"
+    },
+    {
+      "path": "install-worker.js",
+      "bytes": 23958,
+      "sha256": "878581c6c234545b07462a3ffdef90ab6ed6f1a1456f463fb5648985ce769f28"
+    },
+    {
+      "path": "jgld-nops.json",
+      "bytes": 35223,
+      "sha256": "7c1a6d35f29b4484e2f881aa8a9e10bccf91c657885f5c95d5bdfaa7e6d478af"
+    },
+    {
+      "path": "licenses/7zip-source.txt",
+      "bytes": 6341,
+      "sha256": "7b7022cccdee7bddd07f5fd847161e33551cec411e9c9967c14008ee36d5ce3f"
+    },
+    {
+      "path": "licenses/7zip.txt",
+      "bytes": 1932,
+      "sha256": "3d52f98857cb4b34e4ed4c637135884a65d0fa94aef7f992df4b149b6055e23a"
+    },
+    {
+      "path": "licenses/comic-neue.txt",
+      "bytes": 4390,
+      "sha256": "7c38a22e5878e60fe423360553e63dd7be23d29f1f60336034935dbfc96e8320"
+    },
+    {
+      "path": "licenses/compiler-rt.txt",
+      "bytes": 16708,
+      "sha256": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d"
+    },
+    {
+      "path": "licenses/emscripten.txt",
+      "bytes": 5093,
+      "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86"
+    },
+    {
+      "path": "licenses/ffmpeg.txt",
+      "bytes": 26526,
+      "sha256": "b634ab5640e258563c536e658cad87080553df6f34f62269a21d554844e58bfe"
+    },
+    {
+      "path": "licenses/lgpl-2.1.txt",
+      "bytes": 26419,
+      "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95"
+    },
+    {
+      "path": "licenses/libcxx.txt",
+      "bytes": 16703,
+      "sha256": "539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b"
+    },
+    {
+      "path": "licenses/libcxxabi.txt",
+      "bytes": 16706,
+      "sha256": "e2b35be49f7284a45b7baca8fc7b3ab7440e7902392b2528a457816b5bb2a15c"
+    },
+    {
+      "path": "licenses/liberation-fonts.txt",
+      "bytes": 4414,
+      "sha256": "93fed46019c38bbe566b479d22148e2e8a1e85ada614accb0211c37b2c61c19b"
+    },
+    {
+      "path": "licenses/musl.txt",
+      "bytes": 6196,
+      "sha256": "b870108ec5e7790e9f9919064f1b9421d62d5f9b0e6c230c6adf7ea2da62e97b"
+    },
+    {
+      "path": "licenses/rsa-md5.txt",
+      "bytes": 930,
+      "sha256": "905a8ab3d0b83c80b31ec6d12c5a7a8843ca2fd8ad6efde9653c1ae67be9b4f4"
+    },
+    {
+      "path": "licenses/stb-truetype.txt",
+      "bytes": 1160,
+      "sha256": "f7e9ed73812898371959e214ac4d82df98152c658f2270f7e9766d833d155e71"
+    },
+    {
+      "path": "licenses/unrar.txt",
+      "bytes": 1961,
+      "sha256": "bf6343bbe251ec177a0e8a371516c58350daac298eba6883cf978f456fae3d89"
+    },
+    {
+      "path": "licenses/unshield.txt",
+      "bytes": 1091,
+      "sha256": "3aaecd6f4440a1456c7d6fee4fe82a4d47af55646ae3daa1c806c717a9385bba"
+    },
+    {
+      "path": "licenses/zlib.txt",
+      "bytes": 1002,
+      "sha256": "e32ff4e00d9d94930537635291da39e7e612703334bf6fde8c7f1686fe8a45a2"
+    },
+    {
+      "path": "local-install.js",
+      "bytes": 139130,
+      "sha256": "09f60145eea46610e7fd5eaaba687dff928009b7a4856646ecc5ea895b1b7530"
+    },
+    {
+      "path": "manifest.webmanifest",
+      "bytes": 385,
+      "sha256": "e24d86a2d40b096589d9ba3b59be7cc01469d9f80c7a24cf3d3523a31dce45e4"
+    },
+    {
+      "path": "mobile-menu.js",
+      "bytes": 438943,
+      "sha256": "233b7c680daeb1317ac62cb36fb6cd5a77a561ee23de55683dd24b6da37b4ba3"
+    },
+    {
+      "path": "offline.js",
+      "bytes": 7205,
+      "sha256": "d93412e43904730ca22067fd0cf193e2755bc6e38894910b3aaab91433bb2078"
+    },
+    {
+      "path": "public-beta-usage.js",
+      "bytes": 8599,
+      "sha256": "029fe285fb5a9d80b736b6e93cb4994887b01b1965828d83a5905974a7c896fd"
+    },
+    {
+      "path": "routing-map.js",
+      "bytes": 36324,
+      "sha256": "781b5f1d9b6015f41e84f0e48a332dc18a26c32ce389e65b52b1d8f350082d94"
+    },
+    {
+      "path": "save-bundle.js",
+      "bytes": 1761,
+      "sha256": "0f4f6f0c62dc99840b589562c0690bb0d1f6fafb5f8b3a530da8fed268ed2d62"
+    },
+    {
+      "path": "save-rules.js",
+      "bytes": 29333,
+      "sha256": "e76a17c1ef803288d2524d32cc3399c3a1fc434af89f7cefeb617b1ddb8a5238"
+    },
+    {
+      "path": "service-worker.js",
+      "bytes": 4006,
+      "sha256": "69a42747b7756a9129d01d0d024213b90a3cf6d650f6c9b759b01b5460c89b63"
+    },
+    {
+      "path": "sources/7z-wasm-1.2.0-source.tar.gz",
+      "bytes": 763183,
+      "sha256": "0ca44328d043031ad3e2b750d18f94f13126cdbaeacfc8243fefaa331dff487a"
+    },
+    {
+      "path": "sources/7zip-24.09-source.7z",
+      "bytes": 1498342,
+      "sha256": "a33569eed0ce628fb9ceb9f46ac257d3f36b3966471667e65ba01878673c9faa"
+    },
+    {
+      "path": "sources/bink-adapter.c",
+      "bytes": 4087,
+      "sha256": "7d8023b3463c3fa2420283c553f0e1c4eaca8e5d08c93a11dfc4107e88542c63"
+    },
+    {
+      "path": "sources/build-bink.py",
+      "bytes": 2604,
+      "sha256": "614ae514b00c706479c51a767e58701b8bd43827a90c420ed0e9431119b922f8"
+    },
+    {
+      "path": "sources/ffmpeg-7.1.1.tar.xz",
+      "bytes": 11019500,
+      "sha256": "733984395e0dbbe5c046abda2dc49a5544e7e0e1e2366bba849222ae9e3a03b1"
+    },
+    {
+      "path": "unshield.js",
+      "bytes": 63486,
+      "sha256": "9f4eebf3c82c3fba27d549a4aef263a2733a436689f8063ef2fbc18cc06f8149"
+    },
+    {
+      "path": "unshield.wasm",
+      "bytes": 67260,
+      "sha256": "5948d6d5abd89b8218cab2446b3a50ccb0fc0dd8a9f9def2401a0682d03a0e9c"
+    }
+  ]
+}
