@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "build": "sgmobile-beta10-public-rc1-20112",
+  "build": "sgmobile-beta101-profile-edit-v1-20261112",
   "files": [
     {
       "path": "7zz.umd.js",
@@ -19,8 +19,8 @@
     },
     {
       "path": "README.txt",
-      "bytes": 3743,
-      "sha256": "94821418dee5edd14bfc2127c07e6d1df4f46e77c0185c3c7fc52f85222daee3"
+      "bytes": 3745,
+      "sha256": "93a7e656e7eef6231890eb0040880f3519423fc53cef05f3f157e17a32ab9046"
     },
     {
       "path": "THIRD_PARTY_NOTICES.txt",
@@ -139,18 +139,18 @@
     },
     {
       "path": "golf.html",
-      "bytes": 98878,
-      "sha256": "443c80b65601bdad7916c09b2b3109117c119ed4504e086035c0408cab8226e7"
+      "bytes": 98904,
+      "sha256": "39ec94a7c69490853a86f57d4473f1d78400f41439c163585e9d3f21bfa7dbd9"
     },
     {
       "path": "golf.js",
-      "bytes": 494298,
-      "sha256": "1b24d39049de165530aea3c1e0fef596acef49fc26030a3087ba101b3eeee0b7"
+      "bytes": 494957,
+      "sha256": "7fc70d095a1dadf396a2ae486a70f522f87d03eab46fbd4a7f0290a9f1acf70e"
     },
     {
       "path": "golf.wasm",
-      "bytes": 3457173,
-      "sha256": "8eda0388feddf60477f75d43e0fb3af43f4847376f4c72bab4bb6231c9a4ac22"
+      "bytes": 3458113,
+      "sha256": "211708a6b4067ecb69a51360981c3de2b20d992d078095606e1f5d0fdb4a1937"
     },
     {
       "path": "golfer-experience-model.js",
@@ -304,8 +304,8 @@
     },
     {
       "path": "local-install.js",
-      "bytes": 139130,
-      "sha256": "09f60145eea46610e7fd5eaaba687dff928009b7a4856646ecc5ea895b1b7530"
+      "bytes": 139241,
+      "sha256": "7063991ffc739db414bc3d01a9c543eeacc790a739a22df4740d7c6be06571b9"
     },
     {
       "path": "manifest.webmanifest",
@@ -314,8 +314,8 @@
     },
     {
       "path": "mobile-menu.js",
-      "bytes": 438943,
-      "sha256": "233b7c680daeb1317ac62cb36fb6cd5a77a561ee23de55683dd24b6da37b4ba3"
+      "bytes": 444134,
+      "sha256": "3e3a744cb2846660d8ec8712124eb28624b9e11630e5793d524f954550d7e7ef"
     },
     {
       "path": "offline.js",
@@ -344,8 +344,8 @@
     },
     {
       "path": "service-worker.js",
-      "bytes": 4006,
-      "sha256": "69a42747b7756a9129d01d0d024213b90a3cf6d650f6c9b759b01b5460c89b63"
+      "bytes": 4015,
+      "sha256": "a126087c7f72e60e13466b810f9c53e25add7b8612544ed5cff262b48da3951e"
     },
     {
       "path": "sources/7z-wasm-1.2.0-source.tar.gz",

@@ -1453,6 +1453,15 @@
   var root=document.createElement('section');root.id='mobile-profile';root.hidden=true;root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-label','Golfer profile');
   var style=document.createElement('style');style.textContent=`
     #mobile-profile[hidden],#mobile-profile-return[hidden]{display:none!important}
+    #mobile-profile-text{position:fixed;inset:auto;margin:0;transform:translate(-50%,-50%);box-sizing:border-box;overflow:auto;overscroll-behavior:contain;padding:16px;border:1px solid var(--menu-border);border-radius:16px;background:linear-gradient(#fffef0,#ece7d4);color:var(--menu-text);font:16px/1.4 system-ui,sans-serif}
+    #mobile-profile-text::backdrop{background:#161c3780}
+    #mobile-profile-text h2{margin:0 0 12px;font-size:21px}
+    #mobile-profile-text input{display:block;box-sizing:border-box;width:100%;min-height:44px;margin:5px 0 10px;padding:8px 10px;border:1px solid var(--menu-border);border-radius:7px;background:var(--menu-preview);color:inherit;font:inherit}
+    #mobile-profile-text .editor-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-top:12px}
+    #mobile-profile-text button{min-height:44px;padding:7px 12px;border:1px solid var(--menu-border);border-radius:8px;background:var(--menu-button);color:inherit;font:inherit;touch-action:manipulation}
+    #mobile-profile-text button[type="submit"]{background:linear-gradient(#fffde6,#f4db90)}
+    #mobile-profile-text-error{margin:0;color:var(--menu-danger)}
+    #mobile-profile-text-error:empty{display:none}
     #mobile-profile [hidden]{display:none!important}
     body.mobile-profile-open #mobile-ui{visibility:hidden}body.mobile-profile-open #canvas{visibility:hidden}
     #mobile-profile{position:fixed;left:0;right:0;top:var(--profile-header,22px);bottom:0;z-index:65;display:flex;flex-direction:column;box-sizing:border-box;background:var(--menu-bg);color:var(--menu-text);font:16px system-ui,sans-serif;padding:max(10px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));gap:10px}
@@ -1725,6 +1734,83 @@
     if(s.facePage+10<s.faceCount)controls.append(button('Next faces',()=>send(7,10)));
     controls.append(button('Cancel face selection',()=>send(7,12)));for(const b of controls.querySelectorAll('button'))b.disabled=!!s.busy;content.appendChild(controls);
   }
+  const editDialog=document.createElement('dialog');
+  editDialog.id='mobile-profile-text';
+  editDialog.setAttribute('aria-labelledby','mobile-profile-text-title');
+  editDialog.innerHTML=`
+    <form novalidate>
+      <h2 id="mobile-profile-text-title"></h2>
+      <label for="mobile-profile-text-input"></label>
+      <input id="mobile-profile-text-input" type="text" autocomplete="off" autocapitalize="off"
+             spellcheck="false" enterkeyhint="done" aria-describedby="mobile-profile-text-error">
+      <p id="mobile-profile-text-error" aria-live="polite"></p>
+      <div class="editor-actions">
+        <button type="button">Cancel changes</button>
+        <button type="submit">Save changes</button>
+      </div>
+    </form>
+  `;
+  if(typeof editDialog.showModal==='function'){
+    const form=editDialog.querySelector('form'),heading=form.querySelector('h2'),label=form.querySelector('label');
+    const input=form.querySelector('input'),error=form.querySelector('p');
+    let answer=null;
+    function fitEditor(){
+      if(!editDialog.open)return;
+      const {left,top,width,height,safe}=Module.getScreenBounds();
+      const x=left+Math.max(8,safe.left),y=top+Math.max(8,safe.top);
+      const availableWidth=Math.max(1,left+width-Math.max(8,safe.right)-x);
+      const availableHeight=Math.max(1,top+height-Math.max(8,safe.bottom)-y);
+      Object.assign(editDialog.style,{left:(x+availableWidth/2)+'px',top:(y+availableHeight/2)+'px',
+        width:Math.min(420,availableWidth)+'px',maxHeight:availableHeight+'px'});
+    }
+    function finishEdit(value){
+      if(!answer)return;
+      const resolve=answer;answer=null;
+      editDialog.close();resolve(value);
+    }
+    Module.requestMobileProfileText=(field,limit)=>{
+      if(answer||!Module.mobileUI)return Promise.resolve(null);
+      const isName=field===100;
+      heading.textContent=isName?'Edit player name':'Edit job title';
+      label.textContent=isName?'Player name':'Job title';
+      input.maxLength=limit;
+      input.value=isName?Module.profileState.name:Module.profileState.profession;
+      error.textContent='';input.removeAttribute('aria-invalid');
+      editDialog.showModal();fitEditor();
+      input.focus({preventScroll:true});input.select();
+      return new Promise(resolve=>{answer=resolve;});
+    };
+    form.addEventListener('submit',event=>{
+      event.preventDefault();
+      const value=input.value;
+      if(!value.trim()||value.length>input.maxLength||/[^\x20-\x7e]/.test(value)){
+        error.textContent=!value.trim()?'Enter '+(label.textContent==='Player name'?'a player name.':'a job title.'):
+          'Use up to '+input.maxLength+' letters, numbers or standard punctuation.';
+        input.setAttribute('aria-invalid','true');
+        input.focus({preventScroll:true});
+        return;
+      }
+      finishEdit(value);
+    });
+    input.addEventListener('input',()=>{error.textContent='';input.removeAttribute('aria-invalid');});
+    form.querySelector('button[type="button"]').onclick=()=>finishEdit(null);
+    editDialog.addEventListener('cancel',event=>{event.preventDefault();finishEdit(null);});
+    editDialog.addEventListener('close',()=>{if(!editDialog.open)finishEdit(null);});
+    editDialog.addEventListener('keydown',event=>{
+      if(event.isComposing||event.keyCode===229)return;
+      if(event.key==='Escape'){event.preventDefault();finishEdit(null);}
+      if(event.key==='Enter'&&event.target===input){
+        event.preventDefault();if(!event.repeat)form.requestSubmit();
+      }
+    });
+    for(const type of ['pointerdown','pointerup','pointermove','pointercancel','mousedown','mouseup',
+      'mousemove','click','dblclick','touchstart','touchmove','touchend','touchcancel','wheel','keydown','keyup','keypress'])
+      editDialog.addEventListener(type,event=>event.stopPropagation());
+    addEventListener('pagehide',()=>finishEdit(null));
+    addEventListener('simgolf-screen-resize',fitEditor);
+    document.body.append(editDialog);
+  }
+
   function showTextEditor(s){
     content.append(text('label',s.profile===100?'Player name':'Job title'));var input=document.createElement('input');input.type='text';input.maxLength=s.total-1;input.autocomplete='off';input.setAttribute('aria-label',s.profile===100?'Player name':'Job title');input.value=s.profile===100?s.name:s.profession;content.appendChild(input);
     var error=text('p',''),save=button('Save changes',()=>{if(Module.sendGameText(input.value)){save.disabled=true;Module.keyboardInput(13,13);}else error.textContent=Module.gameTextError;});content.append(save,button('Cancel changes',()=>Module.keyboardInput(27,27)),error);

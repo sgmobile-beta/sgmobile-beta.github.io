@@ -1,5 +1,5 @@
 // Versioned app resources only. Original files/saves stay in OPFS/IndexedDB.
-const BUILD = 'sgmobile-beta10-public-rc1-20112';
+const BUILD = 'sgmobile-beta101-profile-edit-v1-20261112';
 const CACHE = 'sgmobile-beta-app-' + BUILD;
 const BASE = new URL('./', self.location.href);
 const manifestURL = new URL('release.json', BASE).href;
