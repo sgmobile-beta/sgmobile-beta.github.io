@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icons/simgolf-mobile.png">
 <link rel="icon" type="image/png" href="icons/simgolf-mobile.png">
 <link rel="manifest" href="manifest.webmanifest">
-<title>SGMobile Beta 1.0.12</title>
+<title>SGMobile Beta 1.0.13</title>
 <style>
   /* Shared mobile presentation palette; original game artwork stays native. */
   :root{
@@ -97,7 +97,7 @@
 </style>
 </head>
 <body>
-<div id="build-header"><div id="build-label" title="SGMobile Beta 1.0.12 · sgmobile-beta112-android-map-recovery-v1-20261113">Beta 1.0.12<span id="build-edition"></span></div><div id="mobile-status" hidden></div></div>
+<div id="build-header"><div id="build-label" title="SGMobile Beta 1.0.13 · sgmobile-beta113-aim-zoom-v1-20261114">Beta 1.0.13<span id="build-edition"></span></div><div id="mobile-status" hidden></div></div>
 <div id="safe-area-probe" aria-hidden="true"></div>
 <div id="game-stage"><canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas></div>
 <script src="golfer-history-model.js"></script>
@@ -133,7 +133,7 @@
     return landscape;
   };
   Module.localFiles = true;
-  Module.buildInfo = Object.freeze({version: '1.0.12', id: 'sgmobile-beta112-android-map-recovery-v1-20261113', channel: 'beta'});
+  Module.buildInfo = Object.freeze({version: '1.0.13', id: 'sgmobile-beta113-aim-zoom-v1-20261114', channel: 'beta'});
   // Choose at launch; the ready initial loader permits one last change before
   // Continue. Future changes are shared unless explicitly
   // registered as Enhanced-only; save storage and formats remain shared.
@@ -444,7 +444,7 @@
       Module.cancelVertexHistoryRequest();
       if(targetZoom!==view.zoom&&!view.zooming)Module.resetSmoothPan?.('zoom');
       view.zooming=true;
-      if(Module.aimMode)Module.setAimMode(false);
+      suspendAim();
       if(Module.lotMode)Module.setLotMode(false);
       if(Module.terrainMode)Module.setTerrainMode(false);
       view.zoom=targetZoom;view.changed=Date.now();
@@ -475,12 +475,21 @@
       Module.refreshCanvasPresentation();schedule();
     };
     Module.mapZoomFrameReady=function(frame){
-      var v=Module.mapPresentation;if(!v.zooming)return;
-      if(pinch||v.pendingNative||!frame.valid||frame.logicalZoom!==v.nativeZoom||frame.zoom!==v.nativeZoom||frame.zoom!==nativeDetail(v.zoom))return;
+      var v=Module.mapPresentation;
+      if((!v.zooming&&!aimScreenPoint)||pinch||v.pendingNative||!frame.valid||
+         frame.logicalZoom!==v.nativeZoom||frame.zoom!==v.nativeZoom)return;
       var resize=Module.viewportResize,target=Module.adaptiveTarget,bounds=Module.getScreenBounds();
       var scale=v.baseScale*v.appliedZoom/(v.nativeZoom/4);
-      if(target?.scale!==scale||target.cssWidth!==bounds.width||target.cssHeight!==bounds.height)return;
-      if(frame.width===canvas.width&&frame.height===canvas.height&&resize?.status===1&&resize.seq===Module.viewportRequest?.seq){v.zooming=false;}
+      if(v.zooming&&(frame.zoom!==nativeDetail(v.zoom)||target?.scale!==scale||
+         target.cssWidth!==bounds.width||target.cssHeight!==bounds.height))return;
+      if(frame.width!==canvas.width||frame.height!==canvas.height||
+         resize?.status!==1||resize.seq!==Module.viewportRequest?.seq)return;
+      v.zooming=false;
+      if(aimScreenPoint&&!fingers.size&&!Module.panVisual?.rest?.pending){
+        if(Module.panVisual?.rest)Module.resetSmoothPan('resume-aim');
+        var point=nativePoint(aimScreenPoint);aimScreenPoint=null;
+        Module.setAimTarget(point[0],point[1]);
+      }
     };
     function queue(type, x, y, distance, mode, inputFrame) {
       if(Module.analyticsActive){if(type===0||type===8||type===9||type===10||type>=11)return;if(type>=1&&type<=4)mode=6;}
@@ -521,13 +530,22 @@
     aimReticle.style.cssText='position:fixed;z-index:25;pointer-events:none;width:26px;height:26px;border:2px solid white;border-radius:50%;box-shadow:0 0 0 2px #15291d;transform:translate(-50%,-50%);display:none';
     aimReticle.textContent='+';aimReticle.style.textAlign='center';aimReticle.style.font='24px/26px monospace';aimReticle.style.color='white';document.body.appendChild(aimReticle);
     Module.aimMode=false;Module.aimTarget=null;Module.aimSerial=0;
+    var aimScreenPoint=null;
+    function suspendAim(){
+      if(!Module.aimMode||aimScreenPoint)return;
+      var r=canvas.getBoundingClientRect(),t=Module.aimTarget;
+      if(!t)return;
+      aimScreenPoint={clientX:r.left+t.x*r.width/canvas.width,clientY:r.top+t.y*r.height/canvas.height};
+      Module.aimAck=null;
+      Module.refreshAimReticle();
+    }
     Module.refreshAimReticle=function(){
-      var t=Module.aimTarget,visible=Module.aimMode&&Module.mobileState?.course&&Module.mobileState?.shotTurn&&t;
+      var t=Module.aimTarget,visible=Module.aimMode&&!aimScreenPoint&&Module.mobileState?.course&&Module.mobileState?.shotTurn&&t;
       aimReticle.style.display=visible?'block':'none';if(!visible)return;
       var r=canvas.getBoundingClientRect();aimReticle.style.left=(r.left+t.x*r.width/canvas.width)+'px';aimReticle.style.top=(r.top+t.y*r.height/canvas.height)+'px';
     };
     Module.setAimTarget=function(x,y){
-      if(!Module.aimMode||Module.shotPending)return;
+      if(!Module.aimMode||aimScreenPoint||Module.shotPending)return;
       Module.aimSerial++;Module.aimAck=null;
       var r=canvas.getBoundingClientRect(),v=stage.getBoundingClientRect(),margin=16;
       var left=Math.max(0,(Math.max(0,v.left)+margin-r.left)*canvas.width/r.width),right=Math.min(canvas.width-1,(Math.min(innerWidth,v.right)-margin-r.left)*canvas.width/r.width);
@@ -535,16 +553,20 @@
       Module.aimTarget={x:Math.max(left,Math.min(right,x)),y:Math.max(top,Math.min(bottom,y))};
       Module.refreshAimTarget();Module.refreshAimReticle();
     };
-    Module.refreshAimTarget=function(){var t=Module.aimTarget;if(Module.aimMode&&t)queue(8,t.x,t.y,Module.aimSerial);};
+    Module.refreshAimTarget=function(){var t=Module.aimTarget;if(Module.aimMode&&!aimScreenPoint&&t)queue(8,t.x,t.y,Module.aimSerial);};
     Module.setAimMode=function(enabled){
       if(enabled)Module.resetSmoothPan?.('precise-tool');
       if(Module.terrainMode)Module.setTerrainMode(false);
-      Module.cancelMapGesture();Module.aimMode=!!enabled&&!!Module.mobileState?.shotTurn&&!Module.mobileState?.photoActive;measuring=Module.aimMode?3:0;Module.mapMode=measuring;
-      if(Module.aimMode){var r=stage.getBoundingClientRect(),t=nativePoint({clientX:r.left+r.width/2,clientY:r.top+r.height/2});Module.setAimTarget(t[0],t[1]);}
+      aimScreenPoint=null;Module.cancelMapGesture();Module.aimMode=!!enabled&&!!Module.mobileState?.shotTurn&&!Module.mobileState?.photoActive;measuring=Module.aimMode?3:0;Module.mapMode=measuring;
+      if(Module.aimMode){
+        var r=stage.getBoundingClientRect(),center={clientX:r.left+r.width/2,clientY:r.top+r.height/2};
+        if(Module.mapPresentation.zooming){aimScreenPoint=center;Module.aimTarget=null;Module.aimAck=null;}
+        else {var t=nativePoint(center);Module.setAimTarget(t[0],t[1]);}
+      }
       else Module.aimTarget=null;
       Module.refreshAimReticle();
     };
-    Module.aimCanShoot=function(){return !!Module.aimTarget&&Module.aimAck?.serial===Module.aimSerial;};
+    Module.aimCanShoot=function(){return !aimScreenPoint&&!Module.mapPresentation.zooming&&!!Module.aimTarget&&Module.aimAck?.serial===Module.aimSerial;};
     Module.requestShot=function(){
       if(!Module.mobileState?.course||Module.mobileState?.photoActive||!Module.mobileState?.shotReady||!Module.aimMode||!Module.aimCanShoot()||Module.shotPending)return false;
       var t=Module.aimTarget;gesture=null;pinch=null;blocked=fingers.size>0;queue(9,t.x,t.y,Module.aimSerial);Module.shotPending=true;return true;
@@ -709,7 +731,7 @@
         if(blocked&&!pinch)return;
         if(fingers.size===2 && Module.mobileUI && Module.mapPresentation.course) {
           var point=twoFingerSample();
-          if(!Module.analyticsActive){if(Module.aimMode)Module.setAimMode(false);if(Module.lotMode)Module.setLotMode(false);if(Module.terrainMode)Module.setTerrainMode(false);}
+          if(!Module.analyticsActive){suspendAim();if(Module.lotMode)Module.setLotMode(false);if(Module.terrainMode)Module.setTerrainMode(false);}
           Module.cancelMapGesture();
           pinch={x:point.x,y:point.y,point:nativePoint({clientX:point.x,clientY:point.y}),distance:Math.max(1,point.distance),zoom:Module.mapPresentation.zoom,time:performance.now(),mode:''};return;
         }
@@ -717,7 +739,7 @@
         if (fingers.size!==1 || blocked) return;
         // A newly-started pinch can supersede a pending refinement, but a
         // lone tap must not build/aim against a different native projection.
-        if(Module.mapPresentation.course&&Module.mapPresentation.zooming){gesture=null;return;}
+        if(Module.mapPresentation.course&&(Module.mapPresentation.zooming||aimScreenPoint)){gesture=null;return;}
         var p = nativePoint(e);
         gesture = {id:e.pointerId,x:e.clientX,y:e.clientY,dist:0,point:p,frame:Module.mapPresentation.course?(Module.panVisual?.frame||null):null,sent:false,navigation:Module.mapPresentation.course&&(Module.analyticsActive||(!Module.aimMode&&!Module.lotMode&&!Module.terrainMode&&((Module.mapMode===0&&!Module.mobileState?.constructing)||Module.mapMode===6)))};
         if(!Module.analyticsActive&&Module.mapPresentation.course&&Module.terrainMode){gesture.terrainStart={...Module.terrainTarget};if(mapMouse)Module.setTerrainTarget(p[0],p[1]);}
@@ -1018,8 +1040,9 @@
     // bitmap if an in-flight native frame no longer covers the visible view.
     // A later camera request brings usable coverage; never clamp the view to
     // the obsolete bitmap or expose an unfinished native drawing surface.
+    function aimOwnsPointer(){return Module.aimMode&&!state.navigation&&!state.drag&&!state.rest;}
     function uncoveredPanFrame(frame,previous){
-      if(!previous?.valid||!frame.valid||!frame.rgba||!Module.mobileUI||Module.uiPresentation||!Module.mapPresentation?.course||Module.aimMode||Module.lotMode||Module.terrainMode||frame.rotation!==previous.rotation||frame.zoom!==previous.zoom||frame.width!==previous.width||frame.height!==previous.height)return false;
+      if(!previous?.valid||!frame.valid||!frame.rgba||!Module.mobileUI||Module.uiPresentation||!Module.mapPresentation?.course||aimOwnsPointer()||Module.lotMode||Module.terrainMode||frame.rotation!==previous.rotation||frame.zoom!==previous.zoom||frame.width!==previous.width||frame.height!==previous.height)return false;
       var d=state.drag,rest=state.rest,offset;
       if(d){var drawn=project(frame.x-d.frame.x,frame.y-d.frame.y,frame);offset={x:d.viewX-drawn.x,y:d.viewY-drawn.y};}
       else if(rest?.pending&&(!rest.acknowledged||((frame.requestedX===undefined||frame.requestedX===rest.target.x)&&(frame.requestedY===undefined||frame.requestedY===rest.target.y))))offset=project(rest.camera.x-frame.x,rest.camera.y-frame.y,frame);
@@ -1069,7 +1092,7 @@
       }
       if(disposition==='recover'){state.frame=frame;apply();return;}
       Module.mapZoomFrameReady?.(frame);
-      var eligible=frame.valid&&Module.mobileUI&&Module.mapPresentation?.course&&(Module.analyticsActive||(!Module.aimMode&&!Module.lotMode&&!Module.terrainMode&&(!Module.mobileState?.constructing||state.rest||state.navigation||state.held||performance.now()-state.recent<180)));
+      var eligible=frame.valid&&Module.mobileUI&&Module.mapPresentation?.course&&(Module.analyticsActive||(!aimOwnsPointer()&&!Module.lotMode&&!Module.terrainMode&&(!Module.mobileState?.constructing||state.rest||state.navigation||state.held||performance.now()-state.recent<180)));
       if(!eligible||!previous||!previous.valid||frame.rotation!==previous.rotation||frame.zoom!==previous.zoom||frame.width!==previous.width||frame.height!==previous.height){Module.resetSmoothPan('frame-context');state.frame=frame;return;}
       state.frame=frame;if(state.drag){if(state.drag.accepted)dragOffset();else apply();return;}if(keepRest(frame))return;var dx=frame.x-previous.x,dy=frame.y-previous.y;if(!dx&&!dy){apply();return;}
       if(Math.abs(dx)>3||Math.abs(dy)>3){Module.resetSmoothPan('camera-jump');state.frame=frame;return;}

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "build": "sgmobile-beta112-android-map-recovery-v1-20261113",
+  "build": "sgmobile-beta113-aim-zoom-v1-20261114",
   "files": [
     {
       "path": "7zz.umd.js",
@@ -20,7 +20,7 @@
     {
       "path": "README.txt",
       "bytes": 3746,
-      "sha256": "824172edafa498a9f9c59d0126372e6b4a8e7ee66b974a08c16ec7b89371c049"
+      "sha256": "52fa292c6100effc59a6d5ea8bf8fa8b89672da976ecdfa23cf52194392885a8"
     },
     {
       "path": "THIRD_PARTY_NOTICES.txt",
@@ -139,18 +139,18 @@
     },
     {
       "path": "golf.html",
-      "bytes": 102634,
-      "sha256": "b69c9545bc5ec6dcc1eddab21b95c0fe6037450d170790910f68634fcd7968ff"
+      "bytes": 103642,
+      "sha256": "dc96d41e9592a21133e09cf4643878c1ea9163335ce5525269c539f81b4616fd"
     },
     {
       "path": "golf.js",
       "bytes": 495998,
-      "sha256": "e45291257250d8d4dce5c2019826f7adf65533290429a093938b6951915490c5"
+      "sha256": "53f03ee3fb8859a9b7fc2d256a38d34fab232afb53e53df2ca8be8c7a059f410"
     },
     {
       "path": "golf.wasm",
-      "bytes": 3513981,
-      "sha256": "305e33404e600ef42a9b27c33ea0542f5d1baeec941adeba49c95404eb51145b"
+      "bytes": 3513775,
+      "sha256": "a26543e499cd590de90e46bf46be42e3f0cb7b831e8f9b76cfd12a49f9076dd6"
     },
     {
       "path": "golfer-experience-model.js",
@@ -304,8 +304,8 @@
     },
     {
       "path": "local-install.js",
-      "bytes": 142661,
-      "sha256": "16be5f2c9a0bc343a41d3b75cf8b086c07d4c5ab3f7ac638dbf86334a393c1a8"
+      "bytes": 142976,
+      "sha256": "5ad36b35423c1ad13522892c5b12811da7c47bbe1297b6c5e40fb5611fe4e22a"
     },
     {
       "path": "manifest.webmanifest",
@@ -344,8 +344,8 @@
     },
     {
       "path": "service-worker.js",
-      "bytes": 4023,
-      "sha256": "f5ff4bce74718366992e6f52656808bc46bbbbe598339ab194de88571f975887"
+      "bytes": 4011,
+      "sha256": "7a7eab213dc942c4f4fff19961381935c4f647842ec317879401394522359f1b"
     },
     {
       "path": "sources/7z-wasm-1.2.0-source.tar.gz",
