@@ -783,13 +783,13 @@
   };
   Module.endRoutingMap=function(serial){
     if(state?.serial!==serial)return;
-    const pixels=Module.panVisual?.pixelSerial||0;
+    const beforePresent=Module.panVisual?.presentSerial||0;
     const started=performance.now();
     state.closing=true;
     syncControls();
     function waitForCourse(now){
       if(state?.serial!==serial)return;
-      if(now-started<300||(!Module.mobileCourseFrameReady?.(pixels)&&now-started<1200)){
+      if(now-started<300||(!Module.mobileCourseFrameReady?.(beforePresent)&&now-started<1200)){
         requestAnimationFrame(waitForCourse);
         return;
       }

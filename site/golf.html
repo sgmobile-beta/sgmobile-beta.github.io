@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icons/simgolf-mobile.png">
 <link rel="icon" type="image/png" href="icons/simgolf-mobile.png">
 <link rel="manifest" href="manifest.webmanifest">
-<title>SGMobile Beta 1.0.13</title>
+<title>SGMobile Beta 1.0.15</title>
 <style>
   /* Shared mobile presentation palette; original game artwork stays native. */
   :root{
@@ -72,10 +72,10 @@
   #build-label{flex:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:left}
   #mobile-status{flex:0 1 auto;min-width:0;margin-left:auto;font-size:12px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-    :is(#initial-loading #initial-loading-mute,#mobile-startup #startup-mute,#opening-video-mute){position:absolute;z-index:1;top:8px;right:max(8px,env(safe-area-inset-right));display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;padding:0;border:1px solid var(--menu-border);border-radius:50%;background:var(--menu-preview);color:var(--menu-text);touch-action:manipulation;cursor:pointer}
+    :is(#initial-loading #initial-loading-mute,#mobile-startup #startup-mute,#opening-video-mute,#course-loading-mute){position:absolute;z-index:1;top:8px;right:max(8px,env(safe-area-inset-right));display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;padding:0;border:1px solid var(--menu-border);border-radius:50%;background:var(--menu-preview);color:var(--menu-text);touch-action:manipulation;cursor:pointer}
     #initial-loading #initial-loading-mute{top:max(8px,env(safe-area-inset-top))}
-    :is(#initial-loading-mute,#startup-mute,#opening-video-mute) svg{width:22px;height:22px;pointer-events:none}
-    :is(#initial-loading-mute,#startup-mute,#opening-video-mute):focus-visible{outline:3px solid var(--menu-focus);outline-offset:2px}
+    :is(#initial-loading-mute,#startup-mute,#opening-video-mute,#course-loading-mute) svg{width:22px;height:22px;pointer-events:none}
+    :is(#initial-loading-mute,#startup-mute,#opening-video-mute,#course-loading-mute):focus-visible{outline:3px solid var(--menu-focus);outline-offset:2px}
     #opening-video-mute{position:fixed;z-index:996;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right))}
   #game-stage {
     position:fixed;left:var(--screen-left,0px);top:var(--screen-top,0px);
@@ -97,7 +97,7 @@
 </style>
 </head>
 <body>
-<div id="build-header"><div id="build-label" title="SGMobile Beta 1.0.13 · sgmobile-beta113-aim-zoom-v1-20261114">Beta 1.0.13<span id="build-edition"></span></div><div id="mobile-status" hidden></div></div>
+<div id="build-header"><div id="build-label" title="SGMobile Beta 1.0.15 · sgmobile-beta115-course-mute-v1-20261114">Beta 1.0.15<span id="build-edition"></span></div><div id="mobile-status" hidden></div></div>
 <div id="safe-area-probe" aria-hidden="true"></div>
 <div id="game-stage"><canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas></div>
 <script src="golfer-history-model.js"></script>
@@ -133,7 +133,7 @@
     return landscape;
   };
   Module.localFiles = true;
-  Module.buildInfo = Object.freeze({version: '1.0.13', id: 'sgmobile-beta113-aim-zoom-v1-20261114', channel: 'beta'});
+  Module.buildInfo = Object.freeze({version: '1.0.15', id: 'sgmobile-beta115-course-mute-v1-20261114', channel: 'beta'});
   // Choose at launch; the ready initial loader permits one last change before
   // Continue. Future changes are shared unless explicitly
   // registered as Enhanced-only; save storage and formats remain shared.
@@ -920,7 +920,7 @@
         var ptr=frame.rgba>>>0,count=frame.width*frame.height*4,heap=Module.HEAPU8;
         if(!heap||frame.width<1||frame.height<1||ptr+count>heap.byteLength)throw Error('Invalid native map pixel range');
         if(cache.width!==frame.width||cache.height!==frame.height){cache.width=frame.width;cache.height=frame.height;pixels=cacheContext.createImageData(frame.width,frame.height);}
-        pixels.data.set(heap.subarray(ptr,ptr+count));cacheContext.putImageData(pixels,0,0);pixelFrame=frame;pixelSerial++;state.pixelSerial=pixelSerial;state.lastPixelAt=performance.now();state.pixelFrame={x:frame.x,y:frame.y,zoom:frame.zoom,width:frame.width,height:frame.height};return true;
+        pixels.data.set(heap.subarray(ptr,ptr+count));cacheContext.putImageData(pixels,0,0);pixelFrame=frame;pixelSerial++;state.pixelSerial=pixelSerial;state.lastPixelAt=performance.now();state.pixelFrame={serial:state.presentSerial,x:frame.x,y:frame.y,zoom:frame.zoom,width:frame.width,height:frame.height};return true;
       }catch(error){pixelFrame=null;Module.mapCopyError=String(error);hideDisplay();return false;}
     }
     function paint(){

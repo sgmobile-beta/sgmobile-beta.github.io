@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "build": "sgmobile-beta113-aim-zoom-v1-20261114",
+  "build": "sgmobile-beta115-course-mute-v1-20261114",
   "files": [
     {
       "path": "7zz.umd.js",
@@ -20,7 +20,7 @@
     {
       "path": "README.txt",
       "bytes": 3746,
-      "sha256": "52fa292c6100effc59a6d5ea8bf8fa8b89672da976ecdfa23cf52194392885a8"
+      "sha256": "eb67a1d72abe1a7b44029d47ed166e30ac6d534f6b163eb985893c6757aca95d"
     },
     {
       "path": "THIRD_PARTY_NOTICES.txt",
@@ -139,18 +139,18 @@
     },
     {
       "path": "golf.html",
-      "bytes": 103642,
-      "sha256": "dc96d41e9592a21133e09cf4643878c1ea9163335ce5525269c539f81b4616fd"
+      "bytes": 103738,
+      "sha256": "ad79d9718d2b7274fe9aaa3c1eb8061ceaef50c4a06e4b435c4aea3b19e21009"
     },
     {
       "path": "golf.js",
       "bytes": 495998,
-      "sha256": "53f03ee3fb8859a9b7fc2d256a38d34fab232afb53e53df2ca8be8c7a059f410"
+      "sha256": "facc90a88b5938a6954dfcbe6b5ada9b368f0140f3409724a3339ec1ead66031"
     },
     {
       "path": "golf.wasm",
-      "bytes": 3513775,
-      "sha256": "a26543e499cd590de90e46bf46be42e3f0cb7b831e8f9b76cfd12a49f9076dd6"
+      "bytes": 3513791,
+      "sha256": "708ed8a7c8c01d245f7a2be2bfe74c1701c1413e4e61718c27f975fbae673ec0"
     },
     {
       "path": "golfer-experience-model.js",
@@ -304,8 +304,8 @@
     },
     {
       "path": "local-install.js",
-      "bytes": 142976,
-      "sha256": "5ad36b35423c1ad13522892c5b12811da7c47bbe1297b6c5e40fb5611fe4e22a"
+      "bytes": 143196,
+      "sha256": "58287e9f98bedf3e7b96ea0ebaf27adc5126f4b6e665d95fb4d2952da5c69fec"
     },
     {
       "path": "manifest.webmanifest",
@@ -314,8 +314,8 @@
     },
     {
       "path": "mobile-menu.js",
-      "bytes": 451185,
-      "sha256": "2ee872993abddf2856631a74371ec89ca1fb359bdbcd9d95c109262750686921"
+      "bytes": 451831,
+      "sha256": "ca8e1331b33d81840ed1ef52f60035ce62dcbbde182b35b7d00387e416217d46"
     },
     {
       "path": "offline.js",
@@ -329,8 +329,8 @@
     },
     {
       "path": "routing-map.js",
-      "bytes": 36324,
-      "sha256": "781b5f1d9b6015f41e84f0e48a332dc18a26c32ce389e65b52b1d8f350082d94"
+      "bytes": 36340,
+      "sha256": "375039bdc1e30ef91b4825a8efc5a9880749bf2fb44e4346e4a0cc94b6d46235"
     },
     {
       "path": "save-bundle.js",
@@ -344,8 +344,8 @@
     },
     {
       "path": "service-worker.js",
-      "bytes": 4011,
-      "sha256": "7a7eab213dc942c4f4fff19961381935c4f647842ec317879401394522359f1b"
+      "bytes": 4014,
+      "sha256": "29b719fef26c9cb3271524f870e2bc33715a90b8ce1aeb37d59cb1d995228e64"
     },
     {
       "path": "sources/7z-wasm-1.2.0-source.tar.gz",

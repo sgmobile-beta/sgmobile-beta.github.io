@@ -1,5 +1,5 @@
 // Versioned app resources only. Original files/saves stay in OPFS/IndexedDB.
-const BUILD = 'sgmobile-beta113-aim-zoom-v1-20261114';
+const BUILD = 'sgmobile-beta115-course-mute-v1-20261114';
 const CACHE = 'sgmobile-beta-app-' + BUILD;
 const BASE = new URL('./', self.location.href);
 const manifestURL = new URL('release.json', BASE).href;

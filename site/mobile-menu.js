@@ -6,10 +6,15 @@
     return !!el&&!el.hidden&&el.getClientRects().length>0;
   };
   Module.mobileCourseFrameReady=before=>{
+    if(!Module.mobileState?.course||!Module.mapPresentation?.course||Module.uiPresentation||
+       Module.loadState?.active)return false;
     const request=Module.viewportRequest,resize=Module.viewportResize;
-    return !!(Module.mobileState?.course&&Module.mapPresentation?.course&&!Module.uiPresentation&&
-      !Module.loadState?.active&&(Module.panVisual?.pixelSerial||0)>before&&shown('map-display')&&
-      (!request||(resize?.seq===request.seq&&resize.status===1)));
+    if(request&&(resize?.seq!==request.seq||resize.status!==1))return false;
+    // HD and the standard renderer's fallback both present directly when a
+    // copied map is unavailable. Require a new course frame in either path.
+    const pan=Module.panVisual,frame=pan?.fallbackFrame||(shown('map-display')?pan?.pixelFrame:null);
+    return !!(frame&&frame.serial>before&&frame.width===Module.canvas.width&&
+      frame.height===Module.canvas.height&&frame.zoom===Module.mapPresentation.nativeZoom);
   };
   if(!Module.mobileUI)return;
   const root=document.createElement('div');
@@ -78,7 +83,7 @@
       document.getElementById('mobile-load').dataset.serial===String(load.serial);
     const themes=theme?.active&&shown('mobile-theme-picker')&&
       document.getElementById('mobile-theme-picker').dataset.serial===String(theme.serial);
-    const course=Module.mobileCourseFrameReady(t.pixels);
+    const course=Module.mobileCourseFrameReady(t.beforePresent);
     const saves=picker&&!load.championship&&!load.proSelection;
     const savePreview=Module.courseLoading?.active&&Module.courseLoading?.reviewing&&shown('course-loading');
     const ready={title,difficulty,locations,themes,course,
@@ -113,7 +118,7 @@
   Module.beginMobileScreenTransition=(target,source=null,serial=null)=>{
     if(!captions[target])return;
     if(transition)finish('replaced');
-    const state={active:true,target,source,serial,pixels:Module.panVisual?.pixelSerial||0,started:performance.now()};
+    const state={active:true,target,source,serial,beforePresent:Module.panVisual?.presentSerial||0,started:performance.now()};
     Module.mobileScreenTransition=transition=state;
     status.textContent=captions[target];
     root.hidden=false;
@@ -4740,7 +4745,8 @@ Module.getGolferDiagnostics=function(){
     #course-loading[hidden],#course-loading [hidden]{display:none!important}
     body.course-loading-open :is(#canvas,#map-display,#mobile-ui,#mobile-mode-rail,#mobile-cancel,#mobile-open-hole,#build-header,#mobile-load,#mobile-load-return,#mobile-startup,#local-title-actions){visibility:hidden!important}
     #course-loading{position:fixed;z-index:66;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;overflow:hidden;padding:max(14px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:radial-gradient(ellipse at 35% 30%,#efeeff,#c1c1e4 65%,#9291bd);color:#1c2541;font:16px/1.3 system-ui,sans-serif}
-    #course-loading header{display:flex;align-items:center;gap:12px;flex:none;min-width:0}#course-loading-emblem:empty{display:none}#course-loading-emblem canvas{display:block;width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 3px 3px #39315d40)}
+    #course-loading header{display:flex;align-items:center;gap:12px;flex:none;min-width:0}
+    #course-loading #course-loading-mute{position:static;flex:none;align-self:start;margin-inline-start:auto}#course-loading-emblem:empty{display:none}#course-loading-emblem canvas{display:block;width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 3px 3px #39315d40)}
     #course-loading header>div:last-child{min-width:0}#course-loading h1{font:normal clamp(24px,4vw,34px)/1.05 OriginalWorldMenu,"Comic Neue",system-ui,sans-serif;margin:3px 0;overflow-wrap:break-word}#course-loading .eyebrow{font-size:11px;font-weight:600;letter-spacing:.16em;color:#49496f}#course-loading-save{font-size:13px;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#49496f}
     #course-loading-body{display:flex;flex-direction:column;gap:12px;flex:1;min-height:0;min-width:0}
     #course-loading-map-card{display:flex;flex-direction:column;flex:0 0 38%;min-height:110px;min-width:0;overflow:hidden;margin:0;border:1px solid #77759b;border-radius:22px;background:linear-gradient(#fbfbeddd,#d9daec99);box-shadow:inset 0 1px #fff,0 4px 14px #39315d20}
@@ -4768,7 +4774,8 @@ Module.getGolferDiagnostics=function(){
     @media(max-height:470px){#course-loading{gap:8px}#course-loading-emblem canvas{width:44px;height:44px}#course-loading h1{font-size:24px}#course-loading footer{padding-top:8px}#course-loading-status{flex:1 1 120px}#course-loading-continue{width:auto;font-size:16px;min-width:130px}#course-loading-body{flex-direction:row}#course-loading-map-card{flex:1}#course-loading-details{flex:1}#course-loading-summary dd{font-size:16px}}
   `;document.head.append(style);
   const text=(tag,value,id)=>{const e=document.createElement(tag);e.textContent=value;if(id)e.id=id;return e;};
-  const header=document.createElement('header'),emblem=document.createElement('div');emblem.id='course-loading-emblem';const heading=document.createElement('div'),eyebrow=text('div','LOADING SAVED GAME');eyebrow.className='eyebrow';const title=text('h1',''),filename=text('p','','course-loading-save');heading.append(eyebrow,title,filename);header.append(emblem,heading);
+  const header=document.createElement('header'),emblem=document.createElement('div');emblem.id='course-loading-emblem';const heading=document.createElement('div'),eyebrow=text('div','LOADING SAVED GAME');eyebrow.className='eyebrow';const title=text('h1',''),filename=text('p','','course-loading-save');heading.append(eyebrow,title,filename);
+  const mute=Module.createAudioMuteButton('course-loading-mute');header.append(emblem,heading,mute);
   const body=document.createElement('div');body.id='course-loading-body';const figure=document.createElement('figure');figure.id='course-loading-map-card';const map=document.createElement('canvas');map.id='course-loading-map';map.width=1000;map.height=660;map.setAttribute('role','img');figure.append(map,text('figcaption','Course layout · numbered tees and hole routes'));
   const details=document.createElement('section');details.id='course-loading-details';details.setAttribute('aria-label','Saved course information');
   const settings=text('button','','course-loading-settings');settings.type='button';settings.hidden=true;settings.setAttribute('aria-haspopup','dialog');
@@ -4782,7 +4789,7 @@ Module.getGolferDiagnostics=function(){
   const stage=text('p','','course-loading-stage');stage.setAttribute('role','status');status.append(spinner,stage);
   const back=text('button','Back','course-loading-back'),enter=text('button','Enter course','course-loading-continue');back.type=enter.type='button';back.hidden=true;enter.disabled=true;
   footer.append(status,back,enter);root.append(header,settings,body,footer);document.body.append(root);
-  let serial=0,beforePixels=0,review=null;
+  let serial=0,beforePresent=0,review=null;
   const stages={accepted:'Opening your saved course…',save:'Reading the saved game…',artwork:'Loading course artwork…',terrain:'Preparing the course terrain…',map:'Preparing the full-size map…'};
   function layout(){if(root.hidden)return;const b=Module.getScreenBounds();Object.assign(root.style,{left:b.left+'px',top:b.top+'px',width:b.width+'px',height:b.height+'px'});if(Module.courseLoading)Module.courseLoading.presentation={layout:'responsive-saved-course-overview',bounds:b};}
   function close(reason){
@@ -4842,7 +4849,7 @@ Module.getGolferDiagnostics=function(){
       const data={...JSON.parse(JSON.stringify(p)),skill:HEAP32[0x541cd8>>2]/100,tiles:Array.from(HEAP8.subarray(0x5722e8,0x5722e8+2500)),flags:Array.from(HEAPU16.subarray(0x53caf0>>1,(0x53caf0>>1)+2500)),routes:[]};
       for(const h of p.holes){const a=0x575ab0+h.hole*520,points=[];for(const offset of [8,16,24]){const x=HEAP32[(a+offset)>>2],y=HEAP32[(a+offset+4)>>2];if(x>0&&x<50&&y>=0&&y<50)points.push([x,y]);}if(h.par>0&&points.length>=2)data.routes.push({hole:h.hole,points});}
       review=selection;
-      beforePixels=Module.panVisual?.pixelSerial||0;
+      beforePresent=Module.panVisual?.presentSerial||0;
       back.hidden=!selection;back.disabled=settings.disabled=enter.disabled=!selection;
       root.dataset.review=String(!!selection);root.dataset.ready=String(!!selection);
       root.setAttribute('aria-busy',String(!selection));spinner.textContent=selection?'✓':'';
@@ -4861,7 +4868,7 @@ Module.getGolferDiagnostics=function(){
   };
   Module.cancelCourseLoading=function(){close('native-load-cancelled');};
   Module.courseLoadingFinished=function(){const s=Module.courseLoading;if(!s?.active)return;if(!s.nativeReads){close('native-load-cancelled');return;}s.nativeFinished=true;Module.courseLoadingStage('map');};
-  function refresh(){const s=Module.courseLoading;if(!s?.active)return;if(s.nativeFinished&&Module.mobileCourseFrameReady(beforePixels)){if(s.enterRequested){s.acknowledged=true;close('fresh-map-ready');return;}if(!s.readyToContinue){s.readyToContinue=true;s.readyAt=performance.now();enter.disabled=false;root.dataset.ready='true';root.setAttribute('aria-busy','false');spinner.textContent='✓';stage.textContent='Course ready';enter.focus({preventScroll:true});}}layout();}
+  function refresh(){const s=Module.courseLoading;if(!s?.active)return;if(s.nativeFinished&&Module.mobileCourseFrameReady(beforePresent)){s.handoffRenderer=Module.panVisual?.fallbackFrame?'native':'copied';if(s.enterRequested){s.acknowledged=true;close('fresh-map-ready');return;}if(!s.readyToContinue){s.readyToContinue=true;s.readyAt=performance.now();enter.disabled=false;root.dataset.ready='true';root.setAttribute('aria-busy','false');spinner.textContent='✓';stage.textContent='Course ready';enter.focus({preventScroll:true});}}layout();}
   setInterval(refresh,40);for(const name of ['resize','orientationchange','simgolf-screen-resize'])addEventListener(name,layout);
   for(const type of ['pointerdown','pointermove','pointerup','pointercancel','mousedown','mousemove','mouseup','click','dblclick','touchstart','touchmove','touchend','touchcancel','wheel','keydown','keyup','keypress'])root.addEventListener(type,e=>e.stopPropagation());
 })();
