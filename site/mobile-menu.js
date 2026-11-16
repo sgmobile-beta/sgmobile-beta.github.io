@@ -242,14 +242,24 @@
     #mobile-ui .icon,#mobile-cancel,#mobile-open-hole{width:48px;height:48px;padding:10px}#mobile-ui .icon svg,#mobile-cancel svg,#mobile-open-hole svg{width:26px;height:26px;display:block;pointer-events:none}
     #mobile-course-dock{
       position:absolute;left:calc(max(8px,env(safe-area-inset-left)) + 54px);right:max(8px,env(safe-area-inset-right));
-      bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px));
+      bottom:max(8px,env(safe-area-inset-bottom));
       display:flex;flex-wrap:wrap-reverse;justify-content:flex-end;align-items:flex-end;gap:6px 12px
     }
     #mobile-build-actions{display:flex;align-items:center;gap:6px}
+    #mobile-ui.build-dock-active #mobile-course-dock{
+      left:max(8px,env(safe-area-inset-left));justify-content:flex-start;flex-wrap:nowrap;
+      gap:4px;overflow-x:auto;overscroll-behavior-x:contain;touch-action:pan-x
+    }
+    #mobile-ui.build-dock-active :is(#mobile-build-actions,#mobile-build-history,#mobile-camera){
+      flex:none;gap:4px;margin:0
+    }
+    #mobile-ui.build-dock-active #mobile-camera{margin-left:auto}
+    #mobile-ui.build-dock-active #mobile-course-dock button{flex:none;width:44px;height:44px}
+    #mobile-ui.build-dock-active #mobile-cancel{position:static}
     #mobile-ui.has-build-history #mobile-build-actions{margin-right:auto}
     #mobile-ui.has-build-history #mobile-camera{margin-left:auto}
-    #mobile-cancel{position:fixed;z-index:90;left:max(8px,env(safe-area-inset-left));bottom:calc(var(--mobile-bottom-offset,0px) + max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px))}#mobile-cancel[hidden]{display:none!important}
-    #mobile-build-strip{position:absolute;left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));bottom:max(8px,env(safe-area-inset-bottom));padding:6px;background:var(--menu-overlay);border:1px solid var(--menu-border);border-radius:6px;pointer-events:auto;box-sizing:border-box}
+    #mobile-cancel{position:fixed;z-index:90;left:max(8px,env(safe-area-inset-left));bottom:calc(var(--mobile-bottom-offset,0px) + max(8px,env(safe-area-inset-bottom)))}#mobile-cancel[hidden]{display:none!important}
+    #mobile-build-strip{position:absolute;left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--build-dock-height,48px) + 8px);padding:6px;background:var(--menu-overlay);border:1px solid var(--menu-border);border-radius:6px;pointer-events:auto;box-sizing:border-box}
     #mobile-build-strip .strip-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
     #mobile-build-strip .strip-title{font-size:13px;margin:0}
     #mobile-build-strip .strip-header.course-tiles{display:grid;grid-template-columns:minmax(0,1fr);justify-items:center;gap:4px;text-align:center}
@@ -263,7 +273,7 @@
     #mobile-build-strip .category-icon.round-badge{clip-path:circle(50%)}
     #mobile-build-strip .category-icon.buildings-symbol{box-sizing:border-box;padding:7px;border:1px solid #293860;border-radius:50%;background:radial-gradient(circle at 34% 18%,#acb9ef,#7888d8 32%,#6878c0 58%,#606fa9 82%,#4f5b98);color:#293860}
 
-    #mobile-build-strip span{display:block}#mobile-build-strip .variations{margin-top:6px}#mobile-build-strip .variations button{min-height:44px;flex-basis:108px}#mobile-build-strip .landmark-choice{flex-basis:auto;min-height:44px;white-space:nowrap}#mobile-build-strip svg{width:36px;height:42px;display:block;margin:auto;pointer-events:none}
+    #mobile-build-strip span{display:block}#mobile-build-strip .variations{margin-top:6px}#mobile-build-strip .variations button{min-height:44px;flex-basis:108px}#mobile-build-strip .variant-cards{min-height:70px}#mobile-build-strip .variant-cards button{min-height:70px}#mobile-build-strip .landmark-choice{flex-basis:auto;min-height:44px;white-space:nowrap}#mobile-build-strip svg{width:36px;height:42px;display:block;margin:auto;pointer-events:none}
     #mobile-panel.landmarks{left:max(8px,env(safe-area-inset-left));right:var(--mobile-rail-space);top:max(8px,env(safe-area-inset-top));bottom:max(8px,env(safe-area-inset-bottom));width:auto;max-height:none!important;z-index:2;background:var(--menu-overlay)}
     #mobile-ui.landmarks-open > :not(#mobile-panel){visibility:hidden}#mobile-panel.landmarks{padding-bottom:64px}
     #mobile-panel.landmarks{container-type:inline-size}
@@ -341,15 +351,15 @@
     #mobile-round-controls{position:absolute;left:max(8px,env(safe-area-inset-left));right:80px;bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px) + 54px);display:flex;gap:6px;flex-wrap:wrap}
     #mobile-shot-choices{position:absolute;left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px) + 162px);display:flex;gap:6px;overflow:auto;padding:4px;background:var(--menu-overlay);border-radius:6px;pointer-events:auto;overscroll-behavior:contain}
     #mobile-shot-choices button{flex:0 0 auto}#mobile-shot-choices button[aria-pressed=true]{background:var(--menu-selected);border-color:var(--menu-focus)}
-    #mobile-terrain-controls{position:absolute;left:16px;right:16px;max-width:420px;margin:0 auto;bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px) + 64px);display:grid;grid-template-columns:48px minmax(96px,120px) 48px;justify-content:space-between;align-items:center;row-gap:8px;pointer-events:none}
-    #mobile-terrain-up{grid-column:1}#mobile-terrain-precision{grid-column:2;min-width:96px}#mobile-terrain-down{grid-column:3}
+    #mobile-terrain-controls{position:absolute;left:16px;right:16px;max-width:420px;margin:0 auto;bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px) + 64px);display:grid;grid-template-columns:48px minmax(0,max-content) 48px;justify-content:center;align-items:center;gap:6px;pointer-events:none}
+    #mobile-terrain-up{grid-area:2/1}#mobile-terrain-down{grid-area:2/3}
     #mobile-terrain-controls button{background:var(--mobile-surface)}#mobile-terrain-controls button[aria-pressed=true]{background:var(--menu-selected)}
-    #mobile-terrain-elevation-map{grid-column:1/-1;justify-self:center;min-height:44px}
-    #mobile-ui.has-build-history #mobile-terrain-controls{
+    #mobile-terrain-elevation-map{grid-area:2/2;min-width:0;min-height:48px;padding-inline:8px}
+    #mobile-ui.build-dock-active #mobile-terrain-controls{
       left:max(16px,env(safe-area-inset-left));right:max(16px,env(safe-area-inset-right));
       bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px) + var(--build-dock-clearance,48px) + var(--build-open-hole-space,0px) + 16px)
     }
-    #mobile-ui.has-build-history #mobile-lot-controls{
+    #mobile-ui.build-dock-active #mobile-lot-controls{
       bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px) + var(--build-dock-clearance,48px) + var(--build-open-hole-space,0px) + 10px)
     }
     #mobile-build-history{display:flex;gap:6px}
@@ -384,6 +394,10 @@
     #mobile-course-status #mobile-status{grid-area:1/3;justify-self:end;margin-left:0;max-width:100%}
     #mobile-closeup,#mobile-zoom-notice{justify-self:center;padding:0 4px;border-radius:3px;background:rgba(199,199,231,.68);white-space:nowrap}
     #mobile-closeup{grid-area:1/2;font-variant-numeric:tabular-nums}
+    #mobile-ui #mobile-closeup,#mobile-ui #mobile-status[data-shortcut]{
+      padding:2px 4px;border:0;min-height:26px;background:rgba(199,199,231,.8);
+      color:inherit;font:inherit;font-size:12px;pointer-events:auto;cursor:pointer
+    }
     #mobile-zoom-notice{grid-column:1/-1}
     @container course-hud (max-width:286px){
       #mobile-course-status{grid-template-columns:fit-content(calc(50% - 6px)) minmax(0,1fr) fit-content(calc(50% - 6px))}
@@ -460,10 +474,17 @@
   var speedHeader=document.createElement('div');speedHeader.className='speed-header';speedHeader.append(speedHeading,speedClose);
   var speedGrid=document.createElement('div');speedGrid.className='speed-options';speedGrid.setAttribute('role','group');speedGrid.setAttribute('aria-label','Game speed choices');speedPicker.append(speedHeader,speedGrid);root.append(speedPicker);
   var speedTestingLabel=document.createElement('span');speedTestingLabel.className='speed-testing-label';speedTestingLabel.textContent='Testing Speeds · Device-Limited';speedTestingLabel.hidden=true;
-  for(const rate of [0,1,2,3,5,10,20,50,100]){if(rate===20)speedGrid.append(speedTestingLabel);const option=button(rate?rate+'×':'Pause',()=>{
-    if(!s.course||(rate===0&&!Module.hasGameFeature('pauseControl'))||(rate>1&&!Module.hasGameFeature('gameSpeed')))return;
-    pendingSpeed=rate;Module.menuQueue=Module.menuQueue.filter(c=>c[0]!==17);command(17,rate,true);closeSpeedPicker(true);syncSpeed();
-  });option.dataset.speed=rate;option.setAttribute('aria-pressed','false');speedOptions.push(option);speedGrid.append(option);}
+  function requestSpeed(rate){
+    if(!s.course||s.fundsCheck||(rate===0&&!Module.hasGameFeature('pauseControl'))||
+       (rate>1&&!Module.hasGameFeature('gameSpeed')))return false;
+    pendingSpeed=rate;Module.menuQueue=Module.menuQueue.filter(c=>c[0]!==17);command(17,rate,true);syncSpeed();
+    return true;
+  }
+  for(const rate of [0,1,2,3,5,10,20,50,100]){
+    if(rate===20)speedGrid.append(speedTestingLabel);
+    const option=button(rate?rate+'×':'Pause',()=>{if(requestSpeed(rate))closeSpeedPicker(true);});
+    option.dataset.speed=rate;option.setAttribute('aria-pressed','false');speedOptions.push(option);speedGrid.append(option);
+  }
   function closeSpeedPicker(focus){speedPickerOpen=false;root.classList.remove('speed-picker-open');speedPicker.hidden=true;speedControl.setAttribute('aria-expanded','false');if(focus&&!speedControl.hidden)speedControl.focus({preventScroll:true});}
   function syncSpeed(){
     var actual=s.paused?0:s.speed||1;
@@ -525,22 +546,16 @@
   var stripHeader=document.createElement('div');stripHeader.className='strip-header';
   var stripTitle=document.createElement('div');stripTitle.className='strip-title';
   var nextVariation=button('Next Variation',function(){
-    if(strip.hidden||!canCycleVariation())return;
-    if(buildPage==='course'&&hasCourseVariation())command(0,9,true); // Original Tab shortcut.
-    else if(buildPage==='improvements'){
-      const next=nextImprovementVariation();
-      if(next>=0)command(14,next,true);
-    }
+    if(!strip.hidden&&buildPage==='course'&&hasCourseVariation()&&canCycleVariation())command(0,9,true); // Original Tab shortcut.
   });nextVariation.id='mobile-next-variation';nextVariation.hidden=true;
   stripHeader.append(stripTitle,nextVariation);strip.appendChild(stripHeader);
   var lotControls=document.createElement('section');lotControls.id='mobile-lot-controls';lotControls.hidden=true;lotControls.setAttribute('aria-label','Building lot placement');var lotDetails=document.createElement('div');lotDetails.setAttribute('role','status');var placeLot=button('Place',function(){Module.requestLot();syncControls();});placeLot.id='mobile-place-lot';lotControls.append(lotDetails,placeLot);root.appendChild(lotControls);
   var terrainControls=document.createElement('section');terrainControls.id='mobile-terrain-controls';terrainControls.hidden=true;terrainControls.setAttribute('aria-label','Terrain adjustment');
   var terrainStatus=document.createElement('div');terrainStatus.id='mobile-terrain-status';terrainStatus.setAttribute('role','status');
   var terrainUp=icon('Raise selected terrain','M12 20V4M5 11l7-7 7 7',function(){Module.requestTerrainStep(1);});terrainUp.id='mobile-terrain-up';terrainUp.hidden=true;
-  var terrainPrecision=button('Precision',function(){Module.setTerrainMode(!Module.terrainMode);syncControls();});terrainPrecision.id='mobile-terrain-precision';terrainPrecision.setAttribute('aria-label','Precision terrain control');terrainPrecision.setAttribute('aria-pressed','false');
   var terrainDown=icon('Lower selected terrain','M12 4v16M5 13l7 7 7-7',function(){Module.requestTerrainStep(-1);});terrainDown.id='mobile-terrain-down';terrainDown.hidden=true;
   var terrainElevationMap=button('Elevation Map',()=>openElevation('terrain'));terrainElevationMap.id='mobile-terrain-elevation-map';terrainElevationMap.hidden=true;
-  terrainControls.append(terrainStatus,terrainUp,terrainPrecision,terrainDown,terrainElevationMap);root.appendChild(terrainControls);
+  terrainControls.append(terrainStatus,terrainUp,terrainElevationMap,terrainDown);root.appendChild(terrainControls);
   var buildHistory=document.createElement('section');buildHistory.id='mobile-build-history';buildHistory.hidden=true;buildHistory.setAttribute('aria-label','Construction history');
   var historyStatus=document.createElement('div');historyStatus.id='mobile-build-history-status';historyStatus.hidden=true;historyStatus.setAttribute('role','status');
   var terrainUndo=button('Undo',function(){Module.requestVertexHistory(-1);Module.refreshVertexHistory();});terrainUndo.id='mobile-terrain-undo';terrainUndo.disabled=true;
@@ -557,7 +572,7 @@
     control.setAttribute('aria-label',value?label+' ('+value+')':label);
   }
   function syncBuildDock(){
-    if(buildHistory.hidden){openHole.style.removeProperty('--build-dock-clearance');return;}
+    if(!root.classList.contains('build-dock-active')){openHole.style.removeProperty('--build-dock-clearance');return;}
     var height=Math.ceil(courseDock.getBoundingClientRect().height)||48;
     var notice=historyStatus.hidden?0:Math.ceil(historyStatus.getBoundingClientRect().height)+6;
     root.style.setProperty('--build-dock-height',height+'px');
@@ -672,7 +687,7 @@
     // Only blocking dialogs receive a native acknowledgement. Ordinary
     // messages close locally, so dismissing one cannot commit a pending shot.
     if(s.photoActive)Module.keyboardInput(27,27);
-    else if(s.fundsCheck)Module.keyboardInput(13,13);
+    else if(s.fundsCheck)dismissFundsWarning();
   });messageClose.id='mobile-message-close';messageClose.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 8l8 8M16 8l-8 8"/></svg>';message.appendChild(messageClose);
   var messageStyle=document.createElement('style');messageStyle.textContent='#mobile-message .club-record-action:not([hidden]){display:block;min-height:44px;margin-top:5px}#mobile-message-text{min-height:0;overflow:auto;overscroll-behavior:contain;touch-action:pan-y}#mobile-ui #mobile-message-close{position:absolute;top:2px;right:2px;width:38px;height:38px;min-width:38px;min-height:38px;padding:7px;margin:0;border:0;border-radius:50%;background:transparent;box-shadow:none;color:inherit}#mobile-ui #mobile-message-close svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2}#mobile-worker-placement{position:absolute;left:64px;right:8px;bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px) + 116px);width:fit-content;max-width:calc(100% - 80px);margin:0 auto;padding:8px 12px;box-sizing:border-box;border-radius:6px;background:var(--menu-overlay);text-align:center;pointer-events:none}';document.head.appendChild(messageStyle);
   var workerHint=document.createElement('div');workerHint.id='mobile-worker-placement';workerHint.setAttribute('role','status');workerHint.hidden=true;root.appendChild(workerHint);
@@ -687,8 +702,29 @@
       },[]).join('\n');
     }).join('\n\n');
   }
-  var acknowledge=button('Continue',function(){Module.keyboardInput(13,13);});
-  var zoomValue=document.createElement('span');zoomValue.id='mobile-closeup';
+  for(const type of ['pointerdown','pointerup','click','touchstart','touchend'])addEventListener(type,e=>{
+    if(Module.mobileUI&&Module.fundsCheck&&!message.contains(e.target)){
+      e.preventDefault();e.stopImmediatePropagation();
+    }
+  },{capture:true,passive:false});
+  function dismissFundsWarning(){
+    if(!Module.fundsCheck)return;
+    if(Module.mapPresentation?.course)Module.fundsDismissRequested=true;
+    else Module.keyboardInput(13,13);
+  }
+  var acknowledge=button('Continue',dismissFundsWarning);
+  var zoomValue=button('Zoom 1.00×',()=>{
+    if(!s.course||s.fundsCheck||modalSection()||Module.mapPresentation.zoom===1)return;
+    Module.setMapZoom(1);
+    zoomValue.textContent='Zoom '+Module.mapPresentation.zoom.toFixed(2)+'×';
+  });
+  zoomValue.id='mobile-closeup';zoomValue.title='Reset zoom to 1×';
+  status.addEventListener('keydown',e=>{
+    if(status.hasAttribute('data-shortcut')&&(e.key==='Enter'||e.key===' ')){e.preventDefault();e.stopPropagation();status.click();}
+  });
+  status.addEventListener('click',()=>{
+    if(status.hasAttribute('data-shortcut')&&!modalSection())requestSpeed(s.paused?1:0);
+  });
   var zoomNotice=document.createElement('span');zoomNotice.id='mobile-zoom-notice';zoomNotice.hidden=true;zoomNotice.setAttribute('role','status');
   courseStatus.append(zoomValue,zoomNotice);
   var panel=document.createElement('section');panel.id='mobile-panel';panel.setAttribute('aria-label','Game menu');root.appendChild(panel);
@@ -816,6 +852,7 @@
     pendingSection=null;
     if(Module.staffPlacement&&s.movingWorker){closeSection();command(13,0);return;}
     // Closing a web panel must not also cancel an unrelated native selection.
+    if(building){sectionButton('build');return;}
     if(open||selectedSection){closeSection();return;}
     closeSection();Module.keyboardInput(27,27);
   }
@@ -870,7 +907,8 @@
     var palettes=[20,16,14,28,20,23,27,17,18];
     return kind>=6&&kind<=14?bankArt(banks[kind-6]+(kind===7?0:level),level&&![6,10].includes(kind)?kind+144:palettes[kind-6],[6,10].includes(kind)?HEAPU8[0x5a34e0]:0):null;
   }
-  function variantLabel(kind,id){return ({1:'Bench',2:'Flower bed',16:'Scenic tree',19:'Scenic bridge'})[kind]+' '+(id+1);}
+  const improvementCardNames={1:'Bench',2:'Flower bed',16:'Scenic tree',19:'Scenic bridge'};
+  function variantLabel(kind,id){return improvementCardNames[kind]+' '+(id+1);}
 
   var courseBadgeCounters='';
   function counter(parent,key,value,label,path,detail){
@@ -1035,24 +1073,19 @@
     return bankArt(bank,id===13?0x25:id===15?0x32:alternate?0x2a:0x29,undefined,rotation);
   }
   function canCycleVariation(){
-    return s.constructing&&!panBuildTool&&!Module.lotPending&&
-      (Module.mapMode===0||(buildPage==='improvements'&&Module.lotMode));
-  }
-  function nextImprovementVariation(){
-    const variation=s.variation;
-    if(buildingChoices||!variation)return -1;
-    for(let offset=1;offset<=variation.count;offset++){
-      const item=(variation.selected+offset)%variation.count;
-      if(item!==variation.selected&&(s.object!==4||(variation.mask&(1<<item))))return item;
-    }
-    return -1;
+    return s.constructing&&!panBuildTool&&!Module.lotPending&&Module.mapMode===0;
   }
   function syncBuildStrip(){
     strip.hidden=!s.course||!Module.mobileUI||!building||open||s.photoActive||!['course','improvements'].includes(buildPage);
     if(strip.hidden)return;
     var tiles=s.terrain||[],v=panBuildTool?.variationState||s.variation,selected=improvements.find(function(t){return activeImprovement<0?s.object===t[2]:activeImprovement===t[1];});
     const courseTiles=buildPage==='course';
-    const hasVariation=courseTiles?hasCourseVariation():nextImprovementVariation()>=0;
+    const objectKind=panBuildTool?.object??s.object;
+    const variantsReady=!!(v&&selected&&objectKind===selected[2]);
+    const hasImprovementCards=!!(!buildingChoices&&selected&&improvementCardNames[selected[2]]);
+    // Every native improvement with variants has cards or its own catalogue.
+    // While a new selection settles, s.variation can still describe the old tool.
+    const hasVariation=courseTiles&&hasCourseVariation();
     nextVariation.hidden=!hasVariation;
     nextVariation.disabled=!hasVariation||!canCycleVariation();
     const variant=courseTiles&&hasVariation?HEAPU32[0x5a34f0>>2]:null;
@@ -1080,12 +1113,12 @@
     else {
       improvements.forEach(function(t){var b=card(t[0],improvementCategoryArt(t[1]),function(){buildingChoices=false;activeImprovement=t[1];toolMode();command(4,t[1]);if(t[1]===4)openLandmarks();});b.dataset.improvement=t[1];if(t[1]===2){b.disabled=s.availableLots<1;b.title=b.disabled?'No building lots available':'Drag a preview, then Place';}b.setAttribute('aria-pressed',String(!buildingChoices&&s.object===t[2]&&Module.mapMode!==2));row.appendChild(b);});
       var buildings=icon('Buildings','M3 21V8h8v13M11 21V3h10v18M6 11h2M6 15h2M14 7h4M14 11h4M14 15h4M1 21h22',function(){buildingChoices=true;activeImprovement=-1;stripStamp='';openCatalogue('buildings');});buildings.className='';buildings.querySelector('svg').classList.add('category-icon','buildings-symbol');var text=document.createElement('span');text.textContent='Buildings';buildings.appendChild(text);buildings.setAttribute('aria-pressed',String(buildingChoices));row.appendChild(buildings);
-      if(buildingChoices||(v&&selected&&(s.object===selected[2]||panBuildTool?.object===selected[2]))){
-        var sub=document.createElement('div');sub.className='strip-items variations';sub.setAttribute('aria-label',buildingChoices?'Building choices':'Improvement variations');strip.appendChild(sub);
+      if(buildingChoices||variantsReady||hasImprovementCards){
+        var sub=document.createElement('div');sub.className=hasImprovementCards?'strip-items variations variant-cards':'strip-items variations';sub.setAttribute('aria-label',buildingChoices?'Building choices':'Improvement variations');strip.appendChild(sub);
         if(buildingChoices){var selectedBuilding=s.buildingDetails?.find(b=>b.kind===(panBuildTool?.object??s.object));var b=button(selectedBuilding?selectedBuilding.name+' · Change':'Choose building',function(){openCatalogue('buildings');});b.className='landmark-choice';sub.appendChild(b);}
-        else if(s.object===4||panBuildTool?.object===4){var l=s.landmarks?.find(l=>l.id===v.selected),b=button(l?landmarkName(l)+' · '+(l.free?'Free':'$'+l.price.toLocaleString())+' · Change':'Choose landmark',openLandmarks);b.className='landmark-choice';b.dataset.landmarkChooser='true';sub.appendChild(b);}
-        else for(let i=0;i<v.count;i++){let kind=panBuildTool?.object??s.object;var label=variantLabel(kind,i),b=button('',function(){toolMode();command(14,i);});b.setAttribute('aria-label',label);var image=improvementArt(kind,i);if(image)b.appendChild(image);var name=document.createElement('span');name.textContent=label;b.appendChild(name);b.setAttribute('aria-pressed',String(v.selected===i));b.dataset.variation=i;sub.appendChild(b);}
-        sub.scrollLeft=subScroll;
+        else if(variantsReady&&objectKind===4){var l=s.landmarks?.find(l=>l.id===v.selected),b=button(l?landmarkName(l)+' · '+(l.free?'Free':'$'+l.price.toLocaleString())+' · Change':'Choose landmark',openLandmarks);b.className='landmark-choice';b.dataset.landmarkChooser='true';sub.appendChild(b);}
+        else if(variantsReady&&hasImprovementCards)for(let i=0;i<v.count;i++){let kind=objectKind;var label=variantLabel(kind,i),b=button('',function(){toolMode();command(14,i);});b.setAttribute('aria-label',label);var image=improvementArt(kind,i);if(image)b.appendChild(image);var name=document.createElement('span');name.textContent=label;b.appendChild(name);b.setAttribute('aria-pressed',String(v.selected===i));b.dataset.variation=i;sub.appendChild(b);}
+        if(variantsReady||buildingChoices)sub.scrollLeft=subScroll;
       }
     }
     row.scrollLeft=scroll;
@@ -1111,6 +1144,7 @@
     if(Module.menuQueue.length<16){
       if(kind===0&&item===76)Module.beginMobileScreenTransition?.('saves');
       if(kind===1&&item===117)Module.beginMobileScreenTransition?.('locations');
+      Module.recordDiagnosticAction?.(kind,item);
       Module.menuQueue.push([kind,item]);
     }
     if(startAim)syncControls();
@@ -1138,7 +1172,7 @@
     if(!Module.canEditCareerEnhancements?.())return;
     open=false;render();Module.menuQueue.push([20,focus]);
   }
-  var items,careerSettingsButton,eyesoreSettingsButton,landOfferButton;
+  var items,careerSettingsButton,landOfferButton;
   function render(){
     if(Module.atTitle){borrowedBuildNavigation=false;repeatedMessage='';selectedSection='';contextGroup='';pendingSection=null;pendingBackOnly=false;leaderboardOpen=false;leaderboardRevealPlayer=false;leaderboardStamp='';seenCourse=false;open=false;page='';building=false;buildPage='';panBuildTool=null;lastBuildTool=null;clubhousePlacement=false;pendingHole=null;holeToOpen=null;pendingSpeed=null;shotChoicesOpen=false;lastReady=false;wasRound=false;}
     else seenCourse=seenCourse||!!s.wasCourse;
@@ -1147,7 +1181,7 @@
     syncControls();message.hidden=(!businessNoticeText&&!challengeNoticeText&&!clubNoticeText&&!repeatedMessage&&(!s.message||dismissedMessage===s.message))||open||!Module.mobileUI;
     if(!open||!['landmarks','buildings'].includes(page))catalogueInfoId=null;
     if(!open)return;
-    panel.replaceChildren();careerSettingsButton=eyesoreSettingsButton=landOfferButton=null;
+    panel.replaceChildren();careerSettingsButton=landOfferButton=null;
     var parentPage={terrain:'build',shots:'play',golfers:'play',keyboard:'system'}[page];
     if(parentPage)panel.appendChild(button('Back to '+parentPage.charAt(0).toUpperCase()+parentPage.slice(1),function(){if(page==='keyboard')leaveKeyboard();navigate(parentPage);}));
     var title=document.createElement('h2');title.textContent=page?({build:'Build',course:'Course',terrain:'Terrain',buildings:'Buildings',improvements:'Improvements',landmarks:'Landmarks',play:'Play',shots:'Shot types',manage:'Manage',enhanced:'Enhanced',system:'System',staff:'Employees',golfers:'Golfers',keyboard:'Keyboard'}[page]||page):'Menu';panel.appendChild(title);
@@ -1244,17 +1278,15 @@
       if(s.roundActive)add('Match players',function(){open=false;render();Module.openMatchPlayers(false);});
       action('Begin tournament',5,3);
       add('Shot types',function(){if(s.roundActive){shotChoicesOpen=true;open=false;render();}else navigate('shots');});add('Golfers',function(){command(5,9,true);navigate('golfers');});
-      key('Place your golfer','p');key('End match / tournament','n');
+      // The original p shortcut opens Pathway Creation. There is no verified
+      // map-placement command for the player's golfer.
+      key('End match / tournament','n');
     }else if(page==='shots'){
       shotNames.forEach(function(n,i){action(n,5,i+4,!!(s.shotMask&(1<<i)),true);});
       if(!s.shotMask){var p=document.createElement('p');p.textContent=s.roundActive?'Shot choices become available when your golfer is ready.':'Shot choices become available during your round.';panel.appendChild(p);}
     }else if(page==='golfers'){
       (s.golfers||[]).forEach(function(g){action(g.name,9,g.item);});
     }else if(page==='enhanced'){
-      if(hasEnhancedSection()){
-        eyesoreSettingsButton=add('Eyesore Demolition',()=>openEnhancedSettings(1),!!Module.canEditCareerEnhancements?.(),true);
-        eyesoreSettingsButton.title='Find the Eyesore Demolition switch in Enhanced Settings.';
-      }
       if(creative()){var note=document.createElement('p');note.id='creative-sandbox-rules';note.textContent=creativeRules();panel.appendChild(note);}
       if(Module.hasGameFeature('clubhouseManagement'))add('Clubhouse & Tee Times',function(){open=false;render();Module.openClubhouseManagement?.();},s.course&&!!Module.canOpenClubhouseManagement?.());
       if(Module.hasGameFeature('courseDesignLab'))add('Course Design Lab',function(){open=false;render();Module.openCourseDesignLab?.();},!!Module.canOpenCourseDesignLab?.());
@@ -1315,7 +1347,6 @@
     syncRail();
     if(open&&page==='enhanced'){
       if(careerSettingsButton)careerSettingsButton.disabled=!Module.canEditCareerEnhancements?.();
-      if(eyesoreSettingsButton)eyesoreSettingsButton.disabled=!Module.canEditCareerEnhancements?.();
       if(landOfferButton)landOfferButton.disabled=!Module.hasDeferredLandOffer?.()||!Module.canEditCareerEnhancements?.();
     }
     var badgeSpace=syncCourseBadge(course);
@@ -1324,21 +1355,21 @@
     var terrainAvailable=course&&building&&buildPage==='terrain'&&!open&&!panBuildTool&&!s.photoActive&&s.elevation&&s.terrainShape>=0&&s.terrainShape<3&&Module.mapMode!==2;
     if(Module.terrainMode&&!terrainAvailable)Module.setTerrainMode(false);
     terrainControls.hidden=!terrainAvailable;
+    if(terrainAvailable&&!Module.terrainMode&&Module.terrainCanStart())Module.setTerrainMode(true);
     terrainElevationMap.hidden=!terrainAvailable||!Module.hasGameFeature('elevationMap')||Module.elevationMapLive;
     terrainElevationMap.disabled=!Module.canOpenElevationMap?.();
-    terrainUp.hidden=terrainDown.hidden=!Module.terrainMode;terrainPrecision.setAttribute('aria-pressed',String(!!Module.terrainMode));
+    terrainUp.hidden=terrainDown.hidden=!Module.terrainMode;
     var modal=modalSection();
     var historyVisible=course&&building&&!s.photoActive&&!s.roundActive&&!s.shotTurn&&
       (!open||groupForPage(page)==='build')&&Module.hasGameFeature('constructionUndoRedo');
     buildHistory.hidden=!historyVisible;
     root.classList.toggle('has-build-history',historyVisible);
-    root.style.setProperty('--build-open-hole-space',historyVisible&&holeVisible?'54px':'0px');
     Module.vertexHistoryBuildActive=historyVisible&&!modal&&!Module.uiPresentation&&!Module.lotPending&&!Module.elevationMapLive&&
       !s.textInput&&!Module.buildingUpgradeNativeOwner&&!Module.mobileSaveNameActive;
     if(terrainAvailable){
       Module.refreshTerrainTarget();var preview=Module.terrainPreview,ready=!!Module.terrainMode&&preview?.serial===Module.terrainSerial&&preview.valid;
       terrainUp.disabled=terrainDown.disabled=!ready||preview.pending>=32||!!Module.vertexHistory?.busy||!!Module.vertexHistoryRequestPending;
-      var hint=['Vertex','Square','Area'][s.terrainShape]+' · '+(!Module.terrainMode?'Tap the map to raise':!ready?'Drag to choose a spot':'Drag to select · arrows adjust');
+      var hint=['Vertex','Square','Area'][s.terrainShape]+' · '+(!ready?'Choose terrain to adjust':'Tap or drag to select · arrows adjust');
       if(terrainStatus.textContent!==hint)terrainStatus.textContent=hint;
     }
     Module.refreshVertexHistory();
@@ -1351,23 +1382,31 @@
     lotControls.hidden=!previewLot||!Module.lotMode;
     if(!lotControls.hidden){Module.refreshLotTarget();var p=Module.lotPreview,ready=p&&p.serial===Module.lotSerial;placeLot.disabled=!ready||!p.valid||!!Module.lotPending;var money=v=>'$'+v.toLocaleString();lotDetails.textContent=Module.lotPending?'Placing…':!ready?'Drag to preview a location; Place confirms.':creative()?(p.reason||((p.kind===5?'Home Site · Income '+money(p.value):p.kind===4?landmarkName(s.landmarks?.[p.variant]):p.kind===15?'Clubhouse':s.object>=6&&s.object<=14?s.buildings[s.object-6]:variantLabel(p.kind,p.variant))+' · Construction Free'+(p.kind===5?'':' · Original Value '+money(p.price)))):p.kind===4?landmarkName(s.landmarks?.[p.variant])+' · '+(p.free?'Free':money(p.price))+' · '+p.radius+' yd influence'+(p.reason?' · '+p.reason:''):p.kind!==5?((p.kind===15?'Clubhouse':s.object>=6&&s.object<=14?s.buildings[s.object-6]:variantLabel(p.kind,p.variant))+' · '+money(p.price)+(p.reason?' · '+p.reason:'')):p.reason||('Lot value '+money(p.value)+' · Preparation '+money(p.preparation)+' · Profit '+money(p.profit));if(openingLot)Module.centreLotTarget();}
 
-    camera.hidden=!course;buildActions.hidden=!course||s.photoActive;cancel.hidden=!seenCourse||!Module.mobileUI;remove.hidden=!building;remove.setAttribute('aria-pressed',String(Module.mapMode===2));pan.setAttribute('aria-pressed',String(panBuildTool!==null||(Module.mapMode===0&&!s.constructing)));syncBuildStrip();var stripSpace=(strip.hidden?0:strip.getBoundingClientRect().height+8)+'px';root.style.setProperty('--strip-space',stripSpace);cancel.style.setProperty('--strip-space',modal?'0px':stripSpace);openHole.style.setProperty('--strip-space',modal?'0px':stripSpace);syncBuildDock();roundControls.hidden=!course||!s.roundActive;
-    toggles.hidden=!course||!s.roundActive;
+    const buildDock=course&&building&&!modal&&(!open||!['landmarks','buildings'].includes(page)||historyVisible);
+    root.classList.toggle('build-dock-active',buildDock);
+    root.style.setProperty('--build-open-hole-space',buildDock&&holeVisible?'54px':'0px');
+    if(buildDock&&cancel.parentNode!==courseDock)courseDock.prepend(cancel);
+    else if(!buildDock&&cancel.parentNode!==document.body)document.body.appendChild(cancel);
+    Module.mobileBuildActive=course&&building;
+    const playingRound=course&&s.roundActive&&!building;
+    camera.hidden=!course;buildActions.hidden=!course||s.photoActive;cancel.hidden=!seenCourse||!Module.mobileUI;remove.hidden=!building;remove.setAttribute('aria-pressed',String(Module.mapMode===2));pan.setAttribute('aria-pressed',String(panBuildTool!==null||(Module.mapMode===0&&!s.constructing)));syncBuildStrip();var stripSpace=(strip.hidden?0:strip.getBoundingClientRect().height+8)+'px';root.style.setProperty('--strip-space',stripSpace);openHole.style.setProperty('--strip-space',modal?'0px':stripSpace);syncBuildDock();roundControls.hidden=!playingRound;
+    toggles.hidden=!playingRound;
     var raisedRound=building||holeVisible||(!toggles.hidden&&toggles.getBoundingClientRect().right+6>camera.getBoundingClientRect().left);
     var roundBottom=raisedRound?108:54;
     toggles.style.bottom='calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px) + '+(roundBottom-54)+'px)';
-    roundControls.style.bottom='calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px) + '+roundBottom+'px)';
     resumeShots.hidden=!s.staffRound;aim.disabled=!s.shotTurn||s.photoActive||!!Module.shotPending;shoot.disabled=!s.shotReady||!Module.aimMode||!Module.aimCanShoot()||!!Module.shotPending;
     aim.setAttribute('aria-pressed',String(!!Module.aimMode));
     closePhoto.hidden=!course||!s.photoActive;
-    choices.hidden=!course||s.photoActive||!s.shotTurn||!shotChoicesOpen;
+    choices.hidden=!playingRound||s.photoActive||!s.shotTurn||!shotChoicesOpen;
     var stamp=JSON.stringify([s.shotMask,s.shot,s.shotTurn]);
     if(stamp!==shotFingerprint){shotFingerprint=stamp;choices.replaceChildren();shotNames.forEach(function(name,i){var b=button(name,function(){command(5,i+4,true);});b.disabled=!s.shotTurn||!(s.shotMask&(1<<i));b.setAttribute('aria-pressed',String(s.shot===shotValues[i]));choices.appendChild(b);});}
-    choices.style.bottom='calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px) + '+(roundBottom+roundControls.getBoundingClientRect().height+6)+'px)';
+    choices.style.bottom='calc(max(8px,env(safe-area-inset-bottom)) + '+roundBottom+'px)';
+    const aimBottom=roundBottom+(choices.hidden?0:choices.getBoundingClientRect().height+6);
+    roundControls.style.bottom='calc(max(8px,env(safe-area-inset-bottom)) + '+aimBottom+'px)';
     var info=Module.roundHUD;roundInfo.textContent=(info?info.lines.filter(Boolean).join(' · '):'')+(Module.aimMode?' · Drag to aim; Shoot confirms.':'');
-    roundInfo.hidden=!course||!s.roundActive||!infoOpen||!roundInfo.textContent;
+    roundInfo.hidden=!playingRound||!infoOpen||!roundInfo.textContent;
     infoToggle.setAttribute('aria-pressed',String(infoOpen));scoreToggle.setAttribute('aria-pressed',String(scoreOpen));
-    scorecard.hidden=!course||!s.roundActive||!scoreOpen;
+    scorecard.hidden=!playingRound||!scoreOpen;
     var cards=s.scorecard||[],scoreStamp=JSON.stringify(cards);
     if(scoreOpen&&scoreStamp!==scoreFingerprint){
       scoreFingerprint=scoreStamp;scorecard.replaceChildren();
@@ -1444,7 +1483,7 @@
     if(!panel.classList.contains('landmarks')){
       var bottomClearance=page==='manage'||page==='system'
         ? 'calc(56px + var(--strip-space,0px))'
-        : historyVisible&&groupForPage(page)==='build'
+        : buildDock&&groupForPage(page)==='build'
           ? 'calc(16px + var(--strip-space,0px) + var(--build-dock-clearance,48px) + var(--build-open-hole-space,0px))'
           : (holeVisible?64:8)+'px';
       panel.style.top='calc(max(8px,env(safe-area-inset-top)) + '+badgeSpace+'px)';
@@ -1452,7 +1491,7 @@
     }else{panel.style.top='';panel.style.maxHeight='';}
     message.style.top='calc(max(8px,env(safe-area-inset-top)) + '+Math.max(50,badgeSpace)+'px)';
     var bounds=Module.getScreenBounds(),messageTop=Math.max(8,bounds.safe.top)+Math.max(50,badgeSpace);
-    var reserve=(strip.hidden?0:strip.getBoundingClientRect().height+8)+(historyVisible
+    var reserve=(strip.hidden?0:strip.getBoundingClientRect().height+8)+(buildDock
       ? (Number.parseInt(root.style.getPropertyValue('--build-dock-clearance'),10)||48)+(holeVisible?54:0)+16
       : 72);
     message.style.maxHeight=Math.max(0,root.getBoundingClientRect().height-messageTop-Math.max(8,bounds.safe.bottom)-reserve)+'px';
@@ -1507,10 +1546,11 @@
       var target=holeToOpen;holeToOpen=null;
       if(s.canOpenHole&&s.openableHole===target){pendingHole={hole:target,count:s.openHoles,time:performance.now()};command(16,target);}
     }
+    Module.mobileModeDiagnostic={mode:building?'Build':s.roundActive?'Play':'Course',menu:open?page:null,buildTool:building?buildPage:null};
     Module.updateMapPresentation(!!s.course);
     if(s.course&&Module.mobileUI){
       if(s.photoActive&&(Module.aimMode||Module.shotPending))Module.setAimMode(false);
-      if(s.shotTurn&&(!lastReady||s.turnSerial!==lastTurn)){buildPage='';lastTurn=s.turnSerial;shotChoicesOpen=true;building=false;Module.setAimMode(false);}
+      if(s.shotTurn&&(!lastReady||s.turnSerial!==lastTurn)){lastTurn=s.turnSerial;shotChoicesOpen=true;if(!building)Module.setAimMode(false);}
       if(lastReady&&!s.shotTurn){shotChoicesOpen=false;if(open&&page==='shots'){open=false;render();}Module.setAimMode(false);}
       lastReady=!!s.shotTurn;wasRound=!!s.roundActive;
     }
@@ -1537,6 +1577,10 @@
     if(s.fundsCheck&&s.message){if(!message.contains(acknowledge))message.appendChild(acknowledge);}else if(message.contains(acknowledge))acknowledge.remove();
     message.hidden=(!businessNoticeText&&!challengeNoticeText&&!clubNoticeText&&!repeatedMessage&&(!s.message||dismissedMessage===s.message))||open||!Module.mobileUI;
     var tool=(s.terrain||[]).find(function(t){return t.id===s.tool;});
+    const pauseShortcut=!!(s.course&&!s.fundsCheck&&Module.hasGameFeature('pauseControl'));
+    if(pauseShortcut){status.setAttribute('data-shortcut','');status.setAttribute('role','button');status.tabIndex=0;}
+    else{status.removeAttribute('data-shortcut');status.removeAttribute('role');status.removeAttribute('tabindex');}
+    status.title=pauseShortcut?(s.paused?'Resume at 1×':'Pause'):'';
     status.hidden=!s.wasCourse||!Module.mobileUI;status.textContent=s.wasCourse?(s.paused?'Paused':'Playing · '+(s.speed||1)+'×')+(tool?' · '+tool.name:'')+(Module.mapMode===1?' · Measure':Module.mapMode===2?' · Remove / Undo':''):'';
     var fingerprint=JSON.stringify([s.wasCourse,s.course,s.textInput,s.terrain,s.buildings,s.golfers,s.employees,s.employeeSelected,s.tab,s.paused,s.roundActive,s.shotMask,Module.mobileUI,open&&page==='landmarks'&&s.landmarks,open&&page==='buildings'&&[s.hole,s.buildingDetails],open&&page==='enhanced'&&Module.canOpenBusinessChallenges?.(),open&&page==='enhanced'&&Module.canOpenCourseReview?.()]);
     if(last!==fingerprint&&!menuPointers.size){last=fingerprint;render();}
@@ -1561,7 +1605,8 @@
     #mobile-profile-text-error{margin:0;color:var(--menu-danger)}
     #mobile-profile-text-error:empty{display:none}
     #mobile-profile [hidden]{display:none!important}
-    body.mobile-profile-open #mobile-ui{visibility:hidden}body.mobile-profile-open #canvas{visibility:hidden}
+    body.mobile-profile-open :is(#mobile-ui,#canvas){visibility:hidden}
+    body.mobile-profile-returning :is(#mobile-mode-rail,#mobile-cancel,#mobile-open-hole){visibility:hidden}
     #mobile-profile{position:fixed;left:0;right:0;top:var(--profile-header,22px);bottom:0;z-index:65;display:flex;flex-direction:column;box-sizing:border-box;background:var(--menu-bg);color:var(--menu-text);font:16px system-ui,sans-serif;padding:max(10px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));gap:10px}
     #mobile-profile button,#mobile-profile-return{font:inherit;min-width:48px;min-height:48px;padding:10px 14px;border:1px solid var(--menu-border);border-radius:7px;background:var(--menu-button);color:var(--menu-text);touch-action:manipulation;box-sizing:border-box}
     #mobile-profile button:disabled{opacity:.4}#mobile-profile button[aria-selected=true]{background:var(--menu-selected);border-color:var(--menu-focus)}
@@ -1593,6 +1638,80 @@
     @media(max-width:380px){#mobile-profile .visitor-panels{grid-template-columns:minmax(0,1fr);max-width:290px}#mobile-profile .visitor-panels canvas:nth-child(2){max-width:210px}}
     @media(max-width:360px){#mobile-profile[data-kind="6"] footer{gap:5px}#mobile-profile[data-kind="6"] footer button{font-size:15px;padding:8px}#mobile-profile .visitor-panels{gap:6px}}
     #mobile-profile .profile-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}#mobile-profile .profile-tabs{display:flex;gap:8px}#mobile-profile .profile-tabs button{flex:1}
+    #mobile-profile[data-kind="1"]{
+      container:golfer-editor / inline-size;
+      background:linear-gradient(155deg,var(--menu-preview),var(--menu-panel) 66%,var(--menu-bg));
+    }
+    #mobile-profile[data-kind="1"] :is(.profile-heading,.profile-tabs,.profile-content,footer){
+      width:min(100%,680px);align-self:center;box-sizing:border-box;
+    }
+    #mobile-profile[data-kind="1"] .profile-heading{
+      padding:6px 2px 8px;border-bottom:2px solid var(--menu-border);
+    }
+    #mobile-profile[data-kind="1"] .profile-heading h1{
+      font-size:clamp(22px,5vw,28px);font-weight:700;line-height:1.15;
+    }
+    #mobile-profile[data-kind="1"] .profile-tabs{
+      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px;padding:3px;
+      background:var(--menu-panel);border:1px solid var(--menu-border);border-radius:12px;
+    }
+    #mobile-profile[data-kind="1"] .profile-tabs button{
+      min-width:0;min-height:44px;padding:5px 3px;border-color:transparent;border-radius:8px;
+      background:transparent;color:var(--menu-text);font:650 14px/1.2 system-ui,sans-serif;
+    }
+    #mobile-profile[data-kind="1"] .profile-tabs button[aria-selected=true]{
+      background:var(--menu-selected);border-color:var(--menu-focus);
+    }
+    #mobile-profile[data-kind="1"] .profile-tabs button:last-child{grid-column:1/-1}
+    @container golfer-editor (min-width:295px){
+      #mobile-profile[data-kind="1"] .profile-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
+      #mobile-profile[data-kind="1"] .profile-tabs button:last-child{grid-column:auto}
+    }
+    @container golfer-editor (min-width:475px){
+      #mobile-profile[data-kind="1"] .profile-tabs{grid-template-columns:repeat(5,minmax(0,1fr))}
+    }
+    #mobile-profile[data-kind="1"] .profile-summary{
+      gap:clamp(10px,4vw,24px);align-items:center;padding:clamp(9px,3vw,20px);
+      border:1px solid var(--menu-border);border-radius:14px;background:var(--menu-preview);
+    }
+    #mobile-profile[data-kind="1"] .profile-summary canvas{
+      width:clamp(54px,18cqi,100px);height:auto;align-self:center;box-sizing:border-box;
+      padding:5px;border:1px solid var(--menu-border);border-radius:10px;
+      background:radial-gradient(ellipse at 40% 28%,var(--menu-preview),var(--menu-selected));
+    }
+    #mobile-profile[data-kind="1"] .profile-summary h2{
+      margin:0;font-size:clamp(20px,6cqi,27px);font-weight:700;line-height:1.15;overflow-wrap:anywhere;
+    }
+    #mobile-profile[data-kind="1"] .profile-summary p{margin:5px 0;font-size:14px;overflow-wrap:anywhere}
+    #mobile-profile[data-kind="1"] .profile-summary .profile-facts{
+      display:flex;flex-wrap:wrap;gap:4px;margin-top:9px;
+    }
+    #mobile-profile .profile-facts span{
+      padding:3px 7px;border-radius:5px;background:var(--menu-panel);color:var(--menu-text);font-size:12px;
+    }
+    #mobile-profile[data-kind="1"] .editor-actions{
+      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:10px;
+    }
+    #mobile-profile[data-kind="1"] :is(.editor-actions button,footer button){
+      min-width:0;min-height:44px;padding:6px 8px;font-size:14px;border-color:var(--menu-border);
+      background:var(--menu-preview);color:var(--menu-text);
+    }
+    #mobile-profile[data-kind="1"] .editor-actions button[aria-pressed=true],
+    #mobile-profile[data-kind="1"] #mobile-profile-done{
+      background:var(--menu-selected);border-color:var(--menu-focus);
+    }
+    #mobile-profile[data-kind="1"] #mobile-profile-done{min-width:72px}
+    #mobile-profile[data-kind="1"] .skill-row{
+      border-color:var(--menu-border);background:var(--menu-preview);
+    }
+    #mobile-profile[data-kind="1"] .skill-meter span{background:var(--menu-accent)}
+    #mobile-profile[data-kind="1"] .editor-dialogue{
+      display:grid;gap:8px;max-width:620px;box-sizing:border-box;padding:10px;
+      border:1px solid var(--menu-border);border-radius:12px;background:var(--menu-preview);
+    }
+    #mobile-profile .editor-dialogue :is(select,textarea){box-sizing:border-box;width:100%;padding:8px;min-height:44px;
+      font:16px system-ui;color:var(--menu-text);border:1px solid var(--menu-border);border-radius:6px;background:var(--menu-surface)}
+    #mobile-profile .editor-dialogue textarea{min-height:84px;resize:vertical}
     #mobile-profile .profile-points{padding:8px 10px;background:var(--menu-panel);border-radius:6px;margin:0;font-weight:600}
     #mobile-profile .profile-content{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:2px 2px 10px}
     #mobile-profile .editor-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}#mobile-profile .profile-face-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}#mobile-profile .profile-face-grid canvas{width:auto;max-width:100%;height:100px;object-fit:contain}#mobile-profile input{font:inherit;width:100%;padding:12px;box-sizing:border-box;margin:12px 0}
@@ -1641,7 +1760,13 @@
   var header=document.createElement('header');header.className='profile-heading';var title=document.createElement('h1');header.appendChild(title);root.appendChild(header);
   var points=document.createElement('p');points.className='profile-points';points.setAttribute('role','status');root.appendChild(points);
   var tabs=document.createElement('nav');tabs.className='profile-tabs';tabs.setAttribute('aria-label','Profile sections');root.appendChild(tabs);
-  var profileTab=button('Profile',function(){tab='profile';fingerprint='';refresh();}),skillTab=button('Skills',function(){tab='skills';fingerprint='';refresh();});tabs.append(profileTab,skillTab);
+  function profileTabButton(label,target){
+    return button(label,()=>{tab=target;fingerprint='';content.scrollTop=0;refresh();});
+  }
+  var profileTab=profileTabButton('Profile','profile'),appearanceTab=profileTabButton('Appearance','appearance');
+  var skillTab=profileTabButton('Skills','skills'),traitsTab=profileTabButton('Personality','traits');
+  var dialogueTab=profileTabButton('Dialogue','dialogue');
+  tabs.append(profileTab,appearanceTab,skillTab,traitsTab,dialogueTab);
   var content=document.createElement('div');content.className='profile-content';root.appendChild(content);
   var footer=document.createElement('footer');var original=button('Original Editor',function(){send(3,0);}),done=button('Done',function(){send(2,0);});original.id='mobile-profile-original';done.id='mobile-profile-done';footer.append(original,done);root.appendChild(footer);
   var returnButton=button('Mobile profile',function(){send(3,0);});returnButton.id='mobile-profile-return';returnButton.hidden=true;
@@ -1784,22 +1909,100 @@
     box.append(actions);content.append(box);
     if(confirmationFocus!==s.serial&&s.frame&&!s.busy){confirmationFocus=s.serial;actions.firstChild.focus({preventScroll:true});}
   }
-  function showProfile(s){
+  function profileSummary(s){
     var summary=document.createElement('div');summary.className='profile-summary';avatar=null;
-    if(s.artParts){avatar=document.createElement('canvas');avatar.width=110;avatar.height=215;avatar.setAttribute('role','img');avatar.setAttribute('aria-label','Original golfer portrait');summary.appendChild(avatar);}
-    var detail=document.createElement('div');detail.append(text('h2',s.name||'Your golfer'));if(s.profession)detail.append(text('p',s.profession));
-    var flags=s.appearance[1];var age=flags&4?'Mature':flags&2?'Middle-aged':flags&1?'Young':'';var relationship=flags&64?'Widowed':flags&32?'Divorced':flags&16?'Married':flags&8?'Single':'';detail.append(text('p',[age,relationship,s.appearance[12]&8?'Child':'Adult'].filter(Boolean).join(' · ')));
-    var traits=document.createElement('div');traits.className='profile-traits';(s.traits||[]).filter(t=>t.active).forEach(t=>traits.append(text('span',t.name)));detail.appendChild(traits);
-    detail.append(text('p',s.kind===2?'Assign the available points under Skills.':'View your current ratings under Skills.'));
-    if(s.kind===1){
-      var actions=document.createElement('div');actions.className='editor-actions';
-      for(const [label,item]of [['Edit name',100],['Edit job title',101],['Change age',103],['Change relationship',102],['Body style',10],['Adult / child',11],['Choose face',12],['Shirt colour',13],['Trousers colour',14],['Skin tone',16],['Change gender',17]])actions.append(button(label,()=>send(6,item)));
-      if(s.appearance[1]&128)actions.append(button('Hair colour',()=>send(6,15)));
-      (s.traits||[]).forEach((t,i)=>{var b=button(t.name,()=>send(6,i+3));b.setAttribute('aria-pressed',String(t.active));actions.append(b);});
-      for(const b of actions.querySelectorAll('button'))b.disabled=!!s.busy;detail.appendChild(actions);
-      detail.append(text('p','Custom dialogue and advanced original options remain in Original editor.'));
+    if(s.artParts){
+      avatar=document.createElement('canvas');avatar.width=110;avatar.height=215;
+      avatar.setAttribute('role','img');avatar.setAttribute('aria-label','Original golfer portrait');
+      summary.append(avatar);
     }
-    summary.appendChild(detail);content.appendChild(summary);
+    var detail=document.createElement('div');
+    var flags=s.appearance[1],age=flags&4?'Mature':flags&2?'Middle-aged':flags&1?'Young':'';
+    var relationship=flags&64?'Widowed':flags&32?'Divorced':flags&16?'Married':flags&8?'Single':'';
+    detail.append(text('h2',s.name||'Your golfer'));
+    if(s.profession)detail.append(text('p',s.profession));
+    const facts=document.createElement('div');facts.className='profile-facts';
+    for(const value of [age,relationship,s.appearance[12]&8?'Child':'Adult'].filter(Boolean))facts.append(text('span',value));
+    detail.append(facts);
+    summary.append(detail);content.append(summary);
+  }
+  function profileActions(s,actions){
+    var group=document.createElement('div');group.className='editor-actions';
+    for(const [label,item,selected] of actions){
+      const b=button(label,()=>send(6,item));b.disabled=!!s.busy;
+      if(typeof selected==='boolean')b.setAttribute('aria-pressed',String(selected));
+      group.append(b);
+    }
+    content.append(group);
+  }
+  function showProfile(s){
+    profileSummary(s);
+    if(s.kind===1)profileActions(s,[['Edit name',100],['Edit job title',101],['Change age',103],['Change relationship',102]]);
+    else content.append(text('p','Assign your available points under Skills.'));
+  }
+  function showAppearance(s){
+    profileSummary(s);
+    const controls=[['Body style',10],['Adult / child',11],['Choose face',12],['Shirt colour',13],['Trousers colour',14],['Skin tone',16],['Change gender',17]];
+    if(s.appearance[1]&128)controls.push(['Hair colour',15]);
+    profileActions(s,controls);
+  }
+  function showPersonality(s){
+    content.append(text('p','These are the personality traits in the original golfer editor. Golf skills are earned separately.'));
+    profileActions(s,(s.traits||[]).map((trait,i)=>[trait.name,i+3,trait.active]));
+  }
+  const dialogueGroups=[
+    ['Shots',[ [1,'Good shot'],[2,'Easy shot'],[3,'Hazard ahead'],[5,'Bad result'],[6,'Shot reaction'],
+      [7,'Ball nearly hits golfer'],[8,'Hit an obstacle'],[9,'Ball in water'] ]],
+    ['Course',[ [0,'Day on the course'],[4,'Striking feature'],[10,'Likes a feature'],[11,'Dislikes a feature'],
+      [12,'Animal'],[13,'Waiting to play'],[19,'Sat on a bench'] ]],
+    ['Needs',[ [14,'Thirsty'],[15,'Had a drink'],[16,'Hungry'],[17,'Had a snack'],[18,'Tired'] ]]
+  ];
+  let dialogueSlot=1,dialogueView=null;
+  function showDialogue(s){
+    if(dialogueView?.serial!==s.serial)dialogueSlot=1;
+    const decoder=new TextDecoder('windows-1252');
+    const windowsBytes=new Map();
+    for(let byte=32;byte<=255;byte++)if(byte!==127&&![129,141,143,144,157].includes(byte))
+      windowsBytes.set(decoder.decode(Uint8Array.of(byte)),byte);
+    const group=text('div','');group.className='editor-dialogue';
+    const choice=document.createElement('select');choice.id='player-dialogue-event';
+    for(const [label,entries] of dialogueGroups){
+      const options=document.createElement('optgroup');options.label=label;
+      for(const [slot,name] of entries){const entry=text('option',name);entry.value=slot;options.append(entry);}
+      choice.append(options);
+    }
+    const input=document.createElement('textarea');input.id='player-dialogue-line';input.rows=3;input.maxLength=49;
+    const eventLabel=text('label','Event'),lineLabel=text('label','Custom line');
+    eventLabel.htmlFor=choice.id;lineLabel.htmlFor=input.id;
+    const note=text('p','Up to 49 characters. An empty line uses the original dialogue. The game replaces MYNAME, PARTNER, and DATA when the event provides them.');
+    const status=text('p','');status.setAttribute('role','status');
+    const readLine=()=>{
+      const bytes=HEAPU8.subarray(0x543d10+dialogueSlot*50,0x543d10+(dialogueSlot+1)*50);
+      const end=bytes.indexOf(0);
+      return decoder.decode(bytes.subarray(0,end<0?49:end));
+    };
+    let saved=readLine();choice.value=dialogueSlot;input.value=saved;
+    choice.onchange=()=>{dialogueSlot=Number(choice.value);saved=readLine();input.value=saved;status.textContent='';};
+    function submit(value){
+      const bytes=Array.from(value,ch=>windowsBytes.get(ch));
+      if(bytes.length>49||bytes.includes(undefined)){status.textContent='Use up to 49 characters supported by the original game.';return;}
+      if(Module.profileState?.serial!==s.serial||Module.profileDialogueEdit)return;
+      Module.profileDialogueApplied=null;
+      Module.profileDialogueEdit={serial:s.serial,slot:dialogueSlot,bytes};
+      const slot=dialogueSlot;
+      setTimeout(()=>{
+        if(!group.isConnected||slot!==dialogueSlot||Module.profileState?.serial!==s.serial)return;
+        saved=readLine();
+        status.textContent=Module.profileDialogueApplied===s.serial&&saved===value?'Saved to the golfer. Save the game to keep this edit.':'The edit is pending. Check the line before leaving.';
+        if(saved===value)input.value=saved;
+      },200);
+    }
+    const actions=text('div','');actions.className='editor-actions';
+    actions.append(button('Save line',()=>submit(input.value)),button('Restore default',()=>submit('')),
+      button('Cancel changes',()=>{input.value=saved;status.textContent='';}));
+    group.append(eventLabel,choice,lineLabel,input,note,actions,status);
+    content.append(group);
+    dialogueView={serial:s.serial};
   }
   function showSkills(s){
     var editable=s.kind===2&&s.total>0,list=document.createElement('div');list.className='skill-list';
@@ -1913,11 +2116,28 @@
     content.append(text('label',s.profile===100?'Player name':'Job title'));var input=document.createElement('input');input.type='text';input.maxLength=s.total-1;input.autocomplete='off';input.setAttribute('aria-label',s.profile===100?'Player name':'Job title');input.value=s.profile===100?s.name:s.profession;content.appendChild(input);
     var error=text('p',''),save=button('Save changes',()=>{if(Module.sendGameText(input.value)){save.disabled=true;Module.keyboardInput(13,13);}else error.textContent=Module.gameTextError;});content.append(save,button('Cancel changes',()=>Module.keyboardInput(27,27)),error);
   }
+  let profilePresent=null;
   function refresh(){
     var s=Module.profileState,visible=!!(Module.mobileUI&&s?.active&&!s.fallback);
     const tournamentOffer=visible&&s.confirmation==='tournament-offer';
     if(tournamentOffer)visible=false;
-    root.hidden=!visible;returnButton.hidden=!(Module.mobileUI&&s?.active&&s.fallback);document.body.classList.toggle('mobile-profile-open',visible);document.body.classList.toggle('mobile-visitor-details-open',visible&&s.kind===6);
+    // The native editor exits before the mobile projection has been restored.
+    // Keep its last web presentation in place until the renderer has a fresh map.
+    let returning=false;
+    if(s?.active){
+      profilePresent=visible&&[1,4,5,6].includes(s.kind)&&Module.mobileState?.wasCourse
+        ? Module.panVisual?.presentSerial||0 : null;
+    }else if(profilePresent!==null){
+      returning=!!(Module.mobileUI&&!Module.atTitle&&!Module.gameExiting&&!Module.loadState?.active&&
+        !Module.mobileCourseFrameReady(profilePresent));
+      if(!returning)profilePresent=null;
+    }
+    root.hidden=!visible&&!returning;
+    root.inert=returning;
+    returnButton.hidden=!(Module.mobileUI&&s?.active&&s.fallback);
+    document.body.classList.toggle('mobile-profile-open',visible||returning);
+    document.body.classList.toggle('mobile-profile-returning',returning);
+    document.body.classList.toggle('mobile-visitor-details-open',visible&&s.kind===6);
     var top=document.getElementById('build-header')?.getBoundingClientRect().bottom||22;document.documentElement.style.setProperty('--profile-header',top+'px');
     const cancel=document.getElementById('mobile-cancel');
     if(cancel){if(visible&&s.kind===6&&cancel.parentNode!==footer)footer.prepend(cancel);else if((!visible||s.kind!==6)&&cancel.parentNode===footer)document.body.append(cancel);}
@@ -1955,11 +2175,15 @@
       root.setAttribute('aria-label',s.confirmation==='overwrite'?'Overwrite File':s.confirmation==='exit'?'Exit Game':s.confirmation==='land-offer'?'Expand Your Course':s.confirmation==='home-demolition'?'Demolish Home Site':s.confirmation==='building-demolition'?'Demolish Building':s.clubhouseDemolition?'Clubhouse demolition':s.kind===3&&Module.loadDeleteConfirm?'Delete saved game':'Golfer profile');
       title.textContent=s.kind===3?(s.confirmation==='overwrite'?'Overwrite File':s.confirmation==='exit'?'Exit Game':s.confirmation==='land-offer'?'Expand Your Course':s.confirmation==='home-demolition'?'Demolish Home Site':s.confirmation==='building-demolition'?'Demolish Building':s.clubhouseDemolition?'Relocate clubhouse':Module.loadDeleteConfirm?'Delete saved game':'Unused skill points'):s.kind===4?'Choose golfer face':s.kind===5?(s.profile===100?'Edit player name':'Edit job title'):s.kind===2?'Assign golfer skills':'Golfer profile';
       points.hidden=s.kind!==2;points.textContent=s.remaining+' points remaining · '+s.spent+' assigned';
-      tabs.hidden=s.kind>=3;footer.hidden=s.kind>=3;profileTab.setAttribute('aria-selected',String(tab==='profile'));skillTab.setAttribute('aria-selected',String(tab==='skills'));
+      tabs.hidden=s.kind>=3;footer.hidden=s.kind>=3;
+      appearanceTab.hidden=traitsTab.hidden=s.kind!==1;
+      dialogueTab.hidden=s.kind!==1||Module.gameEdition!=='enhanced';
+      [[profileTab,'profile'],[skillTab,'skills'],[appearanceTab,'appearance'],[traitsTab,'traits'],[dialogueTab,'dialogue']]
+        .forEach(([control,section])=>control.setAttribute('aria-selected',String(tab===section)));
       done.disabled=!!s.busy;history.hidden=!Module.hasGameFeature?.('golferHistories')||!Module.golferHistoryEligible?.(s.actor);history.disabled=!!s.busy;original.disabled=!!s.busy;
       if(s.kind===3&&s.confirmation)showConfirmation(s);
       else if(s.kind===3){var deleting=!!Module.loadDeleteConfirm,relocating=!!s.clubhouseDemolition,box=document.createElement('div');box.className='profile-confirm';box.append(text('h2',relocating?'Demolish your clubhouse?':deleting?'Delete this saved game?':'You have unused skill points'),text('p',deleting?Module.loadDeleteName:(s.title||'').split('\n').filter(t=>t&&!/^ /.test(t)).join(' ')));if(relocating)box.appendChild(text('p','After demolition, choose a new location and press Place.'));if(deleting)box.appendChild(text('p','This removes the selected save. Your other saves are kept.'));var keep=button(relocating?'No, keep clubhouse':deleting?'Keep saved game':'Keep allocating',function(){send(5,1);}),leave=button(relocating?'Demolish and relocate':deleting?'Delete saved game':'Continue without remaining points',function(){send(5,0);});if(relocating){keep.id='mobile-clubhouse-keep';leave.id='mobile-clubhouse-demolish';}keep.disabled=leave.disabled=!!s.busy||!s.frame;box.append(keep,leave);content.appendChild(box);}
-      else if(s.kind===4)showFaces(s);else if(s.kind===5)showTextEditor(s);else if(tab==='profile')showProfile(s);else showSkills(s);
+      else if(s.kind===4)showFaces(s);else if(s.kind===5)showTextEditor(s);else if(tab==='profile')showProfile(s);else if(tab==='appearance')showAppearance(s);else if(tab==='traits')showPersonality(s);else if(tab==='dialogue')showDialogue(s);else showSkills(s);
       content.scrollTop=scroll;
     }
     drawAvatar(s);
@@ -3677,7 +3901,7 @@ Module.getGolferDiagnostics=function(){
     if(dialog.open||!rules||!name)return false;
     selection={serial,rules,enabled,decision:0};
     title.textContent=enabled?'Demolish this '+name+'?':name[0].toUpperCase()+name.slice(1);
-    detail.textContent=enabled?'Clear this site for construction. Demolition cannot be undone.':'To remove this landmark, exit Remove and go to Menu → Enhanced → Eyesore Demolition.';
+    detail.textContent=enabled?'Clear this site for construction. Demolition cannot be undone.':'Enable Eyesore Demolition in Menu → Enhanced → Enhanced Settings to remove this landmark.';
     cancel.textContent=enabled?'Cancel':'Close';
     confirm.hidden=!enabled;
     confirm.textContent='Demolish for '+new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(fee);

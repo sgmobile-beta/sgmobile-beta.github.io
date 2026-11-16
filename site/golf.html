@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icons/simgolf-mobile.png">
 <link rel="icon" type="image/png" href="icons/simgolf-mobile.png">
 <link rel="manifest" href="manifest.webmanifest">
-<title>SGMobile Beta 1.0.15</title>
+<title>SGMobile Beta 1.0.18</title>
 <style>
   /* Shared mobile presentation palette; original game artwork stays native. */
   :root{
@@ -97,7 +97,7 @@
 </style>
 </head>
 <body>
-<div id="build-header"><div id="build-label" title="SGMobile Beta 1.0.15 · sgmobile-beta115-course-mute-v1-20261114">Beta 1.0.15<span id="build-edition"></span></div><div id="mobile-status" hidden></div></div>
+<div id="build-header"><div id="build-label" title="SGMobile Beta 1.0.18 · sgmobile-beta118-profile-dock-v1-20261116">Beta 1.0.18<span id="build-edition"></span></div><div id="mobile-status" hidden></div></div>
 <div id="safe-area-probe" aria-hidden="true"></div>
 <div id="game-stage"><canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas></div>
 <script src="golfer-history-model.js"></script>
@@ -133,7 +133,7 @@
     return landscape;
   };
   Module.localFiles = true;
-  Module.buildInfo = Object.freeze({version: '1.0.15', id: 'sgmobile-beta115-course-mute-v1-20261114', channel: 'beta'});
+  Module.buildInfo = Object.freeze({version: '1.0.18', id: 'sgmobile-beta118-profile-dock-v1-20261116', channel: 'beta'});
   // Choose at launch; the ready initial loader permits one last change before
   // Continue. Future changes are shared unless explicitly
   // registered as Enhanced-only; save storage and formats remain shared.
@@ -302,19 +302,104 @@
       var h=new DataView(Module.HEAPU8.buffer),u=a=>h.getUint32(a,true),display=u(0x10128420);
       return [u(0x4c1570),u(0x4c1574),display?u(display+0x148):0].map(function(w){var s=w?u(w+4):0;return s&&s+0x4d0<=h.byteLength?{wrapper:w,surface:s,width:u(s+0x38),height:u(s+0x3c),pixelLocks:u(s+0x4c8),cachedPixels:!!u(s+0x4cc)}:null;});
     };
-    Module.getScreenDiagnostics=function(){var elements={};
-      for(var id of ['build-header','game-stage','canvas','mobile-ui','mobile-mode-rail','mobile-menu','mobile-camera','mobile-cancel']){
-        var e=document.getElementById(id);if(e)elements[id]={rect:e.getBoundingClientRect().toJSON(),hidden:e.hidden,display:getComputedStyle(e).display};
-      }
-      var v=window.visualViewport,b=Module.getScreenBounds(),c=Module.canvas.getBoundingClientRect(),p=Module.panVisual;return {build:Module.buildInfo,edition:Module.gameEdition,featureScopes:Module.gameFeatureScopes,savedGameRules:Module.saveRules?.diagnostic(),savePersistence:Module.persistState,enhancedPreferences:Module.enhancedPreferences,time:new Date().toISOString(),bounds:b,viewport:{layout:Module.getLayoutViewport(),inner:[innerWidth,innerHeight],screen:[screen.width,screen.height],pixelRatio:devicePixelRatio,visual:v?{width:v.width,height:v.height,left:v.offsetLeft,top:v.offsetTop,scale:v.scale}:null},rendering:{native:[Module.canvas.width,Module.canvas.height],target:Module.adaptiveTarget,resize:Module.viewportResize,surfaces:Module.getViewportSurfaces(),snapshotLocksBalanced:Module.snapshotLocksBalanced||0,zoom:Module.mapPresentation?.zoom,zoomState:{applied:Module.mapPresentation?.appliedZoom,native:Module.mapPresentation?.nativeZoom,rendered:p?.pixelFrame?.zoom,refining:!!Module.mapPresentation?.zooming,pending:Module.mapPresentation?.pendingNative||null},scale:Module.canvasScale,coverage:{width:c.width-b.width,height:c.height-b.height},coarse:!!p?.coarse,offset:p?[p.appliedX,p.appliedY]:null,panning:p?{drag:!!p.drag,held:!!p.held,nativeOwned:!!p.nativeOwned,pendingRest:!!p.rest?.pending,restAcknowledged:!!p.rest?.acknowledged,completed:p.presentSerial||0,fresh:p.pixelSerial||0,deferred:p.deferredFrames||0,recoveries:p.recoveries||0,nativeAgeMs:p.lastNativeAt?performance.now()-p.lastNativeAt:null,pixelAgeMs:p.lastPixelAt?performance.now()-p.lastPixelAt:null,lastRecovery:p.lastRecovery||null}:null,characters:Module.characterReplay||null,autosave:Module.autosaveState,gameClock:Module.gameClock||null,simulationFrame:Module.HEAPU8?.byteLength>0x834174?new DataView(Module.HEAPU8.buffer).getUint32(0x834170,true):null},history:Module.screenLayoutTrace.slice(),input:{courseLoading:Module.courseLoading||null,initialLoading:Module.initialLoading||null,startup:Module.startupMenu||null,startupArtwork:Module.startupArtwork||null,startupPresentation:Module.startupPresentation||null,home:Module.homeInfo||null,holeStats:Module.holeStats||null,progressScreen:Module.progressScreen||null,golfers:Module.getGolferDiagnostics?.()||null,locations:Module.locationState||null,locationArtwork:Module.locationArtwork||null,locationPresentation:Module.locationPresentation||null,courseState:Module.mobileState||null,erase:Module.eraseState||null,choice:Module.originalChoice||null,profile:Module.profileState?{kind:Module.profileState.kind,serial:Module.profileState.serial,frame:Module.profileState.frame,busy:Module.profileState.busy,fallback:Module.profileState.fallback,clubhouseDemolition:!!Module.profileState.clubhouseDemolition}:null,queues:{touch:Module.touchQueue?.length||0,menu:Module.menuQueue?.length||0,profile:Module.profileQueue?.length||0},mapMode:Module.mapMode,profileVisible:!!document.getElementById("mobile-profile")&&!document.getElementById("mobile-profile").hidden},accomplishments:Module.getAccomplishmentDiagnostics(),elements:elements,mobileUI:Module.mobileUI,course:!!Module.mobileState?.course,atTitle:!!Module.atTitle};
+    var recentActions=[],recentErrors=[],attendance=null;
+    function appendBounded(list,item){if(list.length>=20)list.shift();list.push(item);}
+    Module.recordDiagnosticAction=function(command,item){
+      // Shortcut characters can contain typed input. Only record native
+      // command kinds and arguments for the numbered mobile tool APIs.
+      if(command>=2&&command<=21)appendBounded(recentActions,{ms:Math.round(performance.now()),command,item});
     };
-    Module.openScreenDiagnostics=function(){var dialog=document.getElementById('screen-diagnostics');
-      if(!dialog){dialog=document.createElement('section');dialog.id='screen-diagnostics';dialog.setAttribute('role','dialog');dialog.setAttribute('aria-label','Screen diagnostics');
+    addEventListener('error',()=>appendBounded(recentErrors,{ms:Math.round(performance.now()),category:'script or asset error'}));
+    addEventListener('unhandledrejection',()=>appendBounded(recentErrors,{ms:Math.round(performance.now()),category:'unhandled rejection'}));
+    addEventListener('simgolf-ruleset-change',()=>{attendance=null;});
+    Module.recordAttendance=function(event){
+      if(!attendance)attendance={since:new Date().toISOString(),successfulAttempts:0,failedAttempts:0,completedRounds:0};
+      var key=['successfulAttempts','failedAttempts','completedRounds'][event];
+      if(key)attendance[key]++;
+    };
+    function attendanceSnapshot(active){
+      if(!active||!Module.HEAPU8)return null;
+      var bytes=Module.HEAPU8,words=new Int16Array(bytes.buffer);
+      var waiting=0,playing=0,finished=0,memberProfiles=0,refusedProfiles=0,memberProfilesWithoutRefusal=0;
+      var occupied=new Set();
+      for(var i=0;i<152;i++){
+        var a=0x5794b8+i*256,kind=bytes[a+0x21],profile=words[(a+0xb6)>>1];
+        if(profile<1||profile>75)continue;
+        if(kind!==0)occupied.add(profile);
+        if(bytes[a+0x18]!==0)continue;
+        if(kind===255)waiting++;
+        else if(kind>0&&kind<19)playing++;
+        else if(kind===19)finished++;
+      }
+      var availableMemberProfiles=0;
+      for(var i=1;i<=75;i++){
+        var a=0x5849e0+i*44,member=bytes[a+2]!==0,refused=bytes[a+41]===255;
+        if(refused)refusedProfiles++;
+        if(member){
+          memberProfiles++;
+          if(!refused){
+            memberProfilesWithoutRefusal++;
+            if(!occupied.has(i))availableMemberProfiles++;
+          }
+        }
+      }
+      return {waiting,playing,finished,memberProfiles,refusedProfiles,memberProfilesWithoutRefusal,
+        availableMemberProfiles,recent:attendance,failedAttemptDetails:'Native routine returns failure without a per-attempt reason'};
+    }
+    Module.getScreenDiagnostics=function(){
+      var elements={},s=Module.mobileState||{},v=window.visualViewport,b=Module.getScreenBounds(),
+          c=Module.canvas.getBoundingClientRect(),p=Module.panVisual,map=Module.mapPresentation,
+          save=Module.saveRules?.diagnostic(),summary=Module.courseSummary,load=Module.courseLoading,
+          card=document.getElementById('mobile-course-name'),board=Module.tournamentBoard;
+      for(var id of ['build-header','game-stage','canvas','mobile-ui','mobile-mode-rail','mobile-menu','mobile-camera','mobile-cancel','mobile-course-dock','mobile-panel']){
+        var e=document.getElementById(id);
+        if(e)elements[id]={rect:e.getBoundingClientRect().toJSON(),hidden:e.hidden,display:getComputedStyle(e).display,
+          overflow:[Math.max(0,e.scrollWidth-e.clientWidth),Math.max(0,e.scrollHeight-e.clientHeight)]};
+      }
+      return {time:new Date().toISOString(),build:Module.buildInfo,edition:Module.gameEdition,
+        environment:{userAgent:navigator.userAgent,platform:navigator.userAgentData?.platform||navigator.platform||null,
+          deviceModel:navigator.userAgentData?.model||null,standalone:matchMedia('(display-mode: standalone)').matches||!!navigator.standalone,
+          serviceWorker:navigator.serviceWorker?.controller?new URL(navigator.serviceWorker.controller.scriptURL).pathname.split('/').pop():null,
+          offlinePhase:Module.offlineState?.phase||null,assetPackage:Module.buildInfo?.id||null},
+        bounds:b,viewport:{layout:Module.getLayoutViewport(),inner:[innerWidth,innerHeight],screen:[screen.width,screen.height],
+          orientation:screen.orientation?.type||null,pixelRatio:devicePixelRatio,
+          visual:v?{width:v.width,height:v.height,left:v.offsetLeft,top:v.offsetTop,scale:v.scale}:null},
+        rendering:{canvasCSS:[c.width,c.height],native:[Module.canvas.width,Module.canvas.height],target:Module.adaptiveTarget,
+          resize:Module.viewportResize,zoom:map?.zoom,appliedZoom:map?.appliedZoom,nativeZoom:map?.nativeZoom,
+          scale:Module.canvasScale,camera:p?.frame?[p.frame.x,p.frame.y,p.frame.rotation]:null,
+          offset:p?[p.appliedX,p.appliedY]:null,coverage:{width:c.width-b.width,height:c.height-b.height},
+          surfaces:Module.getViewportSurfaces().map(surface=>surface?{
+            width:surface.width,height:surface.height,pixelLocks:surface.pixelLocks,cachedPixels:surface.cachedPixels}:null),
+          snapshotLocksBalanced:Module.snapshotLocksBalanced||0,coarse:!!p?.coarse,
+          zoomState:{applied:map?.appliedZoom,native:map?.nativeZoom,rendered:p?.pixelFrame?.zoom,
+            refining:!!map?.zooming,pending:map?.pendingNative||null},
+          panning:p?{drag:!!p.drag,held:!!p.held,nativeOwned:!!p.nativeOwned,pendingRest:!!p.rest?.pending,
+            restAcknowledged:!!p.rest?.acknowledged,completed:p.presentSerial||0,fresh:p.pixelSerial||0,
+            deferred:p.deferredFrames||0,recoveries:p.recoveries||0,
+            pixelAgeMs:p.lastPixelAt?performance.now()-p.lastPixelAt:null}:null,
+          simulationFrame:s.course&&Module.HEAPU8?new DataView(Module.HEAPU8.buffer).getUint32(0x834170,true):null},
+        gameplay:{date:summary?.date||null,difficulty:summary?.difficulty||null,speed:s.speed??null,paused:s.paused??null,
+          mode:Module.mobileModeDiagnostic||null,input:{mapMode:Module.mapMode,terrainShape:s.terrainShape,tool:s.tool,object:s.object,
+            aim:!!Module.aimMode,shotReady:!!s.shotReady,round:!!s.roundActive,textInput:!!s.textInput,fundsWarning:!!s.fundsCheck},
+          gameClock:Module.gameClock,features:Object.fromEntries(Object.entries(save?.features||{}).map(([id,rule])=>[id,!!rule.enabled]))},
+        course:{name:card?.textContent?.trim().slice(0,100)||null,openHoles:s.openHoles??null,fun:s.funRating??null,skill:s.skillRating??null},
+        save:{format:save?.format??null,ready:save?.ready??null,savePending:!!Module.persistState?.pending,
+          saveError:!!(save?.error||Module.persistState?.error),loadPhase:load?.phase||null,loadComplete:load?.complete??null,
+          loadError:!!Module.courseLoadingError},
+        attendance:attendanceSnapshot(s.course||s.fundsCheck),
+        tournament:{active:!!s.tournamentActive,standingsRows:board?.rows?.length??null,
+          playerRow:board?.playerRow??null,playerPrize:null},
+        accomplishments:{recentIOCount:Math.min(32,Module.snapshotIO?.length||0)},
+        recentActions:recentActions.slice(),recentErrors:recentErrors.slice(),history:Module.screenLayoutTrace?.slice(-20)||[],
+        elements};
+    };
+    Module.openScreenDiagnostics=function(){var snapshot=Module.getScreenDiagnostics();var dialog=document.getElementById('screen-diagnostics');
+      if(!dialog){dialog=document.createElement('section');dialog.id='screen-diagnostics';dialog.setAttribute('role','dialog');dialog.setAttribute('aria-label','Diagnostic Report');
         dialog.style.cssText='position:fixed;z-index:1000;left:var(--screen-left,0px);top:var(--screen-top,0px);width:var(--screen-width,100%);height:var(--screen-height,100dvh);box-sizing:border-box;padding:24px max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:var(--menu-bg);color:var(--menu-text);overflow:auto;font:16px system-ui';
-        var heading=document.createElement('h2');heading.textContent='Screen diagnostics';var help=document.createElement('p');help.textContent='Share this layout report if controls disappear after folding. It contains screen measurements and the build label; no game files or saves.';
-        var report=document.createElement('textarea');report.readOnly=true;report.setAttribute('aria-label','Screen layout report');report.style.cssText='display:block;width:100%;height:50%;box-sizing:border-box;font:12px monospace';
+        var heading=document.createElement('h2');heading.textContent='Diagnostic Report';var help=document.createElement('p');help.textContent='Copy this report when reporting a bug. Null fields were unavailable at capture time. The report includes the course name, build, device and game state.';
+        var report=document.createElement('textarea');report.readOnly=true;report.setAttribute('aria-label','Diagnostic Report text');report.style.cssText='display:block;width:100%;height:50%;box-sizing:border-box;font:12px monospace';
         var toolbar=document.createElement('div');toolbar.style.cssText='display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:12px';
-        var copy=document.createElement('button');copy.id='screen-diagnostics-copy';copy.textContent='Copy diagnostics';copy.style.cssText='min-height:48px;font:inherit';
+        var copy=document.createElement('button');copy.id='screen-diagnostics-copy';copy.textContent='Copy Report';copy.style.cssText='min-height:48px;font:inherit';
         var status=document.createElement('span');status.id='screen-diagnostics-copy-status';status.setAttribute('role','status');
         copy.onclick=async function(){copy.disabled=true;status.textContent='';
           try {
@@ -324,12 +409,12 @@
           } catch(error){status.textContent='Text selected. Use Copy from the text selection menu.';}
           finally {copy.disabled=false;}
         };
-        var close=document.createElement('button');close.textContent='Close diagnostics';close.style.cssText='min-height:48px;font:inherit';close.onclick=function(){dialog.remove();};toolbar.append(copy,close,status);dialog.append(heading,help,toolbar,report);document.body.append(dialog);
+        var close=document.createElement('button');close.textContent='Close';close.style.cssText='min-height:48px;font:inherit';close.onclick=function(){dialog.remove();};toolbar.append(copy,close,status);dialog.append(heading,help,toolbar,report);document.body.append(dialog);
         for(var type of ['pointerdown','pointerup','pointermove','click','mousedown','mouseup','touchstart','touchmove','touchend','wheel','keydown','keyup'])dialog.addEventListener(type,function(e){e.stopPropagation();});
       }
-      dialog.querySelector('textarea').value=JSON.stringify(Module.getScreenDiagnostics(),null,2);
+      dialog.querySelector('textarea').value=JSON.stringify(snapshot,null,2);
     };
-    var label=document.getElementById('build-label');label.style.pointerEvents='auto';label.setAttribute('role','button');label.tabIndex=0;label.setAttribute('aria-label','Screen diagnostics');label.addEventListener('click',Module.openScreenDiagnostics);label.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();Module.openScreenDiagnostics();}});
+    var label=document.getElementById('build-label');label.style.pointerEvents='auto';label.setAttribute('role','button');label.tabIndex=0;label.setAttribute('aria-label','Diagnostic Report');label.addEventListener('click',Module.openScreenDiagnostics);label.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();Module.openScreenDiagnostics();}});
   })();
   Module.headerHeight=function(){return document.getElementById('build-header').getBoundingClientRect().bottom;};
   new ResizeObserver(function(){dispatchEvent(new Event('simgolf-header-resize'));}).observe(document.getElementById('build-header'));
@@ -455,7 +540,7 @@
       Module.refreshCanvasPresentation();schedule();
     };
     Module.updateMapPresentation = function(course) {
-      if(Module.mobileSaveNameActive)return;
+      if(Module.mobileSaveNameActive||Module.fundsCheck)return;
       var view=Module.mapPresentation;
       var nativeZoom=Module.mobileState?.zoom||4,changed=false;
       if(view.pendingNative&&view.pendingNative===view.nativeAck&&view.serial===view.nativeAckSerial){
@@ -632,6 +717,7 @@
       if(Module.terrainMode&&Module.terrainView!==terrainViewStamp()){Module.cancelMapGesture();Module.terrainView=terrainViewStamp();}
       var t=Module.terrainTarget;if(Module.terrainMode&&t&&Module.terrainPreview?.serial!==Module.terrainSerial&&!Module.touchQueue.some(e=>e[0]===14&&e[3]===Module.terrainSerial)){Module.touchQueue=Module.touchQueue.filter(e=>e[0]!==14);queue(14,t.x,t.y,Module.terrainSerial);}
     };
+    Module.terrainCanStart=function(){return !pinch&&!fingers.size&&!blocked&&!Module.mapPresentation.zooming;};
     Module.setTerrainMode=function(enabled){
       if(enabled)Module.resetSmoothPan?.('precise-tool');
       if(enabled){if(Module.aimMode)Module.setAimMode(false);if(Module.lotMode)Module.setLotMode(false);}
@@ -715,6 +801,7 @@
     }
     function scheduleTwoFinger(){if(!twoFingerFrame)twoFingerFrame=requestAnimationFrame(updateTwoFinger);}
     function pointer(e) {
+      if(Module.mobileUI&&Module.fundsCheck){e.preventDefault();e.stopImmediatePropagation();return;}
       var mapMouse=e.pointerType==='mouse'&&e.button!==2&&!(e.buttons&2)&&Module.mobileUI&&Module.mobileState?.course;
       if(active&&Module.mobileUI&&Module.mobileState?.course){
         if(e.type==='pointerdown'&&!fingers.size)Module.holdSmoothPan?.();

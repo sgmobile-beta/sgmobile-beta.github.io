@@ -643,7 +643,7 @@
         "policy": "native-compatible"
       },
       "discovery": {
-        "menu": "Menu → Enhanced → Eyesore Demolition",
+        "menu": "Menu → Enhanced → Enhanced Settings",
         "controls": "Enable the feature, then tap the base of a landmark from the course or with Remove active.",
         "screen": "Demolish landmark",
         "gameplay": "Demolition permanently clears the site for construction and costs $10,000."

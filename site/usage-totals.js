@@ -105,7 +105,7 @@
       sessions.id = id + '-sessions';
       const hours = node('dd', '—');
       hours.id = id + '-hours';
-      for (const [label, value] of [[config.label, sessions], ['Hours Played', hours]]) {
+      for (const [label, value] of [[config.label, sessions], [config === development ? 'Hours Tested' : 'Hours Played', hours]]) {
         const item = node('div', '');
         item.append(node('dt', label), value);
         values.append(item);
@@ -115,6 +115,7 @@
       if (config === beta) status.className = 'minor';
       status.setAttribute('role', 'status');
       section.append(values, status);
+      if (config === development) section.append(node('p', 'Development sessions and hours tested are tracked separately and are not included in public usage totals.'));
       config.view = { sessions, hours, status };
       update(config, cached(config), false);
       return section;
