@@ -1,0 +1,40 @@
+name: Announce the live Beta on Discord
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_announcement:
+        description: Post the verified live Beta changelog to Discord with one @everyone mention
+        required: true
+        type: boolean
+        default: false
+      manifest_sha256:
+        description: Verified SHA-256 of the published site/release.json
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: discord-beta-announcement
+  cancel-in-progress: false
+
+jobs:
+  announce:
+    if: github.repository == 'sgmobile-beta/sgmobile-beta.github.io' && github.ref == 'refs/heads/main' && github.run_attempt == 1 && inputs.confirm_announcement
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Verify the exact release package
+        env:
+          REVIEWED_MANIFEST_SHA256: ${{ inputs.manifest_sha256 }}
+        run: python3 .github/verify-beta-site.py
+      - name: Post the verified live changelog
+        env:
+          REVIEWED_MANIFEST_SHA256: ${{ inputs.manifest_sha256 }}
+          DISCORD_BETA_WEBHOOK_URL: ${{ secrets.DISCORD_BETA_WEBHOOK_URL }}
+        run: python3 .github/announce-beta.py
