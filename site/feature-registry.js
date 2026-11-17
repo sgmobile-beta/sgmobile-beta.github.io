@@ -710,6 +710,144 @@
       },
       "playContexts": ["career"],
       "native": {"symbol":"SIMGOLF_FEATURE_CONSTRUCTION_UNDO_REDO","index":14}
+    },
+    {
+      "id": "golferAttendanceRecovery",
+      "name": "Golfer Attendance Recovery",
+      "category": "clubLife",
+      "description": "Allow occasional eligible walk-ins when no member can join a short tee queue.",
+      "icon": "golfer",
+      "featureVersion": "1.0.0",
+      "schemaVersion": 1,
+      "available": true,
+      "defaultEnabled": false,
+      "requires": [],
+      "integrations": [],
+      "conflicts": [],
+      "affectsSimulation": true,
+      "requiresPersistentState": false,
+      "mutableDuringPlay": true,
+      "saveCompatibility": {
+        "supportedSchemas": [1],
+        "supportedStateSchemas": [1],
+        "policy": "native-compatible"
+      },
+      "discovery": {
+        "menu": "Enhanced → Enhanced Settings",
+        "controls": "Enable for the current career in Golfers & Club Life.",
+        "screen": null,
+        "gameplay": "Uses original visiting golfers and green fees. Keeps past refusals and membership history."
+      },
+      "playContexts": ["career"],
+      "native": {"symbol":"SIMGOLF_FEATURE_GOLFER_ATTENDANCE_RECOVERY","index":15}
+    },
+    {
+      "id": "financialBreakdown",
+      "name": "Detailed Financial Report",
+      "category": "operations",
+      "description": "Track maintenance and interest separately as the game charges them.",
+      "icon": "analytics",
+      "featureVersion": "1.0.0",
+      "schemaVersion": 1,
+      "available": true,
+      "defaultEnabled": false,
+      "requires": [],
+      "integrations": [],
+      "conflicts": [],
+      "affectsSimulation": false,
+      "requiresPersistentState": true,
+      "mutableDuringPlay": true,
+      "saveCompatibility": {
+        "supportedSchemas": [1],
+        "supportedStateSchemas": [1],
+        "policy": "revision-specific"
+      },
+      "discovery": {
+        "menu": "Manage → Financial Report",
+        "controls": "Enable in Enhanced Settings. The mobile Financial Report shows separate amounts once the game records a charge.",
+        "screen": "Financial Report",
+        "gameplay": "Earlier charges recorded together stay combined. Uses the original cash, interest, upkeep and report totals."
+      },
+      "playContexts": ["career"],
+      "native": null
+    },
+    {
+      "id": "practiceHole",
+      "name": "Practice a Hole",
+      "category": "progression",
+      "description": "Choose any open hole on your course and practice it with your own golfer.",
+      "icon": "history",
+      "featureVersion": "1.0.0",
+      "schemaVersion": 1,
+      "available": true,
+      "defaultEnabled": false,
+      "requires": [],
+      "integrations": [],
+      "conflicts": [],
+      "affectsSimulation": true,
+      "requiresPersistentState": true,
+      "mutableDuringPlay": true,
+      "saveCompatibility": {
+        "supportedSchemas": [
+          1
+        ],
+        "supportedStateSchemas": [
+          1
+        ],
+        "policy": "revision-specific"
+      },
+      "discovery": {
+        "menu": "Play → Practice a Hole",
+        "controls": "Choose an open hole and start from its tee. Hole out or select End hole practice to return to the course.",
+        "screen": "Practice a Hole",
+        "gameplay": "Uses your original golfer, shots, clubs, and course. A single hole does not count as a completed round or a tournament."
+      },
+      "playContexts": [
+        "career"
+      ],
+      "native": {
+        "symbol": "SIMGOLF_FEATURE_PRACTICE_HOLE",
+        "index": 16
+      }
+    },
+    {
+      "id": "holeBoundaries",
+      "name": "Hole Boundaries & Out-of-Bounds",
+      "category": "construction",
+      "description": "Define a permitted playing area for each hole. Golfers aim inside it and receive a penalty when a shot finishes out of bounds.",
+      "icon": "construction",
+      "featureVersion": "1.0.0",
+      "schemaVersion": 1,
+      "available": true,
+      "defaultEnabled": false,
+      "requires": [],
+      "integrations": [],
+      "conflicts": [],
+      "affectsSimulation": true,
+      "requiresPersistentState": true,
+      "mutableDuringPlay": true,
+      "saveCompatibility": {
+        "supportedSchemas": [
+          1
+        ],
+        "supportedStateSchemas": [
+          1
+        ],
+        "policy": "revision-specific"
+      },
+      "discovery": {
+        "menu": "Build \u2192 Course \u2192 Hole Boundaries",
+        "screen": "Hole Boundaries",
+        "controls": "Select an open hole, paint its playing area and apply the boundary.",
+        "gameplay": "Golfers favor legal landing tiles. A ball that finishes out of bounds returns to its previous lie with a penalty."
+      },
+      "playContexts": [
+        "career"
+      ],
+      "native": {
+        "symbol": "SIMGOLF_FEATURE_HOLE_BOUNDARIES",
+        "index": 17
+      }
     }
   ]
 }

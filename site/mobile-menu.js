@@ -526,6 +526,7 @@
   var courseDock=document.createElement('div');courseDock.id='mobile-course-dock';
   var camera=document.createElement('div');camera.id='mobile-camera';
   var pan=icon('Pan map','M12 2v20M2 12h20M8 6l4-4 4 4M8 18l4 4 4-4M6 8l-4 4 4 4M18 8l4 4-4 4',function(){
+    if(Module.holeBoundariesEditorOpen){Module.toggleHoleBoundaryPan?.();return;}
     if(s.rebuildClubhouse&&s.object===15){panBuildTool=panBuildTool?.clubhouse?null:{clubhouse:true,object:15};Module.setMapMode(panBuildTool?6:0);render();return;}
     if(building){
       if(panBuildTool!==null){
@@ -611,7 +612,12 @@
   }
   var aim=button('Aim',function(){setRoundAim(!Module.aimMode);syncControls();});aim.id='mobile-aim';
   var shoot=button('Shoot',function(){Module.requestShot();syncControls();});shoot.id='mobile-shoot';
-  roundControls.append(resumeShots,aim,shoot);
+  const mulligan=button('Mulligan',()=>{
+    if(mulligan.hidden||mulligan.disabled||!s.mulligan)return;
+    command(25,s.mulligan,true);syncControls();
+  });
+  mulligan.id='mobile-mulligan';mulligan.hidden=true;
+  roundControls.append(resumeShots,aim,shoot,mulligan);
   var choices=document.createElement('div');choices.id='mobile-shot-choices';choices.setAttribute('aria-label','Available shot types');root.appendChild(choices);
   var roundInfo=document.createElement('div');roundInfo.id='mobile-round-info';roundInfo.setAttribute('role','status');root.appendChild(roundInfo);
   var shotNames=['Straight','Fade','Draw','High backspin','Low punch'],shotValues=[0,-1,1,3,4];
@@ -828,7 +834,10 @@
     navigate(parent||name);
   }
   function requestSection(name,backOnly){
-    if(Module.terrainMode)Module.setTerrainMode(false);if(Module.aimMode)Module.setAimMode(false);Module.cancelMapGesture();
+    const keepAim=Module.aimMode&&s.shotTurn&&Module.hasGameFeature('holeBoundaries')&&['system','build','play'].includes(name);
+    if(Module.terrainMode)Module.setTerrainMode(false);
+    if(!keepAim&&Module.aimMode)Module.setAimMode(false);
+    if(!Module.shotPending)Module.cancelMapGesture();
     var modal=modalSection();
     if(modal||(!s.course&&seenCourse)){
       pendingSection=name;pendingBackOnly=!!backOnly;
@@ -841,6 +850,7 @@
     pendingSection=null;pendingBackOnly=false;showSection(name);
   }
   function cancelSection(){
+    if(Module.holeBoundariesEditorOpen){Module.closeHoleBoundaries?.();return;}
     if(Module.golferHistoriesOpen){Module.closeGolferHistories?.();return;}
     const card=document.getElementById('mobile-golfer-card');
     if(card&&!card.hidden){document.getElementById('mobile-golfer-card-done').click();return;}
@@ -1076,7 +1086,7 @@
     return s.constructing&&!panBuildTool&&!Module.lotPending&&Module.mapMode===0;
   }
   function syncBuildStrip(){
-    strip.hidden=!s.course||!Module.mobileUI||!building||open||s.photoActive||!['course','improvements'].includes(buildPage);
+    strip.hidden=!!Module.holeBoundariesEditorOpen||!s.course||!Module.mobileUI||!building||open||s.photoActive||!['course','improvements'].includes(buildPage);
     if(strip.hidden)return;
     var tiles=s.terrain||[],v=panBuildTool?.variationState||s.variation,selected=improvements.find(function(t){return activeImprovement<0?s.object===t[2]:activeImprovement===t[1];});
     const courseTiles=buildPage==='course';
@@ -1090,7 +1100,7 @@
     nextVariation.disabled=!hasVariation||!canCycleVariation();
     const variant=courseTiles&&hasVariation?HEAPU32[0x5a34f0>>2]:null;
     const theme=variant===null?0:HEAPU8[0x5a34e0],rotation=variant===null?0:(s.rotation>>1)&3;
-    var stamp=JSON.stringify([s.availableLots,s.landmarks,s.buildingDetails,buildPage,tiles,s.tool,s.object,v,Module.mapMode,buildingChoices,activeImprovement,s.buildings,panBuildTool,variant,theme,rotation]);
+    var stamp=JSON.stringify([s.availableLots,s.landmarks,s.buildingDetails,buildPage,tiles,s.tool,s.object,v,Module.mapMode,buildingChoices,activeImprovement,s.buildings,panBuildTool,variant,theme,rotation,Module.hasGameFeature('holeBoundaries')]);
     if(stamp===stripStamp||menuPointers.size)return;stripStamp=stamp;
     var scroll=strip.querySelector('.strip-items')?.scrollLeft||0,subScroll=strip.querySelector('.variations')?.scrollLeft||0;
     for(const row of strip.querySelectorAll('.strip-items'))row.remove();
@@ -1099,6 +1109,10 @@
     var row=document.createElement('div');row.className='strip-items';row.setAttribute('aria-label',buildPage==='course'?'Course tiles':'Improvement categories');strip.appendChild(row);
     function card(label,image,action){var b=button(label,action);b.setAttribute('aria-label',label);if(image){var text=document.createElement('span');text.textContent=label;b.replaceChildren(image,text);}return b;}
     function toolMode(){panBuildTool=null;if(Module.mapMode!==0)Module.setMapMode(0);}
+    if(courseTiles&&Module.hasGameFeature('holeBoundaries')){
+      const configure=card('Hole Boundaries',null,openBoundaries);
+      row.appendChild(configure);
+    }
     if(courseTiles)tiles.forEach(function(t){
       const active=s.tool===t.id&&Module.mapMode!==2&&panBuildTool===null;
       const variable=hasCourseVariation(t.id);
@@ -1123,6 +1137,15 @@
     }
     row.scrollLeft=scroll;
   }
+  function openBoundaries(){
+    if(!Module.openHoleBoundaries?.())return;
+    if(!s.roundActive){closeSection();return;}
+    // Exit the web Build menu without resetting the native shot or aim.
+    building=false;buildPage='';selectedSection='';contextGroup='';open=false;page='';
+    borrowedBuildNavigation=false;panBuildTool=null;lastBuildTool=null;pendingHole=null;
+    render();
+  }
+  Module.refreshBoundaryControls=syncControls;
   function command(kind,item,keep){
     const shotChoice=kind===5&&item>=4&&item<=8;
     if(shotChoice&&(!s.course||!s.shotTurn||s.photoActive||Module.shotPending||
@@ -1182,9 +1205,9 @@
     if(!open||!['landmarks','buildings'].includes(page))catalogueInfoId=null;
     if(!open)return;
     panel.replaceChildren();careerSettingsButton=landOfferButton=null;
-    var parentPage={terrain:'build',shots:'play',golfers:'play',keyboard:'system'}[page];
+    var parentPage={terrain:'build',shots:'play',golfers:'play',practice:'play',keyboard:'system'}[page];
     if(parentPage)panel.appendChild(button('Back to '+parentPage.charAt(0).toUpperCase()+parentPage.slice(1),function(){if(page==='keyboard')leaveKeyboard();navigate(parentPage);}));
-    var title=document.createElement('h2');title.textContent=page?({build:'Build',course:'Course',terrain:'Terrain',buildings:'Buildings',improvements:'Improvements',landmarks:'Landmarks',play:'Play',shots:'Shot types',manage:'Manage',enhanced:'Enhanced',system:'System',staff:'Employees',golfers:'Golfers',keyboard:'Keyboard'}[page]||page):'Menu';panel.appendChild(title);
+    var title=document.createElement('h2');title.textContent=page?({build:'Build',course:'Course',terrain:'Terrain',buildings:'Buildings',improvements:'Improvements',landmarks:'Landmarks',play:'Play',practice:'Practice a Hole',shots:'Shot types',manage:'Manage',enhanced:'Enhanced',system:'System',staff:'Employees',golfers:'Golfers',keyboard:'Keyboard'}[page]||page):'Menu';panel.appendChild(title);
     items=document.createElement('div');items.className='items';panel.appendChild(items);
     if(['landmarks','buildings'].includes(page)){
       const isLandmark=page==='landmarks',note=document.createElement('p');
@@ -1269,18 +1292,26 @@
       }
     }else if(page==='build'){
       ['Course','Terrain','Improvements'].forEach(function(n){add(n,function(){navigate(n.toLowerCase());},true,true);});
+      if(Module.hasGameFeature('holeBoundaries'))add('Hole Boundaries',openBoundaries,!!Module.canOpenHoleBoundaries?.(),true);
     }else if(page==='terrain'){
       if(Module.hasGameFeature('elevationMap'))add('Elevation Map',()=>openElevation('terrain'),!!Module.canOpenElevationMap?.(),true);
       ['Vertex','Square','Area'].forEach(function(n,i){add('Raise/lower '+n.toLowerCase(),()=>command(7,i),s.course,true);});
     }else if(page==='play'){
       action('Golfer skills / profile',5,0);action('Practice round',5,1);
+      if(Module.hasGameFeature('practiceHole'))add('Practice a Hole',()=>navigate('practice'),
+        s.course&&!s.roundActive&&!s.tournamentActive&&!!s.practiceHoles?.length,true);
       add('Play a professional',function(){open=false;render();Module.openMatchPlayers(true);},s.course&&!s.roundActive);
       if(s.roundActive)add('Match players',function(){open=false;render();Module.openMatchPlayers(false);});
       action('Begin tournament',5,3);
       add('Shot types',function(){if(s.roundActive){shotChoicesOpen=true;open=false;render();}else navigate('shots');});add('Golfers',function(){command(5,9,true);navigate('golfers');});
       // The original p shortcut opens Pathway Creation. There is no verified
       // map-placement command for the player's golfer.
-      key('End match / tournament','n');
+      key(Module.isPracticingHole?.()?'End hole practice':'End match / tournament','n');
+    }else if(page==='practice'){
+      for(const {hole,par,yards} of s.practiceHoles||[]){
+        const label='Hole '+hole+' · Par '+par+(yards>0?' · '+yards+' yd':'');
+        add(label,()=>command(24,hole),s.course&&!s.roundActive&&!s.tournamentActive,true);
+      }
     }else if(page==='shots'){
       shotNames.forEach(function(n,i){action(n,5,i+4,!!(s.shotMask&(1<<i)),true);});
       if(!s.shotMask){var p=document.createElement('p');p.textContent=s.roundActive?'Shot choices become available when your golfer is ready.':'Shot choices become available during your round.';panel.appendChild(p);}
@@ -1388,8 +1419,12 @@
     if(buildDock&&cancel.parentNode!==courseDock)courseDock.prepend(cancel);
     else if(!buildDock&&cancel.parentNode!==document.body)document.body.appendChild(cancel);
     Module.mobileBuildActive=course&&building;
-    const playingRound=course&&s.roundActive&&!building;
-    camera.hidden=!course;buildActions.hidden=!course||s.photoActive;cancel.hidden=!seenCourse||!Module.mobileUI;remove.hidden=!building;remove.setAttribute('aria-pressed',String(Module.mapMode===2));pan.setAttribute('aria-pressed',String(panBuildTool!==null||(Module.mapMode===0&&!s.constructing)));syncBuildStrip();var stripSpace=(strip.hidden?0:strip.getBoundingClientRect().height+8)+'px';root.style.setProperty('--strip-space',stripSpace);openHole.style.setProperty('--strip-space',modal?'0px':stripSpace);syncBuildDock();roundControls.hidden=!playingRound;
+    const boundaries=!!Module.holeBoundariesEditorOpen;
+    const playingRound=course&&s.roundActive&&!building&&!boundaries;
+    mulligan.hidden=!playingRound||!Module.isPracticingHole?.();
+    mulligan.disabled=mulligan.hidden||!s.mulligan||s.photoActive||s.staffRound||
+      !!Module.shotPending||Module.menuQueue.some(([kind])=>kind===25);
+    camera.hidden=!course;buildActions.hidden=boundaries||!course||s.photoActive;cancel.hidden=!seenCourse||!Module.mobileUI;remove.hidden=!building;remove.setAttribute('aria-pressed',String(Module.mapMode===2));pan.setAttribute('aria-pressed',String(boundaries?Module.holeBoundaryTool?.()==='pan':panBuildTool!==null||(Module.mapMode===0&&!s.constructing)));syncBuildStrip();var stripSpace=(strip.hidden?0:strip.getBoundingClientRect().height+8)+'px';root.style.setProperty('--strip-space',stripSpace);openHole.style.setProperty('--strip-space',modal?'0px':stripSpace);syncBuildDock();roundControls.hidden=!playingRound;
     toggles.hidden=!playingRound;
     var raisedRound=building||holeVisible||(!toggles.hidden&&toggles.getBoundingClientRect().right+6>camera.getBoundingClientRect().left);
     var roundBottom=raisedRound?108:54;
@@ -2191,6 +2226,110 @@
   setInterval(refresh,100);addEventListener('resize',refresh);addEventListener('simgolf-header-resize',refresh);
 })();
 
+
+// Store a one-hole session with the original actor records of its exact save.
+(function(){
+  function validate(data){
+    const keys=Object.keys(data);
+    if(!keys.length)return true;
+    const {hole,player,partner,stamp}=data,actor=n=>Number.isInteger(n)&&n>=0&&n<152;
+    return keys.length===4&&Number.isInteger(hole)&&hole>=1&&hole<=18&&actor(player)&&actor(partner)&&
+      player!==partner&&Number.isInteger(stamp)&&stamp>=0&&stamp<=0xffffffff;
+  }
+  Module.isPracticingHole=()=>{
+    const practice=Module.practiceHole;
+    return !!practice&&Module.mobileState?.roundGolfer===practice.player;
+  };
+  Module.saveRules.register('practiceHole',{
+    validate,
+    prepare:data=>Object.keys(data).length?data:null,
+    activate:data=>{Module.practiceHole=data;Module._port_golf_practice_mulligan_reset?.();},
+    capture:()=>Module.isPracticingHole()?Module.practiceHole:{},
+    dispose:()=>{Module.practiceHole=null;Module._port_golf_practice_mulligan_reset?.();}
+  });
+
+  if(!globalThis.HTMLDialogElement?.prototype.showModal)return;
+  const dialog=document.createElement('dialog');
+  dialog.id='practice-hole-results';
+  dialog.setAttribute('aria-labelledby','practice-hole-result-title');
+  dialog.innerHTML='<h2 id="practice-hole-result-title"></h2><p class="practice-score"></p><dl></dl>'+
+    '<footer><p>Play this hole again?</p><div><button type="button" autofocus>No</button>'+
+    '<button type="button" class="practice-replay">Yes</button></div></footer>';
+  const style=document.createElement('style');
+  style.textContent=`
+    #practice-hole-results{position:fixed;inset:auto;margin:0;box-sizing:border-box;max-width:none;max-height:var(--practice-height);overflow:auto;overscroll-behavior:contain;padding:16px;border:1px solid var(--menu-border);border-radius:14px;background:var(--menu-panel);color:var(--menu-text);font:15px/1.35 system-ui,sans-serif}
+    #practice-hole-results::backdrop{background:#161c375c}
+    #practice-hole-results h2{font-size:21px;margin:0}
+    #practice-hole-results .practice-score{font-size:17px;font-weight:650;margin:5px 0 14px}
+    #practice-hole-results dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:0}
+    #practice-hole-results dl div{padding:7px 9px;border:1px solid var(--menu-line);border-radius:7px;background:var(--menu-button)}
+    #practice-hole-results dt{font-size:13px}
+    #practice-hole-results dd{margin:2px 0 0;font-weight:650;font-variant-numeric:tabular-nums}
+    #practice-hole-results footer p{margin:14px 0 7px;font-weight:650}
+    #practice-hole-results footer div{display:flex;gap:8px}
+    #practice-hole-results button{flex:1;min-height:44px;padding:6px 12px;border:1px solid var(--menu-border);border-radius:8px;background:var(--menu-button);color:inherit;font:inherit;touch-action:manipulation;cursor:pointer}
+    #practice-hole-results .practice-replay{background:var(--menu-selected);font-weight:700}
+    #practice-hole-results button:focus-visible{outline:3px solid var(--menu-focus);outline-offset:2px}
+  `;
+  document.head.append(style);
+  document.body.append(dialog);
+  const title=dialog.querySelector('h2'),score=dialog.querySelector('.practice-score'),metrics=dialog.querySelector('dl');
+  const [no,yes]=dialog.querySelectorAll('button');
+  let result=null;
+  function size(){
+    if(!dialog.open)return;
+    const b=Module.getScreenBounds();
+    const width=b.width-b.safe.left-b.safe.right,height=b.height-b.safe.top-b.safe.bottom;
+    dialog.style.width=Math.min(390,Math.max(1,width-24))+'px';
+    dialog.style.setProperty('--practice-height',Math.max(1,height-24)+'px');
+    dialog.style.left=b.left+b.safe.left+(width-dialog.offsetWidth)/2+'px';
+    dialog.style.top=b.top+b.safe.top+(height-dialog.offsetHeight)/2+'px';
+  }
+  function metric(label,value){
+    const pair=document.createElement('div'),term=document.createElement('dt'),detail=document.createElement('dd');
+    term.textContent=label;detail.textContent=value;pair.append(term,detail);return pair;
+  }
+  function dismiss(){
+    result=null;
+    if(dialog.open)dialog.close();
+  }
+  for(const type of ['pointerdown','pointerup','pointermove','pointercancel','mousedown','mouseup','click','touchstart','touchmove','touchend','wheel','keydown','keyup','keypress'])
+    dialog.addEventListener(type,e=>e.stopPropagation());
+  addEventListener('simgolf-screen-resize',size);
+  addEventListener('simgolf-ruleset-change',dismiss);
+  dialog.addEventListener('close',()=>{
+    if(dialog.open)return;
+    result=null;
+    document.getElementById('mobile-menu')?.focus({preventScroll:true});
+  });
+  no.onclick=dismiss;
+  yes.onclick=()=>{
+    if(!dialog.open||!result)return;
+    const {hole,rules}=result;
+    if(rules!==Module.saveRules.active||!Module.hasGameFeature('practiceHole')||Module.menuQueue.length>=16)return;
+    dismiss();
+    Module.recordDiagnosticAction?.(24,hole);
+    Module.menuQueue.push([24,hole]);
+  };
+  Module.showPracticeHoleResults=(hole,strokes)=>{
+    const rules=Module.saveRules.active;
+    const stats=globalThis.SGCourseAnalytics?.review(Module.HEAPU8)?.holes.find(row=>row.hole===hole);
+    if(!stats||!rules||dialog.open)return false;
+    const difference=strokes-stats.par;
+    const vsPar=difference===0?'Even par':difference<0?`${-difference} under par`:`${difference} over par`;
+    title.textContent='Hole '+hole+' practice results';
+    score.textContent=strokes>9?'Stroke limit reached':`${strokes} ${strokes===1?'stroke':'strokes'} · ${vsPar}`;
+    metrics.replaceChildren(
+      metric('Par',stats.par),metric('Distance',stats.yards>0?stats.yards.toLocaleString()+' yd':'—'),
+      metric('Average score',stats.averageText??'—'),metric('Recorded scores',stats.finishes?.toLocaleString()??'—'),
+      metric('Fun',stats.fun?.toLocaleString()??'—'),metric('Skill',stats.skill?.toFixed(2)??'—'));
+    Module.cancelMapGesture();
+    dialog.showModal();
+    result={hole,rules};
+    dialog.scrollTop=0;size();
+    return true;
+  };
+})();
 
 // The original tract chooser owns price calculation, selection and payment.
 (function(){
@@ -3543,11 +3682,26 @@ Module.getGolferDiagnostics=function(){
       const panel=element('article','','report-card');
       panel.append(element('h3',financialYear));
       const list=element('dl','','report-ledger');
+      function addEntry(label, amount){
+        const entry=element('div','','report-ledger-row');
+        entry.append(element('dt',label),element('dd',amount||'—',amount.startsWith('-')?'negative':''));
+        list.append(entry);
+      }
+      const format=amount=>amount ? amount.toLocaleString('en-US') : '—';
       for(const [y,row] of rows){
         const amount=value(data.find(([line])=>line===y-1)?.[1],x+34);
-        const entry=element('div','','report-ledger-row');
-        entry.append(element('dt',value(row,98)),element('dd',amount||'—',amount.startsWith('-')?'negative':''));
-        list.append(entry);
+        const label=value(row,98);
+        if(/^Maint\.\s*\/\s*Interest$/i.test(label)&&Module.hasGameFeature?.('financialBreakdown')){
+          const total=Number(amount.replace(/,/g,''));
+          const detail=Module.financialExpenseDetails?.(Number(financialYear),total);
+          if(detail){
+            addEntry('Maintenance',format(detail.maintenance));
+            addEntry('Interest',format(detail.interest));
+            if(detail.combined)addEntry('Earlier combined charges',format(detail.combined));
+          }else{
+            addEntry('Maintenance / Interest (combined)',amount);
+          }
+        }else addEntry(label,amount);
       }
       panel.append(list);detail.replaceChildren(panel);
     }

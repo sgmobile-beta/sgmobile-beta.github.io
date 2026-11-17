@@ -319,14 +319,14 @@
     for(const node of [overviewLegend,liveLegend])node.dataset.tinted='false';
   }});
 
-  Module.captureElevationFrame=frame=>{
-    if(!live||overview.open||!frame.valid||!allowed()||!courseVisible())return null;
+  Module.getProjectedCourseGrid=frame=>{
     const data=observeTerrain();
     if(!data)return null;
     const key=[frame.x,frame.y,frame.rotation,frame.zoom,frame.width,frame.height].join(',');
     if(mesh?.data===data&&mesh.key===key)return mesh;
     return mesh={data,key,tiles:tilesFor(data,frame,false)};
   };
+  Module.captureElevationFrame=frame=>live&&!overview.open&&frame.valid&&allowed()&&courseVisible()?Module.getProjectedCourseGrid(frame):null;
   Module.paintElevationMap=(g,frame,b,r)=>{
     if(!live||overview.open||!courseVisible()||!allowed()||!frame.elevation)return;
     const {data,tiles}=frame.elevation,sx=r.width/frame.width,sy=r.height/frame.height;

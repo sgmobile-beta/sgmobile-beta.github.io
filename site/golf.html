@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icons/simgolf-mobile.png">
 <link rel="icon" type="image/png" href="icons/simgolf-mobile.png">
 <link rel="manifest" href="manifest.webmanifest">
-<title>SGMobile Beta 1.0.18</title>
+<title>SGMobile Beta 1.0.27</title>
 <style>
   /* Shared mobile presentation palette; original game artwork stays native. */
   :root{
@@ -97,7 +97,7 @@
 </style>
 </head>
 <body>
-<div id="build-header"><div id="build-label" title="SGMobile Beta 1.0.18 · sgmobile-beta118-profile-dock-v1-20261116">Beta 1.0.18<span id="build-edition"></span></div><div id="mobile-status" hidden></div></div>
+<div id="build-header"><div id="build-label" title="SGMobile Beta 1.0.27 · sgmobile-beta127-practice-boundaries-v1-20261117T124713Z">Beta 1.0.27<span id="build-edition"></span></div><div id="mobile-status" hidden></div></div>
 <div id="safe-area-probe" aria-hidden="true"></div>
 <div id="game-stage"><canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas></div>
 <script src="golfer-history-model.js"></script>
@@ -133,7 +133,7 @@
     return landscape;
   };
   Module.localFiles = true;
-  Module.buildInfo = Object.freeze({version: '1.0.18', id: 'sgmobile-beta118-profile-dock-v1-20261116', channel: 'beta'});
+  Module.buildInfo = Object.freeze({version: '1.0.27', id: 'sgmobile-beta127-practice-boundaries-v1-20261117T124713Z', channel: 'beta'});
   // Choose at launch; the ready initial loader permits one last change before
   // Continue. Future changes are shared unless explicitly
   // registered as Enhanced-only; save storage and formats remain shared.
@@ -313,38 +313,39 @@
     addEventListener('unhandledrejection',()=>appendBounded(recentErrors,{ms:Math.round(performance.now()),category:'unhandled rejection'}));
     addEventListener('simgolf-ruleset-change',()=>{attendance=null;});
     Module.recordAttendance=function(event){
-      if(!attendance)attendance={since:new Date().toISOString(),successfulAttempts:0,failedAttempts:0,completedRounds:0};
-      var key=['successfulAttempts','failedAttempts','completedRounds'][event];
+      if(!attendance)attendance={since:new Date().toISOString(),successfulAttempts:0,failedAttempts:0,completedRounds:0,walkInArrivals:0};
+      var key=['successfulAttempts','failedAttempts','completedRounds','walkInArrivals'][event];
       if(key)attendance[key]++;
     };
     function attendanceSnapshot(active){
       if(!active||!Module.HEAPU8)return null;
       var bytes=Module.HEAPU8,words=new Int16Array(bytes.buffer);
       var waiting=0,playing=0,finished=0,memberProfiles=0,refusedProfiles=0,memberProfilesWithoutRefusal=0;
-      var occupied=new Set();
+      var occupied=new Set(),waitingGroups=new Set();
       for(var i=0;i<152;i++){
         var a=0x5794b8+i*256,kind=bytes[a+0x21],profile=words[(a+0xb6)>>1];
         if(profile<1||profile>75)continue;
-        if(kind!==0)occupied.add(profile);
+        if(kind===255||kind>0&&kind<128)occupied.add(profile);
+        if(kind===255)waitingGroups.add(profile%19);
         if(bytes[a+0x18]!==0)continue;
         if(kind===255)waiting++;
         else if(kind>0&&kind<19)playing++;
         else if(kind===19)finished++;
       }
-      var availableMemberProfiles=0;
+      var availableMemberProfiles=0,eligibleWalkInProfiles=0;
       for(var i=1;i<=75;i++){
         var a=0x5849e0+i*44,member=bytes[a+2]!==0,refused=bytes[a+41]===255;
         if(refused)refusedProfiles++;
-        if(member){
-          memberProfiles++;
-          if(!refused){
-            memberProfilesWithoutRefusal++;
-            if(!occupied.has(i))availableMemberProfiles++;
-          }
-        }
+        if(member)memberProfiles++;
+        if(refused)continue;
+        if(member)memberProfilesWithoutRefusal++;
+        if(occupied.has(i)||waitingGroups.has(i%19))continue;
+        if(member)availableMemberProfiles++;
+        else eligibleWalkInProfiles++;
       }
       return {waiting,playing,finished,memberProfiles,refusedProfiles,memberProfilesWithoutRefusal,
-        availableMemberProfiles,recent:attendance,failedAttemptDetails:'Native routine returns failure without a per-attempt reason'};
+        availableMemberProfiles,eligibleWalkInProfiles,recoveryEnabled:!!Module.hasGameFeature?.('golferAttendanceRecovery'),
+        recent:attendance,failedAttemptDetails:'Native routine returns failure without a per-attempt reason'};
     }
     Module.getScreenDiagnostics=function(){
       var elements={},s=Module.mobileState||{},v=window.visualViewport,b=Module.getScreenBounds(),
@@ -617,7 +618,7 @@
     Module.aimMode=false;Module.aimTarget=null;Module.aimSerial=0;
     var aimScreenPoint=null;
     function suspendAim(){
-      if(!Module.aimMode||aimScreenPoint)return;
+      if(Module.holeBoundariesEditorOpen||!Module.aimMode||aimScreenPoint)return;
       var r=canvas.getBoundingClientRect(),t=Module.aimTarget;
       if(!t)return;
       aimScreenPoint={clientX:r.left+t.x*r.width/canvas.width,clientY:r.top+t.y*r.height/canvas.height};
@@ -625,7 +626,7 @@
       Module.refreshAimReticle();
     }
     Module.refreshAimReticle=function(){
-      var t=Module.aimTarget,visible=Module.aimMode&&!aimScreenPoint&&Module.mobileState?.course&&Module.mobileState?.shotTurn&&t;
+      var t=Module.aimTarget,visible=!Module.holeBoundariesEditorOpen&&Module.aimMode&&!aimScreenPoint&&Module.mobileState?.course&&Module.mobileState?.shotTurn&&t;
       aimReticle.style.display=visible?'block':'none';if(!visible)return;
       var r=canvas.getBoundingClientRect();aimReticle.style.left=(r.left+t.x*r.width/canvas.width)+'px';aimReticle.style.top=(r.top+t.y*r.height/canvas.height)+'px';
     };
@@ -653,7 +654,7 @@
     };
     Module.aimCanShoot=function(){return !aimScreenPoint&&!Module.mapPresentation.zooming&&!!Module.aimTarget&&Module.aimAck?.serial===Module.aimSerial;};
     Module.requestShot=function(){
-      if(!Module.mobileState?.course||Module.mobileState?.photoActive||!Module.mobileState?.shotReady||!Module.aimMode||!Module.aimCanShoot()||Module.shotPending)return false;
+      if(Module.holeBoundariesEditorOpen||!Module.mobileState?.course||Module.mobileState?.photoActive||!Module.mobileState?.shotReady||!Module.aimMode||!Module.aimCanShoot()||Module.shotPending)return false;
       var t=Module.aimTarget;gesture=null;pinch=null;blocked=fingers.size>0;queue(9,t.x,t.y,Module.aimSerial);Module.shotPending=true;return true;
     };
     Module.terrainMode=false;Module.terrainTarget=null;Module.terrainSerial=0;
@@ -807,9 +808,12 @@
         if(e.type==='pointerdown'&&!fingers.size)Module.holdSmoothPan?.();
         else if(e.type!=='pointermove'&&e.type!=='pointerdown'&&!fingers.has(e.pointerId))Module.releaseSmoothPan?.(false);
       }
+      if(Module.holeBoundariesEditorOpen&&e.pointerType==='mouse'&&(e.button===2||(e.buttons&2))){
+        e.preventDefault();e.stopImmediatePropagation();return;
+      }
       if (!active || (e.pointerType!=='touch'&&!mapMouse)) return;
       if(mapMouse&&e.type==='pointerdown'&&e.button!==0)return;
-      if(mapMouse&&!Module.terrainMode&&!Module.aimMode&&!Module.lotMode&&e.type==='pointermove'&&!gesture){var q=nativePoint(e);queue(0,q[0],q[1],0);}
+      if(mapMouse&&!Module.holeBoundariesEditorOpen&&!Module.terrainMode&&!Module.aimMode&&!Module.lotMode&&e.type==='pointermove'&&!gesture){var q=nativePoint(e);queue(0,q[0],q[1],0);}
       e.preventDefault(); e.stopImmediatePropagation();
       if (e.type === 'pointerdown') {
         Module.cancelVertexHistoryRequest();
@@ -829,6 +833,13 @@
         if(Module.mapPresentation.course&&(Module.mapPresentation.zooming||aimScreenPoint)){gesture=null;return;}
         var p = nativePoint(e);
         gesture = {id:e.pointerId,x:e.clientX,y:e.clientY,dist:0,point:p,frame:Module.mapPresentation.course?(Module.panVisual?.frame||null):null,sent:false,navigation:Module.mapPresentation.course&&(Module.analyticsActive||(!Module.aimMode&&!Module.lotMode&&!Module.terrainMode&&((Module.mapMode===0&&!Module.mobileState?.constructing)||Module.mapMode===6)))};
+        const boundary=Module.holeBoundaryTool?.();
+        if(Module.holeBoundariesEditorOpen){
+          if(boundary==='pan'){gesture.navigation=true;gesture.boundaryPan=true;}
+          else if(boundary){gesture.boundaryStroke=new Set();gesture.navigation=false;}
+          else gesture=null;
+          return;
+        }
         if(!Module.analyticsActive&&Module.mapPresentation.course&&Module.terrainMode){gesture.terrainStart={...Module.terrainTarget};if(mapMouse)Module.setTerrainTarget(p[0],p[1]);}
         if(!Module.analyticsActive&&Module.mapPresentation.course&&Module.lotMode){gesture.lotStart={...Module.lotTarget};if(mapMouse)Module.setLotTarget(p[0],p[1]);}
         if(!Module.analyticsActive&&Module.mapPresentation.course&&Module.aimMode){gesture.aimStart={...Module.aimTarget};if(mapMouse)Module.setAimTarget(p[0],p[1]);}
@@ -858,22 +869,30 @@
           Module.releaseSmoothPan?.(true);Module.updateSmoothDrag?.(e.clientX-gesture.x,e.clientY-gesture.y);var r=canvas.getBoundingClientRect();
           p=[gesture.point[0]+(e.clientX-gesture.x)*canvas.width/r.width,gesture.point[1]+(e.clientY-gesture.y)*canvas.height/r.height];
         }
-        if(gesture.terrainStart&&Module.terrainMode){
+        if(gesture.boundaryStroke){
+          if(e.type!=='pointercancel'){
+            const last=gesture.boundaryLast||gesture.point;
+            const steps=Math.min(32,Math.max(1,Math.ceil(Math.hypot(p[0]-last[0],p[1]-last[1])/8)));
+            for(let i=0;i<=steps;i++)
+              Module.paintHoleBoundary?.(last[0]+(p[0]-last[0])*i/steps,last[1]+(p[1]-last[1])*i/steps,gesture.frame,gesture.boundaryStroke);
+            gesture.boundaryLast=p;
+          }
+        }else if(gesture.terrainStart&&Module.terrainMode){
           if(e.type!=='pointercancel')Module.setTerrainTarget(mapMouse?p[0]:gesture.terrainStart.x+(p[0]-gesture.point[0])*.65,mapMouse?p[1]:gesture.terrainStart.y+(p[1]-gesture.point[1])*.65);
         }else if(gesture.lotStart&&Module.lotMode){
           if(e.type!=='pointercancel')Module.setLotTarget(mapMouse?p[0]:gesture.lotStart.x+(p[0]-gesture.point[0])*1.15,mapMouse?p[1]:gesture.lotStart.y+(p[1]-gesture.point[1])*1.15);
         }else if(gesture.aimStart&&Module.aimMode){
           if(e.type!=='pointercancel')Module.setAimTarget(mapMouse?p[0]:gesture.aimStart.x+(p[0]-gesture.point[0])*1.15,mapMouse?p[1]:gesture.aimStart.y+(p[1]-gesture.point[1])*1.15);
         }else{
-          if(!gesture.sent&&e.type!=='pointercancel'){queue(1,gesture.point[0],gesture.point[1],0,undefined,gesture.frame);gesture.sent=true;}
-          queue(e.type === 'pointermove' ? 2 : e.type === 'pointerup' ? 3 : 4,p[0],p[1],gesture.dist);
+          if(!gesture.sent&&e.type!=='pointercancel'){queue(1,gesture.point[0],gesture.point[1],0,gesture.boundaryPan?6:undefined,gesture.frame);gesture.sent=true;}
+          queue(e.type === 'pointermove' ? 2 : e.type === 'pointerup' ? 3 : 4,p[0],p[1],gesture.dist,gesture.boundaryPan?6:undefined);
         }
         if (e.type !== 'pointermove') gesture = null;
         }
         if(e.type!=='pointermove'){fingers.delete(e.pointerId);if(!fingers.size){blocked=false;Module.releaseSmoothPan?.(false);if(Module.mapPresentation.zooming)schedule();}}
       }
     }
-    ['mousedown','mouseup','mousemove','click','dblclick'].forEach(function(type){canvas.addEventListener(type,function(e){if(Module.mobileUI&&Module.mobileState?.course&&e.button!==2&&!(e.buttons&2)){e.preventDefault();e.stopImmediatePropagation();}},{capture:true,passive:false});});
+    ['mousedown','mouseup','mousemove','click','dblclick'].forEach(function(type){canvas.addEventListener(type,function(e){if(Module.holeBoundariesEditorOpen||(Module.mobileUI&&Module.mobileState?.course&&e.button!==2&&!(e.buttons&2))){e.preventDefault();e.stopImmediatePropagation();}},{capture:true,passive:false});});
     ['pointerdown','pointermove','pointerup','pointercancel'].forEach(function(type){canvas.addEventListener(type,pointer,{capture:true,passive:false});});
     canvas.addEventListener('lostpointercapture',function(e){
       // Normal release already removed the contact. Unexpected loss can
@@ -889,7 +908,7 @@
       Module.setMapZoom(Module.mapPresentation.zoom*Math.pow(1.25,-delta/100));
     },{capture:true,passive:false});
     ['keydown','keyup','keypress'].forEach(function(type){addEventListener(type,function(e){
-      if(Module.routingMap?.active||Module.analyticsActive||Module.mobilePreferencesOpen||Module.mobileReportOpen||Module.clubRecordsOpen||Module.designChallengesOpen||Module.courseDesignLabOpen||Module.businessChallengesOpen||Module.courseReviewOpen||Module.clubhouseManagementOpen||Module.clubhousePairOpen)return;
+      if(Module.holeBoundariesEditorOpen||Module.routingMap?.active||Module.analyticsActive||Module.mobilePreferencesOpen||Module.mobileReportOpen||Module.clubRecordsOpen||Module.designChallengesOpen||Module.courseDesignLabOpen||Module.businessChallengesOpen||Module.courseReviewOpen||Module.clubhouseManagementOpen||Module.clubhousePairOpen)return;
       var code=e.code||('Key'+String(e.key).toUpperCase()),vk={KeyW:38,KeyA:37,KeyS:40,KeyD:39,ArrowUp:38,ArrowLeft:37,ArrowDown:40,ArrowRight:39}[code];
       if(!vk)return;
       if(type==='keyup'&&directions.has(code)){e.preventDefault();e.stopImmediatePropagation();queue(7,vk,0,0);directions.delete(code);return;}
@@ -1020,7 +1039,7 @@
         var v=Module.mapPresentation,scale=v.baseScale*v.appliedZoom/(pixelFrame.zoom/4),cw=pixelFrame.width*scale,ch=pixelFrame.height*scale;
         r={left:b.left+(b.width-cw)/2,top:b.top+(b.height-ch)/2,width:cw,height:ch};
       }
-      var key=[pixelSerial,b.left,b.top,b.width,b.height,r.left,r.top,r.width,r.height,ratio,Module.analyticsPaintRevision||0,Module.elevationPaintRevision||0].join(',');
+      var key=[pixelSerial,b.left,b.top,b.width,b.height,r.left,r.top,r.width,r.height,ratio,Module.analyticsPaintRevision||0,Module.elevationPaintRevision||0,Module.boundaryPaintRevision||0].join(',');
       if(lastPaint===key)return;lastPaint=key;
       if(display.width!==w||display.height!==h){display.width=w;display.height=h;}
       display.style.left=b.left+'px';display.style.top=b.top+'px';display.style.width=b.width+'px';display.style.height=b.height+'px';
@@ -1028,6 +1047,7 @@
       output.drawImage(cache,r.left-b.left,r.top-b.top,r.width,r.height);
       Module.paintCourseAnalytics?.(output,pixelFrame,b,r);
       Module.paintElevationMap?.(output,pixelFrame,b,r);
+      Module.paintBoundaryFrame?.(output,pixelFrame,b,r);
       state.paintSerial=(state.paintSerial||0)+1;state.displayRatio=ratio;state.atomic=true;display.hidden=false;canvas.style.opacity='0';
     }
     function apply(refitted){
@@ -1156,7 +1176,7 @@
       }
       return true;
     }
-    Module.onMapPresent=function(frame){frame.elevation=Module.captureElevationFrame?.(frame);state.presentSerial=(state.presentSerial||0)+1;state.lastNativeAt=performance.now();var previous=state.frame;
+    Module.onMapPresent=function(frame){frame.elevation=Module.captureElevationFrame?.(frame);frame.boundary=Module.captureBoundaryFrame?.(frame);state.presentSerial=(state.presentSerial||0)+1;state.lastNativeAt=performance.now();var previous=state.frame;
       state.fallbackFrame=null;
       var disposition=deferUncoveredFrame(frame,previous);
       if(disposition===true)return;
@@ -1416,9 +1436,11 @@
 <script src="course-analytics.js"></script>
 <script src="course-review.js"></script>
 <script src="elevation-map.js"></script>
+<script src="hole-boundaries.js"></script>
 <script src="routing-map.js"></script>
 <script src="golfer-histories.js"></script>
 <script src="business-turnaround-lifecycle.js"></script>
+<script src="financial-breakdown.js"></script>
 <script src="club-records.js"></script>
 <script src="design-challenges.js"></script>
 <script src="course-design-lab.js"></script>

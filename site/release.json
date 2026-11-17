@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "build": "sgmobile-beta118-profile-dock-v1-20261116",
+  "build": "sgmobile-beta127-practice-boundaries-v1-20261117T124713Z",
   "files": [
     {
       "path": "7zz.umd.js",
@@ -20,7 +20,7 @@
     {
       "path": "README.txt",
       "bytes": 3746,
-      "sha256": "85edc1fa7aea7fa28f8943ce2cfdb230add3ca37a2cfb380255e06f5c375cef0"
+      "sha256": "295bf61c83b6fef8858ccc7d2fe91a02928629fbc1f15382564b6ab4830debaa"
     },
     {
       "path": "THIRD_PARTY_NOTICES.txt",
@@ -124,13 +124,18 @@
     },
     {
       "path": "elevation-map.js",
-      "bytes": 19848,
-      "sha256": "aa116524899b90955a16ee9702d7bfd40f00d7c74707d3e17504a8a4f1bb7a86"
+      "bytes": 19907,
+      "sha256": "b18adb9f36953b9526896abeab35235a6b4b011ef4a460cb8ed3992ad79471e1"
     },
     {
       "path": "feature-registry.js",
-      "bytes": 33346,
-      "sha256": "33bcccb04e24cff996a993f4adbf7518f41f8428451986f9ebe4d90b7237dbbb"
+      "bytes": 38092,
+      "sha256": "c5f2bd3d1d1b45de4007a00573c918af818a96a8f043a9015aecc93d96ac6789"
+    },
+    {
+      "path": "financial-breakdown.js",
+      "bytes": 3497,
+      "sha256": "2508906fbc4a35d2dff172212860f29aa585ddcdeab80a24194efa67c3cfff79"
     },
     {
       "path": "golf.data",
@@ -139,18 +144,18 @@
     },
     {
       "path": "golf.html",
-      "bytes": 107404,
-      "sha256": "15547a6512e95b94449c1f90db84a8bf727cf30fdb09e849b7938d332fd20a3e"
+      "bytes": 109210,
+      "sha256": "916a7c2b2c8d4970666b9a07030ebc7d654b594ccdd6041a8fdcf12f63992c8f"
     },
     {
       "path": "golf.js",
-      "bytes": 496825,
-      "sha256": "f100b3589e03c44f8b283f8a2c61d316077a6e3377b0fb04ae419d9b9c4c0b1d"
+      "bytes": 501045,
+      "sha256": "cf9fc2c1663e622992d1463dc0c80f2d2bd6d96f62d26368178301664f68aa03"
     },
     {
       "path": "golf.wasm",
-      "bytes": 3515493,
-      "sha256": "b2fcdf923185973834972d3f55a1246bfd3e2e627fce2aba1b50d071a76a5fed"
+      "bytes": 3526022,
+      "sha256": "61ae939a087aced2b8f12e93cf29e2a15a5d87a28494ebd4eb0f7f694cb520fb"
     },
     {
       "path": "golfer-experience-model.js",
@@ -166,6 +171,11 @@
       "path": "golfer-history-model.js",
       "bytes": 8338,
       "sha256": "5d99235bf7eac1a9abc6d845e51540105e8a21cfb7c5741e9c9faf7573cc543b"
+    },
+    {
+      "path": "hole-boundaries.js",
+      "bytes": 22928,
+      "sha256": "bd84a82548f99f7343173ab1ced77b8e99bf846631dfa4ba77ae8f2636ba5aac"
     },
     {
       "path": "icons/barlow-condensed-OFL.txt",
@@ -304,8 +314,8 @@
     },
     {
       "path": "local-install.js",
-      "bytes": 144482,
-      "sha256": "42e09302a291f4bb3cc8ca28914ed53452e41917325b83af899b4c75333b0db5"
+      "bytes": 146012,
+      "sha256": "79863548dfe276eaaed9578486c37ba5d8775a79b4377abc13ea96422f2cc47b"
     },
     {
       "path": "manifest.webmanifest",
@@ -314,8 +324,8 @@
     },
     {
       "path": "mobile-menu.js",
-      "bytes": 463449,
-      "sha256": "0214d86e58c71c783c3ce71fa5b41936771ae8100c86a715f09f0e785dd8a0c5"
+      "bytes": 472443,
+      "sha256": "cdea36d8021063ccf065ff737742702650d477057c1fe1c26a187997dc8fe78b"
     },
     {
       "path": "offline.js",
@@ -339,13 +349,13 @@
     },
     {
       "path": "save-rules.js",
-      "bytes": 29496,
-      "sha256": "27ffaa4891fff2ccab89c422d9255db42e82fc9dc5bafe4820d9e95ceadd8428"
+      "bytes": 29633,
+      "sha256": "2949b1eded3b463b04bcc292612120c38a9f4c7df587788635b4653f3e8da8be"
     },
     {
       "path": "service-worker.js",
-      "bytes": 4015,
-      "sha256": "551c2abc306330298f9dd0788296f20bbf2f51404b1b882799006acece1a65e2"
+      "bytes": 4030,
+      "sha256": "264a94f73e5467fb319b74e1a88a5f820f675f84165f7eda114f386c4ffac9df"
     },
     {
       "path": "sources/7z-wasm-1.2.0-source.tar.gz",

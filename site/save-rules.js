@@ -184,7 +184,7 @@
         const allowed=f.id!=='creativeSandbox'||context==='sandbox';
         const enabled=edition==='enhanced'&&allowed&&selected[f.id]===true;
         // Keep new default-off careers portable to builds before this opt-in.
-        if(f.id==='constructionUndoRedo'&&!enabled)continue;
+        if(!enabled&&['constructionUndoRedo','financialBreakdown','practiceHole','holeBoundaries'].includes(f.id))continue;
         features[f.id]={schema:f.schemaVersion,enabled};
       }
       return validateGame({format:FORMAT,id:uuid(),edition,features,featureIds:Object.keys(features),created:Date.now(),origin:origin||{kind:'new'}});
@@ -202,7 +202,7 @@
       }catch(e){discard(prepared);throw e;}
       return prepared;
     }
-    function activatePrepared(prepared){for(const [,h,p]of prepared)h.activate?.(p);}
+    function activatePrepared(prepared,context){for(const [,h,p]of prepared)h.activate?.(p,context);}
     function snapshot(game,states,revision,base,dormant){
       return freeze(clone({game,states,revision:revision||null,...(base?{base,dormant}:{})}));
     }
@@ -210,12 +210,12 @@
       failure='Feature activation failed. Keep this browser data and use a compatible build: '+e.message;
       options.onError?.(failure);error(failure);
     }
-    function activate(game,states,revision,base,dormant,beforeActivate){
+    function activate(game,states,revision,base,dormant,beforeActivate,context){
       validateGame(game);
       const next=snapshot(game,states,revision,base,dormant),prepared=prepare(game,states);
       try{beforeActivate?.();}catch(e){discard(prepared);throw e;}
       dispose();active=next;
-      try{activatePrepared(prepared);options.onActivate?.(active);}
+      try{activatePrepared(prepared,context);options.onActivate?.(active);}
       catch(e){dispose();activationFailed(e);}
       return active;
     }
@@ -390,7 +390,7 @@
         if(!options.selectEdition?.(a.game.edition)||options.edition()!==a.game.edition)
           error('The saved game’s edition could not be selected.');
       }:undefined;
-      activate(game,states,revision,base,dormant,select);
+      activate(game,states,revision,base,dormant,select,{savedFeatures:effectiveGame(a).features});
       draft=null;return true;
     }
     function cancelLoad(){load=null;}
