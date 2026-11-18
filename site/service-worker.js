@@ -1,5 +1,5 @@
 // Versioned app resources only. Original files/saves stay in OPFS/IndexedDB.
-const BUILD = 'sgmobile-beta127-practice-boundaries-v1-20261117T124713Z';
+const BUILD = 'sgmobile-beta139-undo-donations-v1-20261118T120632Z';
 const CACHE = 'sgmobile-beta-app-' + BUILD;
 const BASE = new URL('./', self.location.href);
 const manifestURL = new URL('release.json', BASE).href;

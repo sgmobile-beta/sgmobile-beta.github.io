@@ -587,12 +587,15 @@
     terrainRedo.disabled=!enabled||!history?.canRedo;
     showHistoryCount(terrainUndo,'Undo',undoCount,history?.undoCount);
     showHistoryCount(terrainRedo,'Redo',redoCount,history?.redoCount);
-    var message=history?.reason==='unsupported'?'This edit isn’t supported by Undo.':
+    if(finalizeButton)finalizeButton.disabled=!canFinalizeConstruction();
+    var message=history?.reason==='finalized'?'Construction finalized.':
+      history?.reason==='unsupported'?'This edit isn’t supported by Undo.':
       history?.reason==='changed'?'History cleared after a different course edit.':
       history?.reason==='applied'?'The change was applied, but its display couldn’t be verified. History cleared.':
       history?.reason==='bench-use'?'Try again after golfers move away from the bench.':
       history?.reason==='pathway-use'?'Try again after golfers move away from the path.':
       history?.reason==='improvement-use'?'Try again after golfers move away from the improvement.':
+      history?.reason==='busy'?'Try again when the course is ready.':
       history?.reason==='period'?'This edit belongs to an earlier accounting year.':
       history?.reason==='funds'?'The original construction amount cannot be applied right now.':
       history?.reason==='render'?'History is unavailable for this edit.':'';
@@ -1195,7 +1198,25 @@
     if(!Module.canEditCareerEnhancements?.())return;
     open=false;render();Module.menuQueue.push([20,focus]);
   }
-  var items,careerSettingsButton,landOfferButton;
+  var items,careerSettingsButton,landOfferButton,finalizeButton;
+  function canFinalizeConstruction(){
+    const history=Module.vertexHistory;
+    return !!(Module.vertexHistoryBuildActive&&(history?.canUndo||history?.canRedo)&&
+      !history.busy&&!Module.vertexHistoryRequestPending&&!Module.editionModalOpen&&
+      !Module.holeBoundariesEditorOpen&&!Module.menuQueue.length);
+  }
+  async function finalizeConstruction(){
+    if(!canFinalizeConstruction())return;
+    const career=Module.saveRules?.active,epoch=Module.vertexHistoryEpoch;
+    let unfinished=false;
+    for(let hole=1;hole<=18&&!unfinished;hole++){
+      const row=0x575ab0+hole*520;
+      unfinished=!HEAPU8[row]&&!!(HEAP32[(row+8)>>2]||HEAP32[(row+16)>>2]||HEAP32[(row+24)>>2]);
+    }
+    const accepted=await Module.confirmFinalizeConstruction(unfinished);
+    if(accepted&&career===Module.saveRules?.active&&epoch===Module.vertexHistoryEpoch&&canFinalizeConstruction())
+      command(26,epoch,true);
+  }
   function render(){
     if(Module.atTitle){borrowedBuildNavigation=false;repeatedMessage='';selectedSection='';contextGroup='';pendingSection=null;pendingBackOnly=false;leaderboardOpen=false;leaderboardRevealPlayer=false;leaderboardStamp='';seenCourse=false;open=false;page='';building=false;buildPage='';panBuildTool=null;lastBuildTool=null;clubhousePlacement=false;pendingHole=null;holeToOpen=null;pendingSpeed=null;shotChoicesOpen=false;lastReady=false;wasRound=false;}
     else seenCourse=seenCourse||!!s.wasCourse;
@@ -1204,7 +1225,7 @@
     syncControls();message.hidden=(!businessNoticeText&&!challengeNoticeText&&!clubNoticeText&&!repeatedMessage&&(!s.message||dismissedMessage===s.message))||open||!Module.mobileUI;
     if(!open||!['landmarks','buildings'].includes(page))catalogueInfoId=null;
     if(!open)return;
-    panel.replaceChildren();careerSettingsButton=landOfferButton=null;
+    panel.replaceChildren();careerSettingsButton=landOfferButton=finalizeButton=null;
     var parentPage={terrain:'build',shots:'play',golfers:'play',practice:'play',keyboard:'system'}[page];
     if(parentPage)panel.appendChild(button('Back to '+parentPage.charAt(0).toUpperCase()+parentPage.slice(1),function(){if(page==='keyboard')leaveKeyboard();navigate(parentPage);}));
     var title=document.createElement('h2');title.textContent=page?({build:'Build',course:'Course',terrain:'Terrain',buildings:'Buildings',improvements:'Improvements',landmarks:'Landmarks',play:'Play',practice:'Practice a Hole',shots:'Shot types',manage:'Manage',enhanced:'Enhanced',system:'System',staff:'Employees',golfers:'Golfers',keyboard:'Keyboard'}[page]||page):'Menu';panel.appendChild(title);
@@ -1293,6 +1314,7 @@
     }else if(page==='build'){
       ['Course','Terrain','Improvements'].forEach(function(n){add(n,function(){navigate(n.toLowerCase());},true,true);});
       if(Module.hasGameFeature('holeBoundaries'))add('Hole Boundaries',openBoundaries,!!Module.canOpenHoleBoundaries?.(),true);
+      if(Module.hasGameFeature('constructionUndoRedo'))finalizeButton=add('Finalize Construction',finalizeConstruction,canFinalizeConstruction(),true);
     }else if(page==='terrain'){
       if(Module.hasGameFeature('elevationMap'))add('Elevation Map',()=>openElevation('terrain'),!!Module.canOpenElevationMap?.(),true);
       ['Vertex','Square','Area'].forEach(function(n,i){add('Raise/lower '+n.toLowerCase(),()=>command(7,i),s.course,true);});
