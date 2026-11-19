@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "build": "sgmobile-beta139-undo-donations-v1-20261118T120632Z",
+  "build": "sgmobile-beta154-landscape-locations-v6-20261119",
   "files": [
     {
       "path": "7zz.umd.js",
@@ -20,7 +20,7 @@
     {
       "path": "README.txt",
       "bytes": 3746,
-      "sha256": "48ac5a63f257bd990907c2fc142e374a98a7fd4dc6f3dd799266975aa809a1ec"
+      "sha256": "69e0752cb8b9060a30b349de2a48de2946871aed8d17b560008b3c291395b325"
     },
     {
       "path": "THIRD_PARTY_NOTICES.txt",
@@ -144,8 +144,8 @@
     },
     {
       "path": "golf.html",
-      "bytes": 110893,
-      "sha256": "4b73e4e04976da1d34c526f85629ec8220c77499b0054c5e25f4d7af85b6223d"
+      "bytes": 110887,
+      "sha256": "3d6c3032f0626f72d8e62e8b5a5639fbc4d24394ad734e6249099b1c052ddef2"
     },
     {
       "path": "golf.js",
@@ -314,8 +314,8 @@
     },
     {
       "path": "local-install.js",
-      "bytes": 148673,
-      "sha256": "677bf57b768b840747925ef69095b2dbbe48c507142b236f6e5da161785bc8ae"
+      "bytes": 149120,
+      "sha256": "db4349e2034307a123cec231d9753a3c9917873049a39eb0dcd18e8f3cf5581f"
     },
     {
       "path": "manifest.webmanifest",
@@ -324,8 +324,8 @@
     },
     {
       "path": "mobile-menu.js",
-      "bytes": 473745,
-      "sha256": "2a5afeb620381de8c588a5ecaac872066f9b3bfb74f75c16332b46ec492ecda6"
+      "bytes": 478309,
+      "sha256": "5b98e19e9e02899d11ef70e1c4ea29d3c0adcfc43b8137193f19b66cc0cdd215"
     },
     {
       "path": "offline.js",
@@ -354,8 +354,8 @@
     },
     {
       "path": "service-worker.js",
-      "bytes": 4025,
-      "sha256": "be3d5485ccab6755d61e400742cfcfd49f0bd40cd3e2044f2546241959c3fa28"
+      "bytes": 4022,
+      "sha256": "faa8a805cd366d283e08f1029d8660ff94e8d2eadc550e3c84b0bb5f5815c92f"
     },
     {
       "path": "sources/7z-wasm-1.2.0-source.tar.gz",

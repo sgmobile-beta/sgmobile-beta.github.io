@@ -457,6 +457,36 @@
     #mobile-mode-rail button,#mobile-cancel,#mobile-open-hole,#mobile-ui > button,#mobile-camera button,#mobile-build-actions button,#mobile-round-controls button,#mobile-round-toggles button{background:var(--mobile-surface)}
     #mobile-mode-rail button[aria-pressed=true],#mobile-ui > button[aria-pressed=true],#mobile-build-actions button[aria-pressed=true],#mobile-round-controls button[aria-pressed=true],#mobile-round-toggles button[aria-pressed=true]{background:var(--menu-selected)}
     body.mobile-rail-visible #mobile-profile,body.mobile-rail-visible #mobile-staff,body.mobile-rail-visible #mobile-match,body.mobile-rail-visible #mobile-load{padding-bottom:calc(max(8px,env(safe-area-inset-bottom)) + 60px)}
+    @media (orientation:landscape){
+      #mobile-ui.build-dock-active #mobile-build-strip{bottom:max(8px,env(safe-area-inset-bottom))}
+      #mobile-ui.build-dock-active #mobile-course-dock{bottom:calc(max(8px,env(safe-area-inset-bottom)) + var(--strip-space,0px))}
+    }
+    /* Short landscape phones need map space, not a stretched portrait HUD.
+       Keep original map scale and the shared 44px action targets. */
+    @media (orientation:landscape) and (max-height:600px){
+      #mobile-course-hud{width:min(430px,calc(100% - max(8px,env(safe-area-inset-left)) - max(8px,env(safe-area-inset-right)) - 64px))}
+      #mobile-course-badge{min-height:58px;padding:2px 6px 2px 0}
+      #mobile-course-badge canvas{width:48px;height:48px;margin-right:4px}
+      #mobile-course-badge:before{left:20px}
+      #mobile-course-details{grid-template-rows:20px 17px 17px;column-gap:6px}
+      #mobile-course-name,#mobile-course-stats #mobile-course-money{font-size:15px;line-height:20px}
+      #mobile-course-date,#mobile-course-stats span{font-size:11px;line-height:17px}
+      #mobile-course-meta{font-size:10px}
+      #mobile-course-indicators{font-size:10px;line-height:17px;gap:3px}
+      #mobile-course-status{margin-top:2px}
+      #mobile-build-strip{padding:4px;max-height:min(42vh,150px);overflow-y:auto;overscroll-behavior:contain}
+      #mobile-build-strip .strip-header.course-tiles{display:flex;justify-content:space-between;gap:6px}
+      #mobile-build-strip .strip-title{font-size:12px;line-height:16px}
+      #mobile-build-strip .strip-items{gap:5px;padding-bottom:1px}
+      #mobile-build-strip button{flex-basis:78px;min-height:52px;padding:3px;font-size:12px}
+      #mobile-build-strip canvas{width:48px;height:30px}
+      #mobile-build-strip .category-icon{width:32px;height:30px;margin-bottom:1px}
+      #mobile-build-strip .category-icon.tile-symbol{width:44px}
+      #mobile-build-strip .variations{margin-top:3px}
+      #mobile-build-strip .variant-cards,#mobile-build-strip .variant-cards button{min-height:52px}
+      #mobile-build-strip #mobile-next-variation{font-size:12px;min-height:44px;padding:3px 8px}
+      #mobile-ui #mobile-mode-rail button.icon{width:44px;height:44px;padding:8px}
+    }
   `;document.head.appendChild(style);
   var menu=icon('Menu','M3 6h18M3 12h18M3 18h18',function(){sectionButton('system');});menu.id='mobile-menu';
   var buildShortcut=artIcon("Build","<g transform=\"rotate(-40 32 32)\"><path d=\"M16 7h27v14H16z\"/><rect x=\"28\" y=\"20\" width=\"7\" height=\"38\" rx=\"2\"/></g><g transform=\"rotate(40 32 32)\"><path d=\"M24 5h16v8a8 8 0 0 1-16 0z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"5\"/><rect x=\"29\" y=\"20\" width=\"6\" height=\"26\"/><path d=\"M21 42h22v9a11 11 0 0 1-22 0z\"/></g>",function(){sectionButton('build');});buildShortcut.id='mobile-build';
@@ -2918,6 +2948,10 @@
     #mobile-location-list strong{position:absolute;top:9%;font-size:clamp(11px,6.8cqi,20px);line-height:1;font-weight:400;white-space:nowrap;max-width:100%}
     #mobile-location-list .location-bonus{position:absolute;top:37%;font-size:clamp(9px,5.7cqi,15px);line-height:1;white-space:nowrap;max-width:100%}
     #mobile-location-list .location-details{position:absolute;top:67%;font-size:clamp(8px,5cqi,13px);line-height:1.15;white-space:nowrap;max-width:100%}
+    #mobile-location-description{grid-column:1/-1;box-sizing:border-box;width:100%;padding:10px 12px;border:1px solid #49496f;border-radius:10px;background:#ffffee;color:#171738;scroll-margin:8px;overflow-wrap:anywhere}
+    #mobile-location-description h2{font:700 18px/1.2 OriginalWorldMenu,"Comic Neue",sans-serif;margin:0 0 5px}
+    #mobile-location-description p{font:16px/1.35 OriginalWorldMenu,"Comic Neue",sans-serif;margin:4px 0}
+    #mobile-location-description[hidden]{display:none!important}
     #mobile-location-tools{flex:none;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 14px;padding:6px 10px;box-sizing:border-box;background:#67679b;border-top:1px solid #45456e}
     #mobile-location-close{order:-1;min-width:44px;min-height:44px;border:1px solid var(--menu-border);border-radius:8px;background:var(--menu-button);color:var(--menu-text);font:26px/1 system-ui;cursor:pointer}
     #mobile-location-secondary,#mobile-location-size{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
@@ -2930,11 +2964,12 @@
     @media(max-width:550px){#mobile-location-header{gap:6px}#mobile-location-heading{min-width:0;font-size:18px;line-height:1.05}#mobile-locations-funds{width:125px;font-size:19px}#mobile-location-world{display:grid;grid-template-columns:130px minmax(0,1fr);gap:8px;align-items:center}#mobile-location-globe{width:130px}#mobile-location-legend{font-size:13px;gap:5px;padding:6px;justify-content:flex-start}#mobile-location-list{gap:8px}#mobile-location-tools{padding:5px 7px;gap:4px}#mobile-location-summary{font-size:14px}#mobile-location-tools .location-native-action{font-size:15px}#mobile-location-tools .location-native-action canvas{width:38px;height:38px}}
   `;document.head.appendChild(style);
   function text(tag,value,cls){var e=document.createElement(tag);e.textContent=value;if(cls)e.className=cls;return e;}
-  function tap(element,action){var down=null,last=-Infinity;element.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')down={id:e.pointerId,x:e.clientX,y:e.clientY};});element.addEventListener('pointercancel',()=>{down=null;});element.addEventListener('pointerup',e=>{if(e.pointerType!=='touch'||!down||down.id!==e.pointerId)return;var hit=Math.hypot(e.clientX-down.x,e.clientY-down.y)<6;down=null;if(hit&&!element.disabled){last=performance.now();e.preventDefault();action(e);}});element.addEventListener('click',e=>{if(performance.now()-last<600){e.preventDefault();return;}action(e);});}
+  var lastLocationTouch=-Infinity;
+  function tap(element,action){var down=null;element.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')down={id:e.pointerId,x:e.clientX,y:e.clientY};});element.addEventListener('pointercancel',()=>{down=null;});element.addEventListener('pointerup',e=>{if(e.pointerType!=='touch'||!down||down.id!==e.pointerId)return;var hit=Math.hypot(e.clientX-down.x,e.clientY-down.y)<6;down=null;if(hit&&!element.disabled){lastLocationTouch=performance.now();e.preventDefault();action(e);}});element.addEventListener('click',e=>{if(performance.now()-lastLocationTouch<600&&(e.pointerType==='touch'||e.sourceCapabilities?.firesTouchEvents||!('sourceCapabilities' in e))){e.preventDefault();return;}action(e);});}
   function button(label,action,id){var b=text('button',label);b.type='button';if(id)b.id=id;tap(b,action);return b;}
   function surface(w,h){var c=document.createElement('canvas');c.width=w;c.height=h;return c;}
   var root=document.createElement('section');root.id='mobile-locations';root.hidden=true;root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-label','Choose course location');var view=document.createElement('div');view.id='mobile-location-view';var scene=document.createElement('div');scene.id='mobile-location-scene';var header=document.createElement('header');header.id='mobile-location-header';var heading=document.createElement('h1');heading.id='mobile-location-heading';heading.append(text('span','Where will you build\nyour golf course?'));heading.lastChild.style.whiteSpace='pre-line';var funds=document.createElement('div');funds.id='mobile-locations-funds';var fundsText=text('span','');funds.append(fundsText);header.append(heading,funds);
-  var content=document.createElement('div');content.id='mobile-location-content';var world=document.createElement('div');world.id='mobile-location-world';var globe=surface(420,430);globe.id='mobile-location-globe';globe.setAttribute('aria-label','Original world map; select a location using a marker or the location buttons');var legend=document.createElement('div');legend.id='mobile-location-legend';world.append(globe,legend);var list=document.createElement('div');list.id='mobile-location-list';list.setAttribute('aria-label','Course locations');content.append(world,list);scene.append(header,content);view.append(scene);
+  var content=document.createElement('div');content.id='mobile-location-content';var world=document.createElement('div');world.id='mobile-location-world';var globe=surface(420,430);globe.id='mobile-location-globe';globe.setAttribute('aria-label','Original world map; select a location using a marker or the location buttons');var legend=document.createElement('div');legend.id='mobile-location-legend';world.append(globe,legend);var list=document.createElement('div');list.id='mobile-location-list';list.setAttribute('aria-label','Course locations');var description=document.createElement('section');description.id='mobile-location-description';description.hidden=true;description.setAttribute('aria-live','polite');description.setAttribute('aria-atomic','true');list.append(description);content.append(world,list);scene.append(header,content);view.append(scene);
   var tools=document.createElement('footer');tools.id='mobile-location-tools';var secondary=document.createElement('div');secondary.id='mobile-location-secondary';var confirm=document.createElement('div');confirm.id='mobile-location-confirm';var summary=text('p','Choose a location.');summary.id='mobile-location-summary';summary.setAttribute('role','status');var build=button('Build here',()=>{var row=state.rows?.find(r=>r.id===selected);if(row?.available)send(0,row);},'mobile-location-build');build.disabled=true;confirm.append(summary,build);tools.append(secondary,confirm);root.append(view,tools);document.body.append(root);
   var state={},serial=0,selected=null,stamp='',art=null,artFailed=false,size=1,pressed=new Set();
   // Decode only the user's imported original 8-bit PCX artwork. No game art
@@ -3016,17 +3051,34 @@
     if(op===2)selected=null;
     stamp='';refresh();
   }
+  // Same native fields used by FUN_0046f550's original expanded hover plate.
+  // Read the owner's installed strings, not a separate invented course catalog.
+  function describeLocation(row){
+    function original(address){return Module.readGameText(address,40).trim();}
+    const slope=[0x4e3fa4,0x4e3fac,0x4e3fb4][row.slope];
+    const coast=[0x4e3f80,0x4e3f8c,0x4e3f98][row.coast];
+    const environment=[0x4e3f68,0x4c9758,0x4e3f74,0x4e3f60][row.environment];
+    const terrain=[slope,coast,environment].filter(Number.isInteger).map(original).filter(Boolean).join(' ');
+    return row.acres+' acres of '+terrain+' property · '+money(row.price);
+  }
+  function selectLocation(row){
+    if(busy())return;
+    selected=row.id;stamp='';refresh();
+    const d=description.getBoundingClientRect(),v=view.getBoundingClientRect();
+    if(d.bottom>v.bottom)view.scrollTop+=d.bottom-v.bottom;
+    else if(d.top<v.top)view.scrollTop-=v.top-d.top;
+  }
   function money(value){return '$'+value.toLocaleString();}
   function bounds(){var b=Module.getScreenBounds(),top=Math.max(b.top,document.getElementById('build-header').getBoundingClientRect().bottom);root.style.left=b.left+'px';root.style.top=top+'px';root.style.width=b.width+'px';root.style.height=Math.max(0,b.top+b.height-top)+'px';Module.locationPresentation={scale:size,fit:1,layout:'responsive-clean-original-elements',width:view.clientWidth,height:view.clientHeight};}
   function drawGlobe(){var g=globe.getContext('2d');g.clearRect(0,0,420,430);g.save();g.beginPath();g.ellipse(210,215,210,215,0,0,Math.PI*2);g.clip();g.drawImage(art.base,0,108,420,430,0,0,420,430);for(const row of state.rows||[]){var y=row.purchased?100:row.available?50:0,x=HEAP16[(0x4c1eca+row.id*130)>>1],gy=HEAP16[(0x4c1ecc+row.id*130)>>1]-108;g.drawImage(art.pins,0,y,20,24,x-10,gy-14,20,24);if(row.id===selected){g.strokeStyle='#ffe654';g.lineWidth=2;g.beginPath();g.arc(x,gy-4,13,0,Math.PI*2);g.stroke();}}g.restore();}
-  tap(globe,e=>{if(busy())return;var r=globe.getBoundingClientRect(),x=(e.clientX-r.x)*420/r.width,y=(e.clientY-r.y)*430/r.height+108,near=null,distance=18;for(const row of state.rows||[]){var d=Math.hypot(x-HEAP16[(0x4c1eca+row.id*130)>>1],y-HEAP16[(0x4c1ecc+row.id*130)>>1]);if(d<distance){near=row;distance=d;}}if(near){selected=near.id;stamp='';refresh();}});
+  tap(globe,e=>{if(busy())return;var r=globe.getBoundingClientRect(),x=(e.clientX-r.x)*420/r.width,y=(e.clientY-r.y)*430/r.height+108,near=null,distance=18;for(const row of state.rows||[]){var d=Math.hypot(x-HEAP16[(0x4c1eca+row.id*130)>>1],y-HEAP16[(0x4c1ecc+row.id*130)>>1]);if(d<distance){near=row;distance=d;}}if(near)selectLocation(near);});
   function refresh(){
     state=Module.locationState||{};if(state.active&&state.frame>0)loadArt();var showing=!!(Module.mobileUI&&state.active&&!state.suspended&&art&&!state.fallback);root.hidden=!showing;document.body.classList.toggle('mobile-locations-open',showing);if(state.active&&artFailed&&!state.fallback&&!busy())(Module.locationQueue||(Module.locationQueue=[])).push([state.serial,5,-1,-1,-1]);if(!showing){stamp='';return;}bounds();if(state.serial!==serial){serial=state.serial;selected=null;view.scrollTop=0;stamp='';}
     var key=JSON.stringify([state.rows,state.cash,state.unlimited,state.newGame,state.busy,!!state.frame,Module.locationQueue?.length,selected]);if(key===stamp||pressed.size)return;stamp=key;var scroll=view.scrollTop;list.replaceChildren();secondary.replaceChildren();fundsText.textContent=state.unlimited?'Unlimited':money(state.cash||0);drawGlobe();var unavailable=busy();
-    for(const row of state.rows||[]){var card=button('',()=>{if(busy())return;selected=row.id;stamp='';refresh();});card.className='location-card';card.dataset.location=String(row.id);card.setAttribute('aria-pressed',String(row.id===selected));card.setAttribute('aria-label',[row.name,row.bonus,row.acres+' acres',money(row.price),row.purchased?'Already purchased':row.available?'Available':'Insufficient funds'].join(', '));card.disabled=unavailable;var c=surface(350,98),g=c.getContext('2d');g.scale(2,2);g.imageSmoothingQuality='high';g.drawImage(art.plate,0,0,175,49);g.save();g.beginPath();g.ellipse(25,24.5,25,24.5,0,0,Math.PI*2);g.clip();g.drawImage(art.icons[row.environment]||art.icons[0],2+(row.available?200:0),0,59,49,0,0,59,49);g.restore();g.drawImage(art.pins,0,row.purchased?100:row.available?50:0,20,24,155,6,20,24);if(row.id===selected){g.strokeStyle='#f7d345';g.lineWidth=2;g.beginPath();g.roundRect(1,1,173,46,12);g.stroke();}var label=document.createElement('span');label.className='location-label';label.append(text('strong',row.name),text('span',row.bonus,'location-bonus'),text('span',row.acres+' ac · '+money(row.price),'location-details'));card.append(c,label);list.append(card);}
+    for(const row of state.rows||[]){var card=button('',()=>selectLocation(row));card.className='location-card';card.dataset.location=String(row.id);card.setAttribute('aria-pressed',String(row.id===selected));card.setAttribute('aria-label',[row.name,row.bonus,row.acres+' acres',money(row.price),row.purchased?'Already purchased':row.available?'Available':'Insufficient funds'].join(', '));card.disabled=unavailable;var c=surface(350,98),g=c.getContext('2d');g.scale(2,2);g.imageSmoothingQuality='high';g.drawImage(art.plate,0,0,175,49);g.save();g.beginPath();g.ellipse(25,24.5,25,24.5,0,0,Math.PI*2);g.clip();g.drawImage(art.icons[row.environment]||art.icons[0],2+(row.available?200:0),0,59,49,0,0,59,49);g.restore();g.drawImage(art.pins,0,row.purchased?100:row.available?50:0,20,24,155,6,20,24);if(row.id===selected){g.strokeStyle='#f7d345';g.lineWidth=2;g.beginPath();g.roundRect(1,1,173,46,12);g.stroke();}var label=document.createElement('span');label.className='location-label';label.append(text('strong',row.name),text('span',row.bonus,'location-bonus'),text('span',row.acres+' ac · '+money(row.price),'location-details'));card.append(c,label);list.append(card);}
     function control(label,op,id,source,x,y,w,h){var b=button('',()=>send(op),id);b.className='location-native-action';b.setAttribute('aria-label',label);var c=surface(w,h);c.getContext('2d').drawImage(source,x,y,w,h,0,0,w,h);b.append(c,text('span',label));b.disabled=unavailable;secondary.append(b);}
     control('Back',1,'mobile-location-back',art.base,730,522,70,75);if(state.newGame)control('Refresh offers',2,'mobile-location-refresh',art.buttons,250,440,76,74);else{const close=button('×',()=>send(1),'mobile-location-close');close.setAttribute('aria-label','Close World Map');close.disabled=unavailable;secondary.append(close);control('Save game',3,'mobile-location-save',art.buttons,548,458,52,64);control('Load game',4,'mobile-location-load',art.buttons,570,408,56,50);}
-    var row=state.rows?.find(r=>r.id===selected);build.disabled=unavailable||!row?.available;summary.textContent=state.busy?'Opening location…':row?(row.name+' · '+row.acres+' acres · '+money(row.price)+' · '+(row.purchased?'Already purchased':row.available?row.bonus:'Insufficient funds')):'Choose a location. Browsing does not spend money.';view.scrollTop=scroll;bounds();root.dataset.serial=String(serial);
+    var row=state.rows?.find(r=>r.id===selected);var cards=Array.from(list.children),selectedIndex=cards.findIndex(c=>Number(c.dataset.location)===selected),after=selectedIndex<0?null:cards[Math.min(cards.length-1,selectedIndex+(selectedIndex%2===0?1:0))];if(after)after.after(description);else list.append(description);description.hidden=!row;if(row){description.replaceChildren(text('h2',row.name),text('p',describeLocation(row)),text('p',row.bonus),text('p',row.purchased?'Already purchased':row.available?'Available — choose Build here to purchase.':'Insufficient funds — you can still browse this location.'));}build.disabled=unavailable||!row?.available;summary.textContent=state.busy?'Opening location…':row?(row.name+' · '+row.acres+' acres · '+money(row.price)+' · '+(row.purchased?'Already purchased':row.available?row.bonus:'Insufficient funds')):'Choose a location. Browsing does not spend money.';view.scrollTop=scroll;bounds();root.dataset.serial=String(serial);
   }
   root.addEventListener('keydown',e=>{if(e.key==='Escape'&&!state.newGame){e.preventDefault();send(1);}});
   root.addEventListener('pointerdown',e=>pressed.add(e.pointerId),true);['pointerup','pointercancel'].forEach(t=>addEventListener(t,e=>pressed.delete(e.pointerId),true));addEventListener('blur',()=>pressed.clear());
