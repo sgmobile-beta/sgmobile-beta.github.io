@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icons/simgolf-mobile.png">
 <link rel="icon" type="image/png" href="icons/simgolf-mobile.png">
 <link rel="manifest" href="manifest.webmanifest">
-<title>SGMobile Beta 1.0.54</title>
+<title>SGMobile Beta 1.0.55</title>
 <style>
   /* Shared mobile presentation palette; original game artwork stays native. */
   :root{
@@ -97,7 +97,7 @@
 </style>
 </head>
 <body>
-<div id="build-header"><div id="build-label" title="SGMobile Beta 1.0.54 · sgmobile-beta154-landscape-locations-v6-20261119">Beta 1.0.54<span id="build-edition"></span></div><div id="mobile-status" hidden></div></div>
+<div id="build-header"><div id="build-label" title="SGMobile Beta 1.0.55 · sgmobile-beta155-bench-zoom-v3-20261119">Beta 1.0.55<span id="build-edition"></span></div><div id="mobile-status" hidden></div></div>
 <div id="safe-area-probe" aria-hidden="true"></div>
 <div id="game-stage"><canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas></div>
 <script src="golfer-history-model.js"></script>
@@ -133,7 +133,7 @@
     return landscape;
   };
   Module.localFiles = true;
-  Module.buildInfo = Object.freeze({version: '1.0.54', id: 'sgmobile-beta154-landscape-locations-v6-20261119', channel: 'beta'});
+  Module.buildInfo = Object.freeze({version: '1.0.55', id: 'sgmobile-beta155-bench-zoom-v3-20261119', channel: 'beta'});
   // Choose at launch; the ready initial loader permits one last change before
   // Continue. Future changes are shared unless explicitly
   // registered as Enhanced-only; save storage and formats remain shared.
@@ -1061,6 +1061,14 @@
       var canvas=Module.canvas;
       if(!pixelFrame||Module.uiPresentation||!Module.mobileUI||!Module.mapPresentation?.course||(!Module.mapPresentation.zooming&&(pixelFrame.width!==canvas.width||pixelFrame.height!==canvas.height))){hideDisplay();return;}
       var b=Module.getScreenBounds(),r=canvas.getBoundingClientRect(),ratio=Math.min(devicePixelRatio||1,Math.max(1,1/(Module.canvasScale||1))),w=Math.max(1,Math.round(b.width*ratio)),h=Math.max(1,Math.round(b.height*ratio));
+      // Scaling the cached pixels is immediate; reallocating their display
+      // surface on every pinch sample is unnecessary. Retain its backing size
+      // until matching native pixels settle, then refine once. A real screen
+      // geometry change still resizes immediately, even during refinement.
+      if(Module.mapPresentation.zooming&&state.displayBoundsWidth===b.width&&
+         state.displayBoundsHeight===b.height){
+        w=display.width;h=display.height;ratio=w/b.width;
+      }
       // Acknowledged native zoom can precede its completed pixels. Normalize
       // using the cached frame's own detail level, never the pending level.
       if(Module.mapPresentation.zooming||pixelFrame.zoom!==Module.mapPresentation.nativeZoom){
@@ -1069,7 +1077,9 @@
       }
       var key=[pixelSerial,b.left,b.top,b.width,b.height,r.left,r.top,r.width,r.height,ratio,Module.analyticsPaintRevision||0,Module.elevationPaintRevision||0,Module.boundaryPaintRevision||0].join(',');
       if(lastPaint===key)return;lastPaint=key;
-      if(display.width!==w||display.height!==h){display.width=w;display.height=h;}
+      if(display.width!==w)display.width=w;
+      if(display.height!==h)display.height=h;
+      state.displayBoundsWidth=b.width;state.displayBoundsHeight=b.height;
       display.style.left=b.left+'px';display.style.top=b.top+'px';display.style.width=b.width+'px';display.style.height=b.height+'px';
       output.setTransform(w/b.width,0,0,h/b.height,0,0);output.imageSmoothingEnabled=Module.mapPresentation.appliedZoom<1;display.style.imageRendering=Module.mapPresentation.appliedZoom<1?'auto':'pixelated';output.clearRect(0,0,b.width,b.height);
       output.drawImage(cache,r.left-b.left,r.top-b.top,r.width,r.height);
