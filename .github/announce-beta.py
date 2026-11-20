@@ -20,7 +20,7 @@ def live_file(name):
         return response.read()
 
 
-def make_announcement(reviewed_sha):
+def make_announcement(reviewed_sha, *, mention_everyone=False):
     manifest = (SITE / 'release.json').read_bytes()
     if sha256(manifest).hexdigest() != reviewed_sha or live_file('release.json') != manifest:
         raise ValueError('The requested manifest is not the package currently served by Beta.')
@@ -55,8 +55,9 @@ def make_announcement(reviewed_sha):
         raise ValueError('The rendered changelog must fit in one Discord embed.')
 
     return {
-        'content': f'@everyone\n**SGMobile {release} is live!**\n[Play SGMobile Beta]({PLAY_URL})',
-        'allowed_mentions': {'parse': ['everyone']},
+        'content': ('@everyone\n' if mention_everyone else '') +
+                   f'**SGMobile {release} is live!**\n[Play SGMobile Beta]({PLAY_URL})',
+        'allowed_mentions': {'parse': ['everyone'] if mention_everyone else []},
         'embeds': [{'title': section['title'], 'description': description}],
     }
 
@@ -72,6 +73,10 @@ def discord_json(request, failure):
 
 
 def post(announcement):
+    allowed = announcement.get('allowed_mentions')
+    if allowed not in ({'parse': []}, {'parse': ['everyone']}):
+        raise ValueError('Expected an explicit, bounded mention policy.')
+    expected_mention = allowed == {'parse': ['everyone']}
     webhook = os.environ.get('DISCORD_BETA_WEBHOOK_URL', '')
     if not re.fullmatch(r'https://discord\.com/api/(?:v10/)?webhooks/[0-9]+/[A-Za-z0-9_\-]+', webhook):
         raise ValueError('DISCORD_BETA_WEBHOOK_URL must be a Discord channel webhook URL.')
@@ -93,9 +98,10 @@ def post(announcement):
     if message.get('channel_id') != channel or not isinstance(message_id, str) or not message_id.isdecimal():
         raise SystemExit('Discord returned an incomplete receipt. Check the channel before retrying.')
     print(f'Discord message https://discord.com/channels/{guild}/{channel}/{message_id}')
-    if not message.get('mention_everyone'):
-        raise SystemExit('The post was sent, but Discord did not confirm the @everyone mention.')
-    print('Discord confirmed the @everyone mention.')
+    if message.get('mention_everyone') is not expected_mention or message.get('mentions') or message.get('mention_roles'):
+        raise SystemExit('The post was sent, but Discord did not confirm the requested mention policy. Check the channel before retrying.')
+    print('Discord confirmed the @everyone mention.' if expected_mention else
+          'Discord confirmed delivery with no everyone, user or role mentions.')
 
 
 def main():
@@ -103,7 +109,11 @@ def main():
     parser.add_argument('--preview', action='store_true', help='Render the verified post locally without sending it.')
     args = parser.parse_args()
     try:
-        announcement = make_announcement(os.environ.get('REVIEWED_MANIFEST_SHA256'))
+        mention_setting = os.environ.get('DISCORD_MENTION_EVERYONE', 'false')
+        if mention_setting not in ('true', 'false'):
+            raise ValueError('DISCORD_MENTION_EVERYONE must be true or false.')
+        announcement = make_announcement(os.environ.get('REVIEWED_MANIFEST_SHA256'),
+                                         mention_everyone=mention_setting == 'true')
         if args.preview:
             print(json.dumps(announcement, ensure_ascii=False, indent=2))
         else:

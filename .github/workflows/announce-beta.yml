@@ -4,8 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       confirm_announcement:
-        description: Post the verified live Beta changelog to Discord with one @everyone mention
+        description: Post the verified live Beta changelog to Discord
         required: true
+        type: boolean
+        default: false
+      mention_everyone:
+        description: Explicitly ping everyone (leave off for a quiet announcement)
+        required: false
         type: boolean
         default: false
       manifest_sha256:
@@ -29,6 +34,8 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
           persist-credentials: false
+      - name: Test explicit mention policy
+        run: python3 -B -m unittest discover -s .github -p 'test_announce_beta.py' -v
       - name: Verify the exact release package
         env:
           REVIEWED_MANIFEST_SHA256: ${{ inputs.manifest_sha256 }}
@@ -36,5 +43,6 @@ jobs:
       - name: Post the verified live changelog
         env:
           REVIEWED_MANIFEST_SHA256: ${{ inputs.manifest_sha256 }}
+          DISCORD_MENTION_EVERYONE: ${{ inputs.mention_everyone }}
           DISCORD_BETA_WEBHOOK_URL: ${{ secrets.DISCORD_BETA_WEBHOOK_URL }}
         run: python3 .github/announce-beta.py
