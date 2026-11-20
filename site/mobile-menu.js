@@ -1207,6 +1207,14 @@
     else if(shotChoice)Module.refreshAimTarget();
     if(!keep){open=false;render();}
   }
+  // Use the same queue and save-name flow as System → Save game.
+  // Queue the original native command; never save a substitute JS snapshot.
+  Module.canRequestMobileGameSave=()=>!!(s.course&&!Module.architectTest&&!Module.mobileSaveNameActive&&Module.menuQueue.length<16&&!s.textInput&&!s.photoActive&&!Module.loadState&&!Module.profileState);
+  Module.requestMobileGameSave=function(){
+    if(!Module.canRequestMobileGameSave())return false;
+    if(Module.prepareMobileSaveName&&!Module.prepareMobileSaveName())return false;
+    command(0,83);return true;
+  };
   function mode(value){if(value===0){building=false;buildPage='';pendingHole=null;}Module.setMapMode(value);open=false;render();}
   function add(text,action,enabled,wide){var b=button(text,action);b.disabled=enabled===false;if(wide)b.className='wide';items.appendChild(b);return b;}
   function key(text,character){add(text,function(){command(0,character.charCodeAt(0));},s.course);}

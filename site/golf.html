@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icons/simgolf-mobile.png">
 <link rel="icon" type="image/png" href="icons/simgolf-mobile.png">
 <link rel="manifest" href="manifest.webmanifest">
-<title>SGMobile Beta 1.0.55</title>
+<title>SGMobile Beta 1.0.56</title>
 <style>
   /* Shared mobile presentation palette; original game artwork stays native. */
   :root{
@@ -97,7 +97,7 @@
 </style>
 </head>
 <body>
-<div id="build-header"><div id="build-label" title="SGMobile Beta 1.0.55 · sgmobile-beta155-bench-zoom-v3-20261119">Beta 1.0.55<span id="build-edition"></span></div><div id="mobile-status" hidden></div></div>
+<div id="build-header"><div id="build-label" title="SGMobile Beta 1.0.56 · sgmobile-beta156-diagnostic-download-v6-20261120">Beta 1.0.56<span id="build-edition"></span></div><div id="mobile-status" hidden></div></div>
 <div id="safe-area-probe" aria-hidden="true"></div>
 <div id="game-stage"><canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas></div>
 <script src="golfer-history-model.js"></script>
@@ -133,7 +133,7 @@
     return landscape;
   };
   Module.localFiles = true;
-  Module.buildInfo = Object.freeze({version: '1.0.55', id: 'sgmobile-beta155-bench-zoom-v3-20261119', channel: 'beta'});
+  Module.buildInfo = Object.freeze({version: '1.0.56', id: 'sgmobile-beta156-diagnostic-download-v6-20261120', channel: 'beta'});
   // Choose at launch; the ready initial loader permits one last change before
   // Continue. Future changes are shared unless explicitly
   // registered as Enhanced-only; save storage and formats remain shared.
@@ -400,7 +400,7 @@
     Module.openScreenDiagnostics=function(){var snapshot=Module.getScreenDiagnostics();var dialog=document.getElementById('screen-diagnostics');
       if(!dialog){dialog=document.createElement('section');dialog.id='screen-diagnostics';dialog.setAttribute('role','dialog');dialog.setAttribute('aria-label','Diagnostic Report');
         dialog.style.cssText='position:fixed;z-index:1000;left:var(--screen-left,0px);top:var(--screen-top,0px);width:var(--screen-width,100%);height:var(--screen-height,100dvh);box-sizing:border-box;padding:24px max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:var(--menu-bg);color:var(--menu-text);overflow:auto;font:16px system-ui';
-        var heading=document.createElement('h2');heading.textContent='Diagnostic Report';var help=document.createElement('p');help.textContent='Copy this report when reporting a bug. Null fields were unavailable at capture time. The report includes the course name, build, device and game state.';
+        var heading=document.createElement('h2');heading.textContent='Diagnostic Report';var help=document.createElement('p');help.textContent='Download or copy this report when reporting a bug. Null fields were unavailable at capture time. The report includes the course name, build, device and game state.';
         var report=document.createElement('textarea');report.readOnly=true;report.setAttribute('aria-label','Diagnostic Report text');report.style.cssText='display:block;width:100%;height:50%;box-sizing:border-box;font:12px monospace';
         var toolbar=document.createElement('div');toolbar.style.cssText='display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:12px';
         var copy=document.createElement('button');copy.id='screen-diagnostics-copy';copy.textContent='Copy Report';copy.style.cssText='min-height:48px;font:inherit';
@@ -413,7 +413,56 @@
           } catch(error){status.textContent='Text selected. Use Copy from the text selection menu.';}
           finally {copy.disabled=false;}
         };
-        var close=document.createElement('button');close.textContent='Close';close.style.cssText='min-height:48px;font:inherit';close.onclick=function(){dialog.remove();};toolbar.append(copy,close,status);dialog.append(heading,help,toolbar,report);document.body.append(dialog);
+        var download=document.createElement('button');download.id='screen-diagnostics-download';download.textContent='Download Report';download.style.cssText='min-height:48px;font:inherit';
+        var close=document.createElement('button');close.id='screen-diagnostics-close';close.textContent='Close';close.style.cssText='min-height:48px;font:inherit';close.onclick=function(){dialog.remove();};
+        var warning=document.createElement('section');warning.id='screen-diagnostics-save-warning';warning.hidden=true;warning.setAttribute('aria-label','Save before downloading');
+        var warningText=document.createElement('p');warningText.textContent='Saving a report opens your device’s file controls. iOS may restart the game when you return. Save your game first to protect recent progress. After saving, reopen Diagnostic Report to download it.';
+        var warningActions=document.createElement('div');warningActions.style.cssText='display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px';
+        var saveFirst=document.createElement('button');saveFirst.id='screen-diagnostics-save-first';saveFirst.textContent='Save Game First';
+        var proceed=document.createElement('button');proceed.id='screen-diagnostics-download-continue';
+        var cancel=document.createElement('button');cancel.id='screen-diagnostics-download-cancel';cancel.textContent='Cancel';
+        for(var button of [saveFirst,proceed,cancel]){button.type='button';button.style.cssText='min-height:48px;font:inherit';}
+        var sharing=false,shareFile=null,useShare=false;
+        saveFirst.onclick=function(){
+          if(Module.requestMobileGameSave?.()){dialog.remove();}
+          else status.textContent='Save is unavailable right now. Close this report and finish the current game action before saving.';
+        };
+        cancel.onclick=function(){warning.hidden=true;status.textContent='Download canceled.';download.focus({preventScroll:true});};
+        download.onclick=function(){
+          if(sharing)return;
+          shareFile=null;useShare=false;status.textContent='';
+          try{shareFile=new File([report.value],'sgmobile-diagnostic.json',{type:'application/json'});useShare=!!(navigator.share&&navigator.canShare?.({files:[shareFile]}));}catch(error){/* Browser download remains an explicit choice below. */}
+          proceed.textContent=useShare?'Continue to Save to Files':'Download Without Saving';
+          saveFirst.disabled=!Module.canRequestMobileGameSave?.();warning.hidden=false;
+          status.textContent=useShare?'Choose Save to Files in the device sheet. Canceling returns here.':'This browser uses a file download that may restart the game on iPhone.';
+        };
+        proceed.onclick=async function(){
+          if(sharing)return;
+          sharing=true;for(var button of [copy,download,close,saveFirst,proceed,cancel])button.disabled=true;
+          var url,link;
+          try{
+            if(useShare){
+              // Invoke directly from this tap: awaiting a game save here would
+              // lose the activation required by the native file-sharing sheet.
+              await navigator.share({files:[shareFile]});
+              warning.hidden=true;status.textContent='File sheet closed. Your game remains open. Attach the saved report to your private bug report when ready.';
+            }else{
+              url=URL.createObjectURL(new Blob([report.value],{type:'application/json;charset=utf-8'}));
+              link=document.createElement('a');link.href=url;link.download='sgmobile-diagnostic.json';link.target='_blank';link.rel='noopener';link.hidden=true;
+              document.body.appendChild(link);link.click();warning.hidden=true;
+              status.textContent='Download requested. Return here after saving the file.';
+            }
+          }catch(error){
+            if(error?.name==='AbortError'){warning.hidden=true;status.textContent='Download canceled. Your game remains open.';}
+            else if(useShare){useShare=false;proceed.textContent='Use Browser Download';status.textContent='Save to Files could not open. Use Copy Report, or save your game before trying Browser Download. iOS may restart the game.';}
+            else status.textContent='Download unavailable. Use Copy Report to save the text.';
+          }finally{
+            sharing=false;for(var button of [copy,download,close,saveFirst,proceed,cancel])button.disabled=false;
+            saveFirst.disabled=!Module.canRequestMobileGameSave?.();link?.remove();
+            if(url)setTimeout(function(){URL.revokeObjectURL(url);},30000);
+          }
+        };
+        warningActions.append(saveFirst,proceed,cancel);warning.append(warningText,warningActions);toolbar.append(copy,download,close,status);dialog.append(heading,help,toolbar,warning,report);document.body.append(dialog);
         for(var type of ['pointerdown','pointerup','pointermove','click','mousedown','mouseup','touchstart','touchmove','touchend','wheel','keydown','keyup'])dialog.addEventListener(type,function(e){e.stopPropagation();});
       }
       dialog.querySelector('textarea').value=JSON.stringify(snapshot,null,2);

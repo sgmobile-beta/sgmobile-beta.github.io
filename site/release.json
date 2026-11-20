@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "build": "sgmobile-beta155-bench-zoom-v3-20261119",
+  "build": "sgmobile-beta156-diagnostic-download-v6-20261120",
   "files": [
     {
       "path": "7zz.umd.js",
@@ -20,7 +20,7 @@
     {
       "path": "README.txt",
       "bytes": 3746,
-      "sha256": "2570eaacfd615b93dcc0348b4aacecdeb49204444d0f5a94bcd2a3d9ce5bb225"
+      "sha256": "51874a35e17e802d9961b847d11df9a3c7f202527f6b60ab288de842028bed7b"
     },
     {
       "path": "THIRD_PARTY_NOTICES.txt",
@@ -144,8 +144,8 @@
     },
     {
       "path": "golf.html",
-      "bytes": 111452,
-      "sha256": "a4a61b67b4f0283fcf6b0bde0bc9e251008a56ff8b4381acbe18925336a99b23"
+      "bytes": 116016,
+      "sha256": "abb3d88e25f19f96b4c3a844a9fc83fce7ca622c0c6fba5286b636629160663c"
     },
     {
       "path": "golf.js",
@@ -314,8 +314,8 @@
     },
     {
       "path": "local-install.js",
-      "bytes": 149619,
-      "sha256": "02d7b883a4c6b2399bd535d10654bccf92bb197d8a35f912a51081d5783ab0b1"
+      "bytes": 150148,
+      "sha256": "cb54ebcf6fe5a5858adf6ca6012b0a74e2100b7293c3c39992a3915d5150049d"
     },
     {
       "path": "manifest.webmanifest",
@@ -324,8 +324,8 @@
     },
     {
       "path": "mobile-menu.js",
-      "bytes": 478309,
-      "sha256": "5b98e19e9e02899d11ef70e1c4ea29d3c0adcfc43b8137193f19b66cc0cdd215"
+      "bytes": 478876,
+      "sha256": "5136546b7ced8229b103273026afa2516925682543d09899b047bc128f522d90"
     },
     {
       "path": "offline.js",
@@ -354,8 +354,8 @@
     },
     {
       "path": "service-worker.js",
-      "bytes": 4013,
-      "sha256": "2f653a31e79b54f332ce3c27b97fc3e7cdf53335c292fa7127a61a880fe5be1d"
+      "bytes": 4022,
+      "sha256": "df5bbda8f7ffb7b93d8e4512ac3e5480dc7afc0a1c545fc4d91df76285921070"
     },
     {
       "path": "sources/7z-wasm-1.2.0-source.tar.gz",
